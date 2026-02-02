@@ -1,0 +1,189 @@
+2026-02-02 10:58:18,704 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-02 10:58:19,257 - calendar_service - INFO - Primary Calendar Timezone detected: UTC
+2026-02-02 10:58:29,669 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-02 10:58:30,213 - calendar_service - INFO - Primary Calendar Timezone detected: UTC
+2026-02-02 10:59:20,605 - server - INFO - GET_SLOTS: date=2026-02-02 type=regular duration=20 avail_only=True
+2026-02-02 10:59:21,004 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 10:59:21,004 - server - INFO - Slot 10:20 ACCEPTED
+2026-02-02 10:59:21,004 - server - INFO - Slot 10:40 ACCEPTED
+2026-02-02 10:59:21,005 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 10:59:21,005 - server - INFO - Slot 11:20 REJECTED (Conflict)
+2026-02-02 10:59:21,005 - server - INFO - Slot 11:40 REJECTED (Conflict)
+2026-02-02 10:59:21,005 - server - INFO - Slot 12:00 REJECTED (Conflict)
+2026-02-02 10:59:21,005 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 10:59:21,006 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 10:59:21,006 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 10:59:21,006 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 10:59:21,006 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 10:59:21,007 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 10:59:21,007 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 10:59:21,007 - server - INFO - Slot 14:40 ACCEPTED
+2026-02-02 11:07:17,006 - server - INFO - GET_SLOTS: date=2026-02-03 type=None duration=20 avail_only=False
+2026-02-02 11:07:28,456 - server - INFO - GET_SLOTS: date=2026-02-02 type=None duration=20 avail_only=False
+2026-02-02 11:07:28,817 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:07:28,818 - server - INFO - Slot 10:20 ACCEPTED
+2026-02-02 11:07:28,818 - server - INFO - Slot 10:40 ACCEPTED
+2026-02-02 11:07:28,818 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:07:28,818 - server - INFO - Slot 11:20 REJECTED (Conflict)
+2026-02-02 11:07:28,818 - server - INFO - Slot 11:40 REJECTED (Conflict)
+2026-02-02 11:07:28,819 - server - INFO - Slot 12:00 REJECTED (Conflict)
+2026-02-02 11:07:28,819 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:07:28,819 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:07:28,819 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:07:28,819 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:07:28,819 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:07:28,820 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:07:28,820 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:07:28,820 - server - INFO - Slot 14:40 ACCEPTED
+2026-02-02 11:07:31,528 - server - INFO - GET_SLOTS: date=2026-02-03 type=None duration=20 avail_only=False
+2026-02-02 11:07:40,016 - server - INFO - GET_SLOTS: date=2026-02-03 type=None duration=20 avail_only=False
+2026-02-02 11:07:40,409 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:07:40,410 - server - INFO - Slot 10:20 ACCEPTED
+2026-02-02 11:07:40,410 - server - INFO - Slot 10:40 ACCEPTED
+2026-02-02 11:07:40,411 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:07:40,411 - server - INFO - Slot 11:20 ACCEPTED
+2026-02-02 11:07:40,411 - server - INFO - Slot 11:40 ACCEPTED
+2026-02-02 11:07:40,412 - server - INFO - Slot 12:00 ACCEPTED
+2026-02-02 11:07:40,412 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:07:40,412 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:07:40,412 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:07:40,413 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:07:40,413 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:07:40,413 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:07:40,413 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:07:40,414 - server - INFO - Slot 14:40 ACCEPTED
+2026-02-02 11:08:18,230 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=20 avail_only=True
+2026-02-02 11:08:18,600 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:08:18,600 - server - INFO - Slot 10:20 ACCEPTED
+2026-02-02 11:08:18,600 - server - INFO - Slot 10:40 ACCEPTED
+2026-02-02 11:08:18,600 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:08:18,600 - server - INFO - Slot 11:20 ACCEPTED
+2026-02-02 11:08:18,600 - server - INFO - Slot 11:40 ACCEPTED
+2026-02-02 11:08:18,601 - server - INFO - Slot 12:00 ACCEPTED
+2026-02-02 11:08:18,601 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:08:18,601 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:08:18,601 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:08:18,601 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:08:18,601 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:08:18,601 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:08:18,601 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:08:18,602 - server - INFO - Slot 14:40 ACCEPTED
+2026-02-02 11:08:43,591 - payment_service - INFO - [DEMO] Razorpay order created for 66.0 EUR
+2026-02-02 11:08:52,595 - server - INFO - GET_SLOTS: date=2026-02-02 type=None duration=20 avail_only=False
+2026-02-02 11:08:53,013 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:08:53,014 - server - INFO - Slot 10:20 ACCEPTED
+2026-02-02 11:08:53,015 - server - INFO - Slot 10:40 ACCEPTED
+2026-02-02 11:08:53,015 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:08:53,015 - server - INFO - Slot 11:20 REJECTED (Conflict)
+2026-02-02 11:08:53,016 - server - INFO - Slot 11:40 REJECTED (Conflict)
+2026-02-02 11:08:53,016 - server - INFO - Slot 12:00 REJECTED (Conflict)
+2026-02-02 11:08:53,017 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:08:53,017 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:08:53,017 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:08:53,018 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:08:53,018 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:08:53,019 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:08:53,019 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:08:53,020 - server - INFO - Slot 14:40 ACCEPTED
+2026-02-02 11:08:55,771 - server - INFO - GET_SLOTS: date=2026-02-03 type=None duration=20 avail_only=False
+2026-02-02 11:08:56,185 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:08:56,186 - server - INFO - Slot 10:20 ACCEPTED
+2026-02-02 11:08:56,186 - server - INFO - Slot 10:40 REJECTED (Conflict)
+2026-02-02 11:08:56,186 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:08:56,187 - server - INFO - Slot 11:20 ACCEPTED
+2026-02-02 11:08:56,187 - server - INFO - Slot 11:40 ACCEPTED
+2026-02-02 11:08:56,187 - server - INFO - Slot 12:00 ACCEPTED
+2026-02-02 11:08:56,188 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:08:56,188 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:08:56,189 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:08:56,189 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:08:56,189 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:08:56,190 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:08:56,190 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:08:56,190 - server - INFO - Slot 14:40 ACCEPTED
+2026-02-02 11:09:30,825 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=20 avail_only=True
+2026-02-02 11:09:31,207 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:09:31,207 - server - INFO - Slot 10:20 ACCEPTED
+2026-02-02 11:09:31,208 - server - INFO - Slot 10:40 REJECTED (Conflict)
+2026-02-02 11:09:31,208 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:09:31,209 - server - INFO - Slot 11:20 ACCEPTED
+2026-02-02 11:09:31,209 - server - INFO - Slot 11:40 ACCEPTED
+2026-02-02 11:09:31,209 - server - INFO - Slot 12:00 ACCEPTED
+2026-02-02 11:09:31,210 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:09:31,210 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:09:31,211 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:09:31,211 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:09:31,212 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:09:31,212 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:09:31,213 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:09:31,213 - server - INFO - Slot 14:40 ACCEPTED
+2026-02-02 11:10:05,357 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=40 avail_only=True
+2026-02-02 11:10:05,821 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:10:05,821 - server - INFO - Slot 10:20 REJECTED (Conflict)
+2026-02-02 11:10:05,821 - server - INFO - Slot 10:40 REJECTED (Conflict)
+2026-02-02 11:10:05,821 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:10:05,822 - server - INFO - Slot 11:20 ACCEPTED
+2026-02-02 11:10:05,822 - server - INFO - Slot 11:40 ACCEPTED
+2026-02-02 11:10:05,822 - server - INFO - Slot 12:00 ACCEPTED
+2026-02-02 11:10:05,822 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:10:05,822 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:10:05,822 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:10:05,823 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:10:05,823 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:10:05,823 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:10:05,823 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:10:16,109 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=20 avail_only=True
+2026-02-02 11:10:16,472 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:10:16,472 - server - INFO - Slot 10:20 ACCEPTED
+2026-02-02 11:10:16,473 - server - INFO - Slot 10:40 REJECTED (Conflict)
+2026-02-02 11:10:16,473 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:10:16,474 - server - INFO - Slot 11:20 ACCEPTED
+2026-02-02 11:10:16,474 - server - INFO - Slot 11:40 ACCEPTED
+2026-02-02 11:10:16,474 - server - INFO - Slot 12:00 ACCEPTED
+2026-02-02 11:10:16,475 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:10:16,475 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:10:16,475 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:10:16,476 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:10:16,476 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:10:16,477 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:10:16,477 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:10:16,477 - server - INFO - Slot 14:40 ACCEPTED
+2026-02-02 11:10:59,543 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=40 avail_only=True
+2026-02-02 11:10:59,896 - server - INFO - Slot 10:00 ACCEPTED
+2026-02-02 11:10:59,896 - server - INFO - Slot 10:20 REJECTED (Conflict)
+2026-02-02 11:10:59,896 - server - INFO - Slot 10:40 REJECTED (Conflict)
+2026-02-02 11:10:59,896 - server - INFO - Slot 11:00 ACCEPTED
+2026-02-02 11:10:59,897 - server - INFO - Slot 11:20 ACCEPTED
+2026-02-02 11:10:59,897 - server - INFO - Slot 11:40 ACCEPTED
+2026-02-02 11:10:59,897 - server - INFO - Slot 12:00 ACCEPTED
+2026-02-02 11:10:59,897 - server - INFO - Slot 12:20 ACCEPTED
+2026-02-02 11:10:59,897 - server - INFO - Slot 12:40 ACCEPTED
+2026-02-02 11:10:59,898 - server - INFO - Slot 13:00 ACCEPTED
+2026-02-02 11:10:59,898 - server - INFO - Slot 13:20 ACCEPTED
+2026-02-02 11:10:59,898 - server - INFO - Slot 13:40 ACCEPTED
+2026-02-02 11:10:59,898 - server - INFO - Slot 14:00 ACCEPTED
+2026-02-02 11:10:59,898 - server - INFO - Slot 14:20 ACCEPTED
+2026-02-02 11:28:40,965 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-02 11:28:41,572 - calendar_service - INFO - Primary Calendar Timezone detected: UTC
+2026-02-02 11:29:58,153 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=20 avail_only=True
+2026-02-02 11:30:32,020 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=40 avail_only=True
+2026-02-02 11:31:37,397 - payment_service - INFO - [DEMO] Razorpay order created for 129.0 EUR
+2026-02-02 11:31:45,649 - server - INFO - GET_SLOTS: date=2026-02-02 type=None duration=20 avail_only=False
+2026-02-02 11:32:25,686 - server - INFO - GET_SLOTS: date=2026-02-03 type=None duration=20 avail_only=False
+2026-02-02 11:32:55,067 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=20 avail_only=True
+2026-02-02 11:33:16,222 - server - INFO - GET_SLOTS: date=2026-02-03 type=regular duration=40 avail_only=True
+2026-02-02 11:39:29,201 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-02 11:39:29,765 - calendar_service - INFO - Primary Calendar Timezone detected: UTC
+2026-02-02 11:40:02,290 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-02 11:40:02,841 - calendar_service - INFO - Primary Calendar Timezone detected: UTC
+2026-02-02 11:40:54,589 - server - INFO - GET_SLOTS: date=2026-02-03 type=None duration=20 avail_only=False
+2026-02-02 11:42:07,971 - server - INFO - GET_SLOTS: date=2026-02-02 type=None duration=20 avail_only=False
+2026-02-02 11:42:29,689 - server - INFO - GET_SLOTS: date=2026-02-02 type=None duration=20 avail_only=False
+2026-02-02 12:42:09,116 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-02 12:42:09,694 - calendar_service - INFO - Primary Calendar Timezone detected: UTC
+2026-02-02 12:43:13,945 - server - INFO - GET_SLOTS: date=2026-02-02 type=None duration=20 avail_only=False
+2026-02-02 12:43:19,965 - server - WARNING - No DB booking found for GCal ID: ochan7pnof54fcfikf7hld5kkk (might be older booking or manual event)
+2026-02-02 12:43:20,561 - server - INFO - GET_SLOTS: date=2026-02-02 type=None duration=20 avail_only=False
+2026-02-02 12:43:32,418 - server - INFO - GET_SLOTS: date=2026-02-02 type=None duration=20 avail_only=False
+2026-02-02 12:45:28,760 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-02-02 12:45:29,376 - calendar_service - INFO - Primary Calendar Timezone detected: UTC

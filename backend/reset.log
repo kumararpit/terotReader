@@ -1,0 +1,10 @@
+Connecting to MongoDB: mongodb://localhost:27017 (tarot_db)
+Collection 'bookings' is already empty.
+Collection 'slots' is already empty.
+Collection 'status_checks' is already empty.
+Collection 'testimonials' is already empty.
+MongoDB reset complete.
+Resetting Google Calendar Events...
+Found 1 events in Calendar.
+Deleting event: REGULAR_TIMING (2026-02-02T10:00:00Z)
+Calendar reset complete. Deleted 1 system-related events.

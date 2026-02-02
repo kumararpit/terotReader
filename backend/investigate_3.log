@@ -1,0 +1,13 @@
+Listing events for 2026-02-02...
+Event: REGULAR_TIMING
+  Start: 2026-02-02T04:30:00Z
+  End:   2026-02-02T09:30:00Z
+------------------------------
+Event: BOOKED: Test User (live-40)
+  Start: 2026-02-02T05:50:00Z
+  End:   2026-02-02T06:30:00Z
+------------------------------
+Event: BOOKED: arpit (live-20)
+  Start: 2026-02-02T06:30:00Z
+  End:   2026-02-02T06:50:00Z
+------------------------------
