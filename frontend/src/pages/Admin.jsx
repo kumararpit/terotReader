@@ -398,7 +398,6 @@ const Admin = () => {
                                 <h3 className="font-bold text-lg text-gray-800">{selectedBooking.full_name}</h3>
                                 <div className="text-sm text-gray-600 flex flex-col gap-1 mt-1">
                                     <span className="flex items-center gap-2"><MessageSquare className="w-3 h-3" /> {selectedBooking.email}</span>
-                                    <span className="flex items-center gap-2">📞 {selectedBooking.phone || 'N/A'}</span>
                                 </div>
                             </div>
                             <div className="text-right">
@@ -412,12 +411,8 @@ const Admin = () => {
                             </div>
                         </div>
 
-                        {/* Questions & Context */}
+                        {/* Context */}
                         <div className="space-y-4">
-                            <div>
-                                <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Questions</h4>
-                                <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.questions}</p>
-                            </div>
                             <div>
                                 <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
                                 <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.situation_description || 'No description provided.'}</p>
