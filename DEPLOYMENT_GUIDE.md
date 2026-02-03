@@ -69,6 +69,15 @@ The architecture consists of:
     - Open your Vercel URL.
     - Try to book a slot or log in to Admin panel.
 
+## 5. Keep-Alive (Prevent Sleep)
+
+Render's Free Tier spins down after 15 minutes of inactivity. To keep it awake:
+1.  Go to [Cron-job.org](https://cron-job.org/) or [UptimeRobot](https://uptimerobot.com/).
+2.  Create a new monitor/job.
+3.  **URL**: `https://your-backend-url.onrender.com/api/health`
+4.  **Interval**: Every 10 minutes.
+5.  This will "ping" your server and prevent it from going to sleep.
+
 ## Troubleshooting
 
 - **Backend Logs**: Check the "Logs" tab in Render if the API fails.

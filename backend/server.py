@@ -66,6 +66,10 @@ async def lifespan(app: FastAPI):
 # Create the main app without a prefix
 app = FastAPI(lifespan=lifespan)
 
+@app.get("/")
+async def root():
+    return {"message": "Tarot Reader API is running. Visit /api/health for status."}
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
