@@ -33,17 +33,23 @@ load_dotenv(ROOT_DIR / '.env')
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("backend_debug.log")
-    ]
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger("server")
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+MONGO_URL = os.environ.get('MONGO_URL')
+DB_NAME = os.environ.get('DB_NAME', 'tarot_db')
+
+if not MONGO_URL:
+    logger.error("CRITICAL: MONGO_URL environment variable is not set!")
+    # We don't raise here to allow the app to potentially start but log heavily
+    # though it will fail later on DB access. 
+    # Actually, for FastAPI it's better to fail early if DB is required.
+    raise RuntimeError("MONGO_URL environment variable is required.")
+
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
 
 # Ensure unique index for slots to prevent duplicates at DB level
 from contextlib import asynccontextmanager
@@ -62,6 +68,10 @@ app = FastAPI(lifespan=lifespan)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+
+@api_router.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
 # Define Models
