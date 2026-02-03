@@ -1,6 +1,7 @@
 services:
   - type: web
     name: tarotreader-backend
+    plan: free
     env: python
     rootDir: .
     buildCommand: pip install -r backend/requirements.txt
