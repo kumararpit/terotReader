@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Trash2, Plus, Calendar as CalendarIcon, MessageSquare, LogOut } from 'lucide-react';
+import { Trash2, Plus, Calendar as CalendarIcon, MessageSquare, LogOut, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -25,8 +25,33 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').
 const API = `${BACKEND_URL}/api`;
 
 const Admin = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [pin, setPin] = useState('');
+    const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('admin_token'));
+
+    // Auth Flow State
+    const [needsSetup, setNeedsSetup] = useState(null);
+    const [authView, setAuthView] = useState('login'); // 'login', 'forgot', 'reset'
+
+    // Form States
+    const [credentials, setCredentials] = useState({ username: '', password: '' });
+    const [setupData, setSetupData] = useState({ username: '', email: '', password: '' });
+    const [resetData, setResetData] = useState({ email: '', otp: '', newPassword: '' });
+
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            checkSetupStatus();
+        }
+    }, [isAuthenticated]);
+
+    const checkSetupStatus = async () => {
+        try {
+            const res = await axios.get(`${API}/auth/setup-status`);
+            setNeedsSetup(res.data.needs_setup);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     // Slot State
     const [slots, setSlots] = useState([]);
@@ -39,15 +64,74 @@ const Admin = () => {
     const [testimonials, setTestimonials] = useState([]);
     const [newTestimonial, setNewTestimonial] = useState({ author: '', text: '', rating: 5 });
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        // Simple client-side PIN for demo purposes (should be env var or backend auth in prod)
-        if (pin === '1234') {
+        setIsLoading(true);
+        try {
+            const res = await axios.post(`${API}/login`, credentials);
+            localStorage.setItem('admin_token', res.data.access_token);
             setIsAuthenticated(true);
-            toast.success('Welcome back, Tejashvini');
-        } else {
-            toast.error('Invalid PIN');
+            toast.success('Welcome back');
+        } catch (error) {
+            toast.error('Invalid credentials');
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    const handleSetup = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            await axios.post(`${API}/auth/setup`, setupData);
+            toast.success('Admin account created! Please login.');
+            setNeedsSetup(false);
+            setCredentials({ username: setupData.username, password: '' });
+        } catch (error) {
+            toast.error('Setup failed: ' + (error.response?.data?.detail || error.message));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            await axios.post(`${API}/auth/forgot-password`, { email: resetData.email });
+            toast.success('If registered, an OTP has been sent.');
+            setAuthView('reset');
+        } catch (error) {
+            toast.error('Request failed');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            await axios.post(`${API}/auth/reset-password`, {
+                email: resetData.email,
+                otp: resetData.otp,
+                new_password: resetData.newPassword
+            });
+            toast.success('Password updated! Please login.');
+            setAuthView('login');
+        } catch (error) {
+            toast.error('Reset failed: ' + (error.response?.data?.detail || 'Invalid OTP'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
+
+    const handleLogout = () => {
+        localStorage.removeItem('admin_token');
+        setIsAuthenticated(false);
+        toast.info('Logged out');
     };
 
     // Availability State
@@ -267,28 +351,228 @@ const Admin = () => {
         }
     };
 
+    // Booking Details Modal State
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(false);
+
+    const fetchBookingDetails = async (gcalEventId) => {
+        setIsDetailsLoading(true);
+        setDetailsOpen(true);
+        setSelectedBooking(null); // Reset
+        try {
+            const res = await axios.get(`${API}/bookings/gcal/${gcalEventId}`);
+            setSelectedBooking(res.data);
+        } catch (error) {
+            console.error("Fetch booking details failed:", error);
+            toast.error("Failed to load booking details");
+            setDetailsOpen(false);
+        } finally {
+            setIsDetailsLoading(false);
+        }
+    };
+
+    // Component for Booking Details
+    const BookingDetailsModal = () => (
+        <AlertDialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+            <AlertDialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="flex justify-between items-center text-xl text-purple-900">
+                        Booking Details
+                        <Button variant="ghost" size="sm" onClick={() => setDetailsOpen(false)}>✕</Button>
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Complete information for this session.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                {isDetailsLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    </div>
+                ) : selectedBooking ? (
+                    <div className="space-y-6 pt-2">
+                        {/* Header Info */}
+                        <div className="flex flex-col md:flex-row gap-4 justify-between bg-purple-50 p-4 rounded-lg">
+                            <div>
+                                <h3 className="font-bold text-lg text-gray-800">{selectedBooking.full_name}</h3>
+                                <div className="text-sm text-gray-600 flex flex-col gap-1 mt-1">
+                                    <span className="flex items-center gap-2"><MessageSquare className="w-3 h-3" /> {selectedBooking.email}</span>
+                                    <span className="flex items-center gap-2">📞 {selectedBooking.phone || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold mb-2">
+                                    {selectedBooking.status.toUpperCase()}
+                                </span>
+                                <div className="text-sm text-gray-500">
+                                    {format(new Date(selectedBooking.preferred_date), 'PPP')}<br />
+                                    {selectedBooking.preferred_time}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Questions & Context */}
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Questions</h4>
+                                <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.questions}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
+                                <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.situation_description || 'No description provided.'}</p>
+                            </div>
+                        </div>
+
+                        {/* Aura Image if available */}
+                        {selectedBooking.aura_image && (
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 text-sm uppercase tracking-wide flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-purple-500" /> Aura Photo
+                                </h4>
+                                <div className="border rounded-lg overflow-hidden bg-black/5 p-2 flex justify-center">
+                                    <img
+                                        src={selectedBooking.aura_image}
+                                        alt="Aura"
+                                        className="max-h-64 object-contain rounded-md shadow-sm"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Meta Info */}
+                        <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 border-t pt-4">
+                            <div>
+                                <span className="block font-medium">Service Type:</span> {selectedBooking.service_type}
+                            </div>
+                            <div>
+                                <span className="block font-medium">Payment:</span> {selectedBooking.amount} {selectedBooking.currency} ({selectedBooking.payment_method})
+                            </div>
+                            <div>
+                                <span className="block font-medium">DOB:</span> {selectedBooking.date_of_birth}
+                            </div>
+                            <div>
+                                <span className="block font-medium">Gender:</span> {selectedBooking.gender}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-gray-500">No details found.</div>
+                )}
+
+                <AlertDialogFooter className="sm:justify-between gap-4 border-t pt-4 mt-4">
+                    <div className="flex gap-2">
+                        {/* Optional: Add Action buttons here if needed */}
+                    </div>
+                    <AlertDialogCancel onClick={() => setDetailsOpen(false)}>Close</AlertDialogCancel>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[var(--bg-secondary)]">
-                <Card className="w-full max-w-md">
-                    <CardHeader>
-                        <CardTitle className="text-center font-heading text-2xl">Admin Login</CardTitle>
+            <div className="min-h-screen flex items-center justify-center bg-[#f6f1ff] relative overflow-hidden">
+                {/* Mystical Background Elements */}
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,#ece4ff_0%,transparent_70%)]" />
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#9d80d6] opacity-10 blur-[100px] rounded-full" />
+                <div className="absolute top-20 left-20 w-72 h-72 bg-[#b9a3e6] opacity-20 blur-[80px] rounded-full" />
+
+                <Card className="w-full max-w-md relative z-10 border-white/60 bg-white/80 shadow-2xl backdrop-blur-xl">
+                    <CardHeader className="space-y-1">
+                        <div className="mx-auto w-14 h-14 bg-gradient-to-br from-[#b9a3e6] to-[#9d80d6] rounded-full flex items-center justify-center mb-4 shadow-lg ring-4 ring-white/50">
+                            <Sparkles className="text-white h-7 w-7" />
+                        </div>
+                        <CardTitle className="text-center font-serif text-3xl text-[#3f3660]">
+                            {needsSetup ? 'Setup Admin' : authView === 'login' ? 'Admin Portal' : authView === 'forgot' ? 'Reset Password' : 'New Password'}
+                        </CardTitle>
+                        <CardDescription className="text-center text-gray-500">
+                            {needsSetup ? 'Create your admin account to get started' :
+                                authView === 'login' ? 'Enter your credentials to access the dashboard' :
+                                    authView === 'forgot' ? 'Enter your email to receive an OTP' :
+                                        'Enter the OTP sent to your email'}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleLogin} className="space-y-4">
-                            <div>
-                                <Label>Enter PIN</Label>
-                                <Input
-                                    type="password"
-                                    value={pin}
-                                    onChange={(e) => setPin(e.target.value)}
-                                    className="mt-1"
-                                />
-                            </div>
-                            <Button type="submit" className="w-full bg-[var(--color-deep-blue)]">Login</Button>
-                        </form>
+                        {needsSetup ? (
+                            <form onSubmit={handleSetup} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label className="text-[#3f3660]">Username</Label>
+                                    <Input required value={setupData.username} onChange={e => setSetupData({ ...setupData, username: e.target.value })} placeholder="admin" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[#3f3660]">Email</Label>
+                                    <Input required type="email" value={setupData.email} onChange={e => setSetupData({ ...setupData, email: e.target.value })} placeholder="admin@example.com" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[#3f3660]">Password</Label>
+                                    <Input required type="password" value={setupData.password} onChange={e => setSetupData({ ...setupData, password: e.target.value })} placeholder="••••••••" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                </div>
+                                <Button type="submit" className="w-full bg-gradient-to-r from-[#b9a3e6] to-[#9d80d6] hover:opacity-90 transition-opacity text-white font-semibold py-5" disabled={isLoading}>{isLoading ? 'Creating...' : 'Create Account'}</Button>
+                            </form>
+                        ) : authView === 'forgot' ? (
+                            <form onSubmit={handleForgotPassword} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label className="text-[#3f3660]">Registered Email</Label>
+                                    <Input required type="email" value={resetData.email} onChange={e => setResetData({ ...resetData, email: e.target.value })} placeholder="admin@example.com" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                </div>
+                                <Button type="submit" className="w-full bg-gradient-to-r from-[#b9a3e6] to-[#9d80d6] hover:opacity-90" disabled={isLoading}>{isLoading ? 'Sending...' : 'Send OTP'}</Button>
+                                <Button type="button" variant="ghost" className="w-full text-[#6b6680] hover:text-[#3f3660]" onClick={() => setAuthView('login')}>Back to Login</Button>
+                            </form>
+                        ) : authView === 'reset' ? (
+                            <form onSubmit={handleResetPassword} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label className="text-[#3f3660]">Enter OTP</Label>
+                                    <Input required value={resetData.otp} onChange={e => setResetData({ ...resetData, otp: e.target.value })} placeholder="123456" className="text-center text-2xl tracking-widest bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" maxLength={6} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[#3f3660]">New Password</Label>
+                                    <Input required type="password" value={resetData.newPassword} onChange={e => setResetData({ ...resetData, newPassword: e.target.value })} placeholder="••••••••" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                </div>
+                                <Button type="submit" className="w-full bg-gradient-to-r from-[#b9a3e6] to-[#9d80d6] hover:opacity-90" disabled={isLoading}>{isLoading ? 'Updating...' : 'Set New Password'}</Button>
+                                <Button type="button" variant="ghost" className="w-full text-[#6b6680] hover:text-[#3f3660]" onClick={() => setAuthView('login')}>Back to Login</Button>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleLogin} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="username" className="text-[#3f3660]">Username</Label>
+                                    <Input
+                                        id="username"
+                                        type="text"
+                                        placeholder="admin"
+                                        value={credentials.username}
+                                        onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                                        className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password" className="text-[#3f3660]">Password</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        value={credentials.password}
+                                        onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                                        className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]"
+                                        required
+                                    />
+                                </div>
+                                <div className="text-right">
+                                    <button type="button" onClick={() => setAuthView('forgot')} className="text-xs text-[#9d80d6] hover:text-[#3f3660] font-medium hover:underline">Forgot Password?</button>
+                                </div>
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-[#b9a3e6] to-[#9d80d6] hover:opacity-90 text-white shadow-md transition-all duration-200 py-5"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? 'Authenticating...' : 'Sign In'}
+                                </Button>
+                            </form>
+                        )}
                     </CardContent>
                 </Card>
+
             </div>
         );
     }
@@ -300,7 +584,7 @@ const Admin = () => {
                     <h1 className="text-3xl font-bold font-heading text-[var(--color-black)]">
                         Admin Dashboard
                     </h1>
-                    <Button variant="outline" onClick={() => setIsAuthenticated(false)}>
+                    <Button variant="outline" onClick={handleLogout}>
                         <LogOut className="mr-2 h-4 w-4" /> Logout
                     </Button>
                 </div>
@@ -413,7 +697,7 @@ const Admin = () => {
                                                 // Calculate Booked Minutes in this Window
                                                 // Filter slots that are BOOKED and overlap with this window
                                                 const bookedMinutes = slots
-                                                    .filter(s => s.is_booked)
+                                                    .filter(s => s.is_booked && s.type !== 'canceled')
                                                     .reduce((acc, slot) => {
                                                         const slotStartMin = parseInt(slot.time.split(':')[0]) * 60 + parseInt(slot.time.split(':')[1]);
                                                         const slotDuration = slot.duration || 20;
@@ -535,17 +819,37 @@ const Admin = () => {
                                                                 slotsInHour.sort((a, b) => a.time.localeCompare(b.time)).map(slot => (
                                                                     <div
                                                                         key={slot.id}
+                                                                        onClick={() => {
+                                                                            if (slot.is_booked && slot.type !== 'canceled') {
+                                                                                fetchBookingDetails(slot.id);
+                                                                            }
+                                                                        }}
                                                                         className={`
                                                                             relative px-3 py-2 rounded-lg border text-sm font-medium shadow-sm flex items-center gap-2
-                                                                            ${slot.is_booked ? 'bg-red-100 border-red-300 text-red-900' : 'bg-gray-100'}
+                                                                            ${slot.type === 'canceled'
+                                                                                ? 'bg-gray-100 border-gray-200 text-gray-400'
+                                                                                : slot.is_booked
+                                                                                    ? 'bg-red-100 border-red-300 text-red-900 cursor-pointer hover:bg-red-200 transition-colors'
+                                                                                    : 'bg-gray-100'}
                                                                         `}
                                                                     >
                                                                         <div className="flex flex-col leading-tight">
-                                                                            <span className="font-bold">{slot.time} <span className="text-[10px] font-normal opacity-75">({slot.duration || 20}m)</span></span>
+                                                                            <span className={`font-bold ${slot.type === 'canceled' ? 'line-through decoration-2 decoration-gray-400' : ''}`}>
+                                                                                {slot.time} <span className="text-[10px] font-normal opacity-75">({slot.duration || 20}m)</span>
+                                                                            </span>
                                                                         </div>
 
                                                                         {/* Stickers/Tags */}
-                                                                        {slot.is_booked ? (
+                                                                        {slot.type === 'canceled' ? (
+                                                                            <div className="flex flex-col items-start gap-1">
+                                                                                <span className="text-[9px] bg-gray-400 text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
+                                                                                    CANCELED
+                                                                                </span>
+                                                                                <span className="text-[10px] truncate max-w-[150px]">
+                                                                                    {slot.booked_by.replace(/^CANCELED:\s*/, '')}
+                                                                                </span>
+                                                                            </div>
+                                                                        ) : slot.is_booked ? (
                                                                             <div className="flex flex-col items-start gap-1">
                                                                                 <span className="text-[9px] bg-red-600 text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
                                                                                     {slot.booked_by && !slot.booked_by.startsWith('BOOKED') ? 'BUSY' : 'BOOKED'}
@@ -558,30 +862,23 @@ const Admin = () => {
                                                                             </div>
                                                                         ) : null}
 
-                                                                        {/* Delete Button (Only for specific booked slots or if we want to "block" a dynamic time?) 
-                                                                           Strictly speaking, dynamic slots aren't in DB, so deleting them is transient.
-                                                                           Real "Delete" should probably block the time. 
-                                                                           But for now, Admin just "sees" them.
-                                                                           Let's hide delete for dynamic slots (no ID in DB logic implies generated ID usually, 
-                                                                           but we gave them IDs like 'dynamic-...'). 
-                                                                           Deleting a dynamic slot -> meaningful only if we "Block" it.
-                                                                           Let's disable delete for dynamic slots for now to avoid confusion, 
-                                                                           OR implement a "Block" feature later.
-                                                                        */}
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="h-5 w-5 -mr-1 ml-1 text-gray-500 hover:text-red-600 hover:bg-white/50 rounded-full"
-                                                                            onClick={() => {
-                                                                                if (slot.is_booked) {
-                                                                                    deleteBooking(slot.id);
-                                                                                } else {
-                                                                                    deleteSlot(slot.id);
-                                                                                }
-                                                                            }}
-                                                                        >
-                                                                            <Trash2 className="h-3 w-3" />
-                                                                        </Button>
+                                                                        {/* Delete Button (Hide for Canceeled) */}
+                                                                        {slot.type !== 'canceled' && (
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-5 w-5 -mr-1 ml-1 text-gray-500 hover:text-red-600 hover:bg-white/50 rounded-full"
+                                                                                onClick={() => {
+                                                                                    if (slot.is_booked) {
+                                                                                        deleteBooking(slot.id);
+                                                                                    } else {
+                                                                                        deleteSlot(slot.id);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                <Trash2 className="h-3 w-3" />
+                                                                            </Button>
+                                                                        )}
                                                                     </div>
                                                                 ))
                                                             )}
@@ -717,6 +1014,7 @@ const Admin = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            <BookingDetailsModal />
         </div >
     );
 };

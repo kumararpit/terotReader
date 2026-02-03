@@ -11,35 +11,34 @@ export const ServicesLight = () => {
   };
 
   return (
-    <section id="services" className="section relative py-24 overflow-hidden">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
+    <section id="services" className="section relative py-32 overflow-hidden bg-background">
 
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Section Header */}
-        <div className="text-center mb-20 fade-in-up">
-          <h2 className="text-4xl md:text-5xl font-heading font-medium text-[#2F2A4D] mb-6">
-            Choose Your <span className="text-[#9D72FF]">Spiritual Journey</span>
+      <div className="container mx-auto px-6 relative z-10">
+        {/* Section Header - Editorial Style */}
+        <div className="text-center mb-20 max-w-3xl mx-auto">
+          <span className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase block mb-4">
+            Offerings
+          </span>
+          <h2 className="text-4xl md:text-5xl font-heading font-medium text-primary mb-6">
+            Guidance tailored to your <br />
+            <span className="italic font-light text-slate-500">inner journey.</span>
           </h2>
-          <p className="text-lg text-[#5A5670] max-w-2xl mx-auto font-light leading-relaxed">
-            Professional intuitive guidance tailored to your needs.
+          <p className="text-lg text-slate-600 font-light leading-relaxed">
             Select the reading style that resonates most with your seeking heart.
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[#9D72FF] to-transparent mx-auto mt-8 opacity-20" />
         </div>
 
-        {/* Services Grid */}
-        <div className="grid md:grid-cols-3 gap-10 max-w-7xl mx-auto">
+        {/* Services Grid - Reference Layout: Two-Tone Minimalist */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {services.map((service, index) => {
             const Icon = iconMap[service.icon];
 
             // Determine image source based on service type
             let imageSrc;
             if (service.title.includes("Delivered")) {
-              imageSrc = process.env.PUBLIC_URL + '/assets/service-deck.png';
+              imageSrc = process.env.PUBLIC_URL + '/assets/deliveredreading.jpeg';
             } else if (service.title.includes("Live")) {
-              imageSrc = process.env.PUBLIC_URL + '/assets/live-call.png';
+              imageSrc = process.env.PUBLIC_URL + '/assets/livereading.jpeg';
             } else if (service.title.includes("Aura")) {
               imageSrc = process.env.PUBLIC_URL + '/assets/service-aura.png';
             } else {
@@ -49,62 +48,61 @@ export const ServicesLight = () => {
             return (
               <div
                 key={service.id}
-                className="group relative flex flex-col h-full transition-all duration-500 hover:-translate-y-2"
+                className="group relative flex flex-col h-full bg-card rounded-[32px] overflow-hidden border border-border/40 hover:border-border/80 transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-slate-200/50"
               >
-                {/* Glass Background Shell */}
-                <div className="absolute inset-0 bg-white/40 backdrop-blur-xl border border-white/60 rounded-[40px] shadow-xl shadow-purple-900/5 group-hover:shadow-purple-500/10 transition-all duration-500" />
+                {/* Image Area - Top Half */}
+                <div className="relative h-72 w-full overflow-hidden">
+                  <img
+                    src={imageSrc}
+                    alt={service.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
 
-                <div className="relative p-8 flex flex-col h-full">
-                  {/* Service Image Wrapper */}
-                  <div className="relative mb-8 aspect-[16/10] overflow-hidden rounded-3xl border border-white/80 shadow-inner bg-white/20">
-                    <img
-                      src={imageSrc}
-                      alt={service.title}
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                    />
-                    {/* Soft gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#2F2A4D]/20 to-transparent opacity-60" />
-
-                    {/* Subtle aesthetic accent: Pulsing Star */}
-                    <div className="absolute top-4 right-4 text-[#9D72FF] drop-shadow-[0_0_8px_rgba(157,114,255,1)] animate-pulse">
-                      <Stars size={18} fill="currentColor" />
-                    </div>
+                  {/* Minimal Badge Top-Left */}
+                  <div className="absolute top-5 left-5 w-10 h-10 rounded-xl bg-white/95 backdrop-blur-sm flex items-center justify-center text-primary shadow-sm">
+                    <Icon size={18} strokeWidth={1.5} />
                   </div>
+                </div>
 
-                  {/* Icon & Title */}
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-purple-100/80 flex items-center justify-center text-[#9D72FF]">
-                      <Icon size={20} strokeWidth={2} />
-                    </div>
-                    <h3 className="text-2xl font-heading font-semibold text-[#2F2A4D]">
-                      {service.title}
-                    </h3>
-                  </div>
+                {/* Content Area - Bottom Half */}
+                <div className="p-8 pb-10 flex flex-col flex-grow bg-white">
 
-                  {/* Full Description */}
-                  <p className="text-[#3F3A52] mb-8 leading-relaxed font-medium text-[14px] italic">
+                  <h3 className="text-2xl font-heading font-medium text-primary mb-4 leading-tight">
+                    {service.title}
+                  </h3>
+
+                  <p className="text-slate-600 mb-8 leading-relaxed font-light text-[15px]">
                     {service.description}
                   </p>
 
-                  {/* Features List - Redesigned with thematic icons */}
-                  <div className="flex-grow space-y-4 mb-10">
-                    {service.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start space-x-3 text-[14px] text-[#2F2A4D]">
-                        <div className="flex-shrink-0 mt-1">
-                          <Sparkles size={14} className="text-[#9D72FF]" />
-                        </div>
-                        <span className="font-semibold leading-snug">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {/* Divider */}
+                  <div className="w-full h-px bg-slate-100 mb-6" />
 
-                  {/* Action Area - Refined, more elegant button size */}
-                  <div className="pt-6 border-t border-white/40 mt-auto flex justify-center">
-                    <Link to={`/booking/${service.id}`} className="w-full max-w-[200px]">
-                      <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-[#B9A3E6] to-[#9D80D6] hover:from-[#9D80D6] hover:to-[#8E6DCF] text-white py-3 rounded-full font-semibold shadow-lg shadow-purple-500/20 transition-all duration-300 transform active:scale-95 group/btn">
-                        <span>Book Now</span>
-                        <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-                      </button>
+                  {/* Simple Features */}
+                  <ul className="space-y-3 mb-8 flex-grow">
+                    {service.features.slice(0, 3).map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-sm text-slate-500">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 block flex-shrink-0" />
+                        <span className="leading-relaxed font-light">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Footer Action Area: Price Left, Link Right */}
+                  <div className="mt-auto flex items-center justify-between pt-2 border-t border-transparent">
+                    <div className="flex flex-row items-baseline gap-2">
+                      <span className="text-[11px] font-bold tracking-widest text-slate-400 uppercase">
+                        Starting from
+                      </span>
+                      <span className="text-lg font-heading font-medium text-primary">
+                        €{service.price}
+                      </span>
+                    </div>
+
+                    <Link to={`/booking/${service.id}`} className="group/btn inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-slate-600 transition-colors">
+                      <span>Book Session</span>
+                      <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
                     </Link>
                   </div>
                 </div>

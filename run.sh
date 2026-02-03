@@ -40,7 +40,7 @@ if [ "$START_BACKEND" = true ]; then
     if [ "$INSTALL_DEPS" = true ]; then
         echo "📦 Installing Backend dependencies..."
         pip install --upgrade pip
-        pip install fastapi uvicorn motor pydantic python-dotenv stripe razorpay-python
+        pip install fastapi uvicorn motor pydantic python-dotenv stripe razorpay-python reportlab
     fi
 
     echo "🚀 Starting Backend on port 8000..."

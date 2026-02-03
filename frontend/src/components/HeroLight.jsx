@@ -3,74 +3,75 @@ import { Sparkles, Lock, MessagesSquare, Mail } from "lucide-react";
 
 export const HeroLight = () => {
   return (
-    <section id="home" className="hero-root">
-      {/* ===== BACKGROUND ===== */}
-      <div className="hero-bg">
-        <div className="hero-clouds" />
-        <div className="hero-clouds" />
-        <div className="hero-sparkles" />
-      </div>
+    <section id="home" className="hero-root relative min-h-[90vh] flex items-center bg-background">
+      {/* Subtle Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-accent/20 to-white/0 pointer-events-none" />
 
-      {/* ===== CONTENT ===== */}
-      <div className="hero-container">
-        <div className="hero-grid">
-          {/* LEFT */}
-          <div className="hero-text">
-            <h1>
-              Tarot Card <br />
-              <span>Reading</span>
-            </h1>
+      <div className="container mx-auto px-6 relative z-10 pt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
-            <h2>
-              Tarot Is a Powerful Tool <br />
-              for Insight, Clarity & Self-Reflection
-            </h2>
+          {/* TEXT CONTENT (Left - Span 7) */}
+          <div className="lg:col-span-6 space-y-10 text-center lg:text-left">
+            <div className="space-y-6">
+              <span className="inline-block text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                Tarot Reader & Intuitive Guide
+              </span>
+              <h1 className="text-5xl lg:text-7xl font-heading font-medium text-primary leading-tight">
+                Clarity for the <br />
+                <span className="italic font-light text-slate-500">modern soul.</span>
+              </h1>
+              <p className="text-lg text-slate-600 font-light leading-relaxed max-w-lg mx-auto lg:mx-0">
+                Tarot is a mirror, not a map. Discover guidance, emotional clarity, and empowerment through intuitive readings designed to help you navigate life with confidence.
+              </p>
+            </div>
 
-            <p>
-              Discover guidance, emotional clarity, and empowerment through
-              intuitive tarot readings designed to help you navigate life with
-              confidence.
-            </p>
+            <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
+              <a href="#services" className="px-10 py-4 bg-primary text-primary-foreground rounded-full text-sm font-medium tracking-wide hover:bg-primary/90 transition-all shadow-xl shadow-primary/10">
+                BOOK A READING
+              </a>
+              <a href="#about" className="px-10 py-4 bg-transparent border border-gray-300 text-primary rounded-full text-sm font-medium tracking-wide hover:bg-white hover:border-gray-400 transition-all">
+                MEET TEJASHVINI
+              </a>
+            </div>
 
-            <div className="hero-buttons">
-              <button className="btn-primary-soft">
-                Book Your Reading
-              </button>
-              <button className="btn-secondary-soft">
-                Explore Services
-              </button>
+            {/* Minimal Trust Bar */}
+            <div className="flex items-center justify-center lg:justify-start gap-8 pt-8 text-xs font-medium text-slate-400 tracking-wider uppercase">
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span> 6+ Years Experience
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Confidential
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span> English & Hindi
+              </span>
             </div>
           </div>
 
-          {/* RIGHT — ✨ UPDATED IMAGE STYLE ✨ */}
-          <div className="hero-image-wrap">
-            <div className="hero-image-frame">
-              <div className="hero-image">
+          {/* IMAGE CONTENT (Right - Span 5) */}
+          <div className="lg:col-span-6 lg:col-start-8 relative">
+            <div className="relative aspect-[4/5] md:aspect-square lg:aspect-[3.5/4.5] ml-auto">
+              <div className="absolute inset-0 bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 overflow-hidden transform hover:scale-[1.01] transition-transform duration-700 ease-out border-4 border-white">
                 <img
-                  src={process.env.PUBLIC_URL + "/assets/uploads/img4.png"}
-                  alt="Tarot Reader"
+                  src={process.env.PUBLIC_URL + "/assets/homepage.jpeg"}
+                  alt="Tejashvini Batheja"
+                  className="w-full h-full object-cover filter grayscale-[10%] contrast-[1.05]"
                 />
-                <span className="hero-image-sparkle">✦</span>
+
+                {/* Editorial Badge */}
+                <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-sm border border-white/50">
+                  <div className="flex items-center gap-3">
+                    <Sparkles strokeWidth={1.5} className="w-5 h-5 text-slate-400" />
+                    <span className="text-sm font-medium text-slate-800">Intuitive Guidance</span>
+                  </div>
+                </div>
               </div>
+
+              {/* Abstract Decor */}
+              <div className="absolute -z-10 top-1/2 -right-12 w-64 h-64 bg-accent rounded-full blur-3xl opacity-60"></div>
             </div>
           </div>
 
-        </div>
-
-        {/* TRUST BAR */}
-        <div className="hero-trust-bar">
-          <div className="trust-item">
-            <Sparkles size={18} /> 6+ Years of Experience
-          </div>
-          <div className="trust-item">
-            <Lock size={18} /> Confidential & Safe Space
-          </div>
-          <div className="trust-item">
-            <MessagesSquare size={18} /> English & Hindi
-          </div>
-          <div className="trust-item">
-            <Mail size={18} /> Email-Only Communication
-          </div>
         </div>
       </div>
     </section>

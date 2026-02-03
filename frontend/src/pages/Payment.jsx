@@ -90,8 +90,10 @@ const Payment = () => {
                 partner_info: bookingData.partnerName ? `${bookingData.partnerName} (${bookingData.partnerDob})` : null,
                 questions: bookingData.questions || 'Aura Reading', // Aura might not have questions
                 situation_description: bookingData.situation || 'Aura Reading',
+                reading_focus: bookingData.readingFocus || null,
                 payment_method: selectedPayment,
-                is_emergency: bookingData.isEmergency || false
+                is_emergency: bookingData.isEmergency || false,
+                aura_image: bookingData.auraImage || null
             };
 
             // Quick fix for missing email in non-Aura forms if valid
@@ -138,15 +140,15 @@ const Payment = () => {
     return (
         <div className="min-h-screen bg-[#FAFBFC] flex flex-col relative overflow-hidden">
             {/* Background Decorative Elements */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/5 rounded-full blur-[120px] pointer-events-none" />
             <Header />
 
             <main className="flex-grow pt-32 pb-20">
                 <div className="container mx-auto px-4 max-w-5xl">
                     <div className="text-center mb-10">
-                        <h1 className="text-3xl font-heading font-bold text-[#2F2A4D]">Checkout</h1>
-                        <p className="text-[#5A5670]">Complete your secure booking</p>
+                        <h1 className="text-3xl font-heading font-bold text-slate-800">Checkout</h1>
+                        <p className="text-slate-600">Complete your secure booking</p>
                     </div>
 
                     <div className="grid md:grid-cols-12 gap-8">
@@ -154,7 +156,7 @@ const Payment = () => {
                         <div className="md:col-span-7 space-y-6">
                             {/* Service Details Card */}
                             <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100">
-                                <h2 className="text-lg font-semibold text-[#2F2A4D] mb-4 flex items-center gap-2">
+                                <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                                     <ShieldCheck className="w-5 h-5 text-green-500" />
                                     Booking Summary
                                 </h2>
@@ -162,13 +164,13 @@ const Payment = () => {
                                 <div className="space-y-4">
                                     <div className="flex justify-between py-3 border-b border-gray-50">
                                         <span className="text-gray-500">Service</span>
-                                        <span className="font-medium text-[#2F2A4D]">{service?.title}</span>
+                                        <span className="font-medium text-slate-800">{service?.title}</span>
                                     </div>
 
                                     {bookingData?.sessionType && (
                                         <div className="flex justify-between py-3 border-b border-gray-50">
                                             <span className="text-gray-500">Option</span>
-                                            <span className="font-medium text-[#2F2A4D] capitalize">
+                                            <span className="font-medium text-slate-800 capitalize">
                                                 {bookingData.sessionType.replace(/_/g, ' ')}
                                             </span>
                                         </div>
@@ -177,7 +179,7 @@ const Payment = () => {
                                     {bookingData?.slot && (
                                         <div className="flex justify-between py-3 border-b border-gray-50">
                                             <span className="text-gray-500">Slot Date</span>
-                                            <span className="font-medium text-[#2F2A4D]">
+                                            <span className="font-medium text-slate-800">
                                                 {new Date(bookingData.slot).toLocaleString()}
                                             </span>
                                         </div>
@@ -185,14 +187,14 @@ const Payment = () => {
 
                                     <div className="flex justify-between py-3 border-b border-gray-50">
                                         <span className="text-gray-500">Client Name</span>
-                                        <span className="font-medium text-[#2F2A4D]">{bookingData?.name}</span>
+                                        <span className="font-medium text-slate-800">{bookingData?.name}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Pricing Card */}
                             <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100">
-                                <h2 className="text-lg font-semibold text-[#2F2A4D] mb-4">Payment Breakdown</h2>
+                                <h2 className="text-lg font-semibold text-slate-800 mb-4">Payment Breakdown</h2>
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-gray-600">
                                         <span>Base Fee</span>
@@ -205,7 +207,7 @@ const Payment = () => {
                                         </div>
                                     )}
                                     <div className="border-t border-dashed border-gray-200 my-4"></div>
-                                    <div className="flex justify-between text-xl font-bold text-[#2F2A4D]">
+                                    <div className="flex justify-between text-xl font-bold text-slate-800">
                                         <span>Total to Pay</span>
                                         <span>€{total.toFixed(2)}</span>
                                     </div>
@@ -215,14 +217,14 @@ const Payment = () => {
 
                         {/* RIGHT COLUMN: Payment Method Selection */}
                         <div className="md:col-span-5 space-y-6">
-                            <div className="bg-white rounded-[24px] p-8 shadow-xl shadow-purple-900/5 border border-purple-100/50 sticky top-32">
-                                <h3 className="text-lg font-semibold text-[#2F2A4D] mb-6">Select Payment Method</h3>
+                            <div className="bg-white rounded-[24px] p-8 shadow-xl shadow-blue-900/5 border border-blue-100/50 sticky top-32">
+                                <h3 className="text-lg font-semibold text-slate-800 mb-6">Select Payment Method</h3>
 
                                 <div className="space-y-4">
                                     {/* Razorpay Option */}
                                     <label
                                         className={`relative flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${selectedPayment === 'razorpay'
-                                            ? 'border-[#9D72FF] bg-purple-50/30'
+                                            ? 'border-blue-500 bg-blue-50/30'
                                             : 'border-gray-100 hover:border-gray-200'
                                             }`}
                                     >
@@ -235,7 +237,7 @@ const Payment = () => {
                                             className="mt-1"
                                         />
                                         <div className="ml-3">
-                                            <span className="block font-semibold text-[#2F2A4D]">Razorpay (Indian Clients)</span>
+                                            <span className="block font-semibold text-slate-800">Razorpay (Indian Clients)</span>
                                             <span className="text-xs text-gray-500 block mt-1">UPI, Credit/Debit Cards, NetBanking</span>
                                         </div>
                                     </label>
@@ -256,7 +258,7 @@ const Payment = () => {
                                             className="mt-1"
                                         />
                                         <div className="ml-3">
-                                            <span className="block font-semibold text-[#2F2A4D]">PayPal (International)</span>
+                                            <span className="block font-semibold text-slate-800">PayPal (International)</span>
                                             <span className="text-xs text-gray-500 block mt-1">International Cards, PayPal Wallet</span>
                                         </div>
                                     </label>

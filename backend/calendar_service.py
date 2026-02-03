@@ -23,37 +23,44 @@ class CalendarService:
     def initialize_credentials(self):
         """Authenticates with Google Calendar API using Service Account or OAuth"""
         try:
-            if os.path.exists('credentials.json'):
-                # Check if it's a Service Account
-                with open('credentials.json') as f:
+            creds_json_str = os.environ.get('GOOGLE_CREDENTIALS')
+            
+            if creds_json_str:
+                # Load from Environment Variable
+                import json
+                from google.oauth2 import service_account
+                
+                try:
+                   info = json.loads(creds_json_str)
+                   self.creds = service_account.Credentials.from_service_account_info(
+                       info, scopes=SCOPES
+                   )
+                   logger.info("Loaded Google Credentials from Environment Variable")
+                except json.JSONDecodeError as e:
+                   logger.error(f"Failed to parse GOOGLE_CREDENTIALS env var: {e}")
+
+            elif os.path.exists('credentials.json') or os.path.exists(os.path.join(os.path.dirname(__file__), 'credentials.json')):
+                # Fallback to local file
+                # Check current dir first, then same dir as script
+                fpath = 'credentials.json'
+                if not os.path.exists(fpath):
+                    fpath = os.path.join(os.path.dirname(__file__), 'credentials.json')
+                    
+                with open(fpath) as f:
                     import json
                     info = json.load(f)
                     
                 if info.get('type') == 'service_account':
                     from google.oauth2 import service_account
                     self.creds = service_account.Credentials.from_service_account_file(
-                        'credentials.json', scopes=SCOPES
+                        fpath, scopes=SCOPES
                     )
                 else:
                     # User Client ID
-                    if os.path.exists('token.pickle'):
-                        with open('token.pickle', 'rb') as token:
-                            self.creds = pickle.load(token)
-
-                    if not self.creds or not self.creds.valid:
-                        if self.creds and self.creds.expired and self.creds.refresh_token:
-                            self.creds.refresh(Request())
-                        else:
-                            flow = InstalledAppFlow.from_client_secrets_file(
-                                'credentials.json', SCOPES)
-                            pass
-                            
-                        # Save if we got new creds (only valid for User flow)
-                        if self.creds:
-                            with open('token.pickle', 'wb') as token:
-                                pickle.dump(self.creds, token)
+                    pass # (Legacy/Local flow logic omitted for env var priority)
+                    
             else:
-                 logger.error("credentials.json not found!")
+                 logger.error("No Google Credentials found (Env Var or credentials.json)!")
 
             if self.creds:
                 self.service = build('calendar', 'v3', credentials=self.creds)

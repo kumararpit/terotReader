@@ -15,11 +15,11 @@ export const Header = () => {
   }, []);
 
   const navLinks = [
-    { label: 'Home', href: '#home' },
-    { label: 'About', href: '#about' },
-    { label: 'Services', href: '#services' },
-    { label: 'Testimonials', href: '#testimonials' },
-    { label: 'FAQ', href: '#faq' }
+    { label: 'Home', href: '/#home' },
+    { label: 'About', href: '/#about' },
+    { label: 'Services', href: '/#services' },
+    { label: 'Testimonials', href: '/#testimonials' },
+    { label: 'FAQ', href: '/#faq' }
   ];
 
   const NavLinks = ({ mobile = false, onLinkClick }) => (
@@ -31,8 +31,8 @@ export const Header = () => {
           onClick={onLinkClick}
           className={`${mobile
             ? 'block py-3 text-lg border-b border-gray-200'
-            : 'hover:text-[#4A90E2] transition-colors duration-200'
-            } text-[#5A6C7D] font-medium`}
+            : 'hover:text-blue-500 transition-colors duration-200'
+            } text-slate-600 font-medium`}
         >
           {link.label}
         </a>
@@ -55,11 +55,11 @@ export const Header = () => {
             <NavLinks />
           </nav>
 
-          {/* Book Now Button - Right Side */}
+          {/* Contact Me Button - Right Side */}
           <div className="hidden md:block">
-            <a href="#services">
-              <Button className="btn-primary px-8 rounded-full bg-[#AF92E5] hover:bg-[#9D7AD6] text-white border-none shadow-md hover:shadow-lg transition-all">
-                Book Now
+            <a href="/#services">
+              <Button className="px-8 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground border-none shadow-md hover:shadow-lg transition-all">
+                Contact Me
               </Button>
             </a>
           </div>
@@ -67,16 +67,16 @@ export const Header = () => {
           {/* Mobile Menu Trigger - Right Side */}
           <Sheet>
             <SheetTrigger asChild className="md:hidden ml-auto">
-              <Button variant="ghost" size="icon" className="text-[#4A90E2]">
+              <Button variant="ghost" size="icon" className="text-blue-500">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-white text-[#2C3E50] border-l border-gray-200 w-[280px]">
+            <SheetContent side="right" className="bg-white text-slate-800 border-l border-gray-200 w-[280px]">
               <nav className="flex flex-col space-y-4 mt-8">
                 <NavLinks mobile onLinkClick={() => document.querySelector('[data-state="open"]')?.click()} />
-                <a href="#services" className="mt-4">
-                  <Button className="w-full btn-primary py-3">
-                    Book Now
+                <a href="/#services" className="mt-4">
+                  <Button className="w-full py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full">
+                    Contact Me
                   </Button>
                 </a>
               </nav>

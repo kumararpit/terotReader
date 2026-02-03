@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
+import email_service
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -17,7 +18,12 @@ except ImportError:
 # Define Business Timezone
 BUSINESS_TZ = ZoneInfo('Asia/Kolkata')
 from payment_service import payment_service
-from email_service import email_service
+from email_service import send_password_reset_otp, send_booking_confirmation_to_client, send_booking_notification_to_tejashvini
+import zoom_service
+import auth
+from auth import Token, create_access_token, verify_password, get_password_hash
+import random
+import string
 
 
 ROOT_DIR = Path(__file__).parent
@@ -72,7 +78,7 @@ class StatusCheckCreate(BaseModel):
 class BookingCreate(BaseModel):
     full_name: str
     email: EmailStr
-    phone: str
+    phone: Optional[str] = None
     gender: str
     date_of_birth: str
     service_type: str
@@ -80,9 +86,12 @@ class BookingCreate(BaseModel):
     preferred_time: Optional[str] = None
     alternative_time: Optional[str] = None
     partner_info: Optional[str] = None
-    questions: str
+    questions: Optional[str] = None
     situation_description: str
+    reading_focus: Optional[str] = None
     payment_method: str  # 'stripe', 'razorpay', 'paypal'
+    is_emergency: bool = False
+    aura_image: Optional[str] = None
 
 class Booking(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -91,7 +100,7 @@ class Booking(BaseModel):
     booking_id: str
     full_name: str
     email: EmailStr
-    phone: str
+    phone: Optional[str] = None
     gender: str
     date_of_birth: str
     service_type: str
@@ -99,8 +108,9 @@ class Booking(BaseModel):
     preferred_time: Optional[str] = None
     alternative_time: Optional[str] = None
     partner_info: Optional[str] = None
-    questions: str
-    situation_description: str
+    questions: Optional[str] = None
+    situation_description: Optional[str] = None
+    reading_focus: Optional[str] = None
     payment_method: str
     is_emergency: bool = False
     payment_status: str = "pending"
@@ -109,6 +119,7 @@ class Booking(BaseModel):
     currency: Optional[str] = None
     status: str = "confirmed"  # 'confirmed', 'canceled'
     gcal_event_id: Optional[str] = None
+    aura_image: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -150,21 +161,114 @@ class SlotCreate(BaseModel):
     type: Optional[str] = "regular"
     duration: Optional[int] = 20
 
-class BookingCreate(BaseModel):
-    full_name: str
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class SetupAdminRequest(BaseModel):
+    username: str
     email: EmailStr
-    phone: str
-    gender: str
-    date_of_birth: str
-    service_type: str
-    preferred_date: str
-    preferred_time: Optional[str] = None
-    alternative_time: Optional[str] = None
-    partner_info: Optional[str] = None
-    questions: str
-    situation_description: str
-    payment_method: str  # 'stripe', 'razorpay', 'paypal'
-    is_emergency: Optional[bool] = False
+    password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp: str
+    new_password: str
+
+# --- Auth Routes ---
+
+@api_router.get("/auth/setup-status")
+async def get_setup_status():
+    """Check if admin setup is required"""
+    count = await db.users.count_documents({})
+    return {"needs_setup": count == 0}
+
+@api_router.post("/auth/setup")
+async def setup_admin(data: SetupAdminRequest):
+    """Create initial admin user"""
+    count = await db.users.count_documents({})
+    if count > 0:
+        raise HTTPException(status_code=400, detail="Setup already completed")
+    
+    hashed_password = get_password_hash(data.password)
+    user_doc = {
+        "username": data.username,
+        "email": data.email,
+        "password_hash": hashed_password,
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.users.insert_one(user_doc)
+    return {"message": "Admin user created successfully"}
+
+@api_router.post("/login", response_model=Token)
+async def login_for_access_token(form_data: LoginRequest):
+    # Find user
+    user = await db.users.find_one({"username": form_data.username})
+    
+    if not user or not verify_password(form_data.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+    
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["username"]}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+    user = await db.users.find_one({"email": data.email})
+    if not user:
+        # Don't reveal user existence for security, just pretend success
+        return {"message": "If email exists, OTP sent"}
+    
+    # Generate OTP
+    otp = ''.join(random.choices(string.digits, k=6))
+    
+    # Store OTP (expires in 10 mins)
+    await db.otps.update_one(
+        {"email": data.email},
+        {"$set": {"otp": otp, "created_at": datetime.now(timezone.utc)}},
+        upsert=True
+    )
+    
+    # Send Email
+    background_tasks.add_task(send_password_reset_otp, data.email, otp)
+    return {"message": "If email exists, OTP sent"}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(data: ResetPasswordRequest):
+    # Verify OTP
+    record = await db.otps.find_one({"email": data.email})
+    if not record:
+        raise HTTPException(status_code=400, detail="Invalid request")
+    
+    # Check expiry (10 mins)
+    age = datetime.now(timezone.utc) - record["created_at"].replace(tzinfo=timezone.utc)
+    if age.total_seconds() > 600:
+        raise HTTPException(status_code=400, detail="OTP expired")
+        
+    if record["otp"] != data.otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+    
+    # Update Password
+    new_hash = get_password_hash(data.new_password)
+    result = await db.users.update_one(
+        {"email": data.email},
+        {"$set": {"password_hash": new_hash}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    # Clear OTP
+    await db.otps.delete_one({"email": data.email})
+    
+    return {"message": "Password updated successfully"}
+
+
 
 # Pricing mapping
 PRICING_MAP = {
@@ -786,7 +890,8 @@ async def get_status_checks():
     return status_checks
 
 @api_router.post("/bookings/create")
-async def create_booking(booking_data: BookingCreate):
+@api_router.post("/bookings/create")
+async def create_booking(booking_data: BookingCreate, background_tasks: BackgroundTasks):
     """Create a new booking and initiate payment"""
     try:
         # Generate booking ID
@@ -812,11 +917,13 @@ async def create_booking(booking_data: BookingCreate):
             partner_info=booking_data.partner_info,
             questions=booking_data.questions,
             situation_description=booking_data.situation_description,
+            reading_focus=booking_data.reading_focus,
             payment_method=booking_data.payment_method,
             is_emergency=booking_data.is_emergency,
             amount=pricing['amount'],
             currency=pricing['currency'],
-            status="confirmed"
+            status="confirmed",
+            aura_image=booking_data.aura_image
         )
 
         # Apply Emergency Charge (+30%)
@@ -869,9 +976,53 @@ async def create_booking(booking_data: BookingCreate):
         doc['created_at'] = doc['created_at'].isoformat()
         doc['updated_at'] = doc['updated_at'].isoformat()
         
-        # Save to database
-        await db.bookings.insert_one(doc)
+        # Insert into MongoDB
+        new_booking = await db.bookings.insert_one(doc)
         
+        # Schedule Zoom Meeting if Live Reading
+        meeting_link = None
+        if str(doc.get('service_type', '')).startswith('live-'):
+            try:
+                # Format: "{Service Name} with {User Name}"
+                
+                # Get Readable Service Name
+                raw_service = doc.get('service_type', '')
+                service_name = "Live Reading"
+                if '20' in raw_service:
+                    service_name = "Live Reading (20 Mins)"
+                elif '40' in raw_service:
+                    service_name = "Live Reading (40 Mins)"
+                
+                topic = f"{service_name} with {doc.get('full_name')}"
+                
+                # Calculate start time (assuming preferred_date is YYYY-MM-DD and time is HH:mm)
+                start_time_iso = f"{doc.get('preferred_date')}T{doc.get('preferred_time')}:00"
+                
+                # Default duration 40, or 20/40 based on type
+                duration = 40
+                if '20' in raw_service:
+                    duration = 20
+                
+                logger.info(f"Scheduling Zoom meeting: {topic} at {start_time_iso}")
+                meeting_link = await zoom_service.create_meeting(topic, start_time_iso, duration)
+                
+                if meeting_link:
+                    # Update booking with meeting link
+                    await db.bookings.update_one(
+                        {"_id": new_booking.inserted_id},
+                        {"$set": {"meeting_link": meeting_link}}
+                    )
+                    logger.info(f"Zoom meeting created: {meeting_link}")
+            except Exception as e:
+                logger.error(f"Failed to create Zoom meeting: {e}")
+
+        # Send Confirmation Email (Background Task)
+        # Pass meeting_link to email service
+        background_tasks.add_task(send_booking_confirmation_to_client, doc, None, meeting_link)
+        
+        # Notify Admin
+        background_tasks.add_task(send_booking_notification_to_tejashvini, doc)
+
         # Create payment based on method
         payment_result = None
         if booking_data.payment_method == 'stripe':
@@ -951,6 +1102,8 @@ async def verify_payment(verification: PaymentVerification):
         booking = await db.bookings.find_one({'booking_id': verification.booking_id}, {"_id": 0})
         
         # Send confirmation emails
+        import email_service
+        import zoom_service
         email_service.send_booking_confirmation_to_client(
             booking,
             payment_verified
@@ -981,6 +1134,25 @@ async def get_booking(booking_id: str):
     if isinstance(booking['created_at'], str):
         booking['created_at'] = datetime.fromisoformat(booking['created_at'])
     if isinstance(booking['updated_at'], str):
+        booking['updated_at'] = datetime.fromisoformat(booking['updated_at'])
+    
+    return booking
+
+@api_router.get("/bookings/gcal/{event_id}")
+async def get_booking_by_gcal(event_id: str):
+    """Get booking details by Google Calendar Event ID"""
+    booking = await db.bookings.find_one({'gcal_event_id': event_id}, {"_id": 0})
+    if not booking:
+        # Fallback: Check if it's the booking_id itself (in case frontend passed internal ID)
+        booking = await db.bookings.find_one({'booking_id': event_id}, {"_id": 0})
+        
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Convert ISO string timestamps back to datetime objects
+    if isinstance(booking.get('created_at'), str):
+        booking['created_at'] = datetime.fromisoformat(booking['created_at'])
+    if isinstance(booking.get('updated_at'), str):
         booking['updated_at'] = datetime.fromisoformat(booking['updated_at'])
     
     return booking

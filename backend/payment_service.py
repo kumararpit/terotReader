@@ -31,8 +31,9 @@ class PaymentService:
     def create_stripe_payment(amount: float, currency: str, booking_data: Dict[str, Any]):
         """Create Stripe payment session"""
         try:
-            # For demo purposes with dummy keys, return mock data
-            if 'dummy' in stripe.api_key:
+            # For demo purposes with dummy keys or empty keys, return mock data
+            stripe_key = stripe.api_key or ''
+            if not stripe_key or 'dummy' in stripe_key:
                 logger.info(f"[DEMO] Stripe payment session created for {amount} {currency}")
                 return {
                     'success': True,
@@ -75,15 +76,16 @@ class PaymentService:
     def create_razorpay_order(amount: float, currency: str, booking_data: Dict[str, Any]):
         """Create Razorpay order"""
         try:
-            # For demo purposes with dummy keys, return mock data
-            if 'dummy' in os.getenv('RAZORPAY_KEY_ID', ''):
+            # For demo purposes with dummy keys or empty keys, return mock data
+            rzp_key = os.getenv('RAZORPAY_KEY_ID', '')
+            if not rzp_key or 'dummy' in rzp_key:
                 logger.info(f"[DEMO] Razorpay order created for {amount} {currency}")
                 return {
                     'success': True,
                     'order_id': 'order_demo123456789',
                     'amount': int(amount * 100),
                     'currency': currency,
-                    'key_id': os.getenv('RAZORPAY_KEY_ID'),
+                    'key_id': rzp_key or 'rzp_test_demo',
                     'payment_method': 'razorpay'
                 }
             
@@ -114,8 +116,9 @@ class PaymentService:
     def create_paypal_payment(amount: float, currency: str, booking_data: Dict[str, Any]):
         """Create PayPal payment"""
         try:
-            # For demo purposes with dummy keys, return mock data
-            if 'dummy' in os.getenv('PAYPAL_CLIENT_ID', ''):
+            # For demo purposes with dummy keys or empty keys, return mock data
+            pp_client = os.getenv('PAYPAL_CLIENT_ID', '')
+            if not pp_client or 'dummy' in pp_client:
                 logger.info(f"[DEMO] PayPal payment created for {amount} {currency}")
                 return {
                     'success': True,
