@@ -11,7 +11,7 @@ const Payment = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { service, bookingData } = location.state || {};
-    const [selectedPayment, setSelectedPayment] = React.useState('razorpay');
+    const [selectedPayment, setSelectedPayment] = React.useState('paypal');
     const [isProcessing, setIsProcessing] = React.useState(false);
 
     useEffect(() => {
@@ -111,20 +111,11 @@ const Payment = () => {
             if (response.data.success) {
                 const { payment } = response.data;
 
-                if (payment.payment_method === 'razorpay') {
-                    // For demo/mock, just show success
-                    toast.success("Payment Initiated (Demo Mode)");
-                    // In real implementation, open Razorpay logic here
-                    // Since backend returns success: true immediately for demo keys
-                    if (payment.success) {
-                        navigate('/payment-success', { state: { bookingId: response.data.booking_id, ...payment } });
-                    }
-                } else if (payment.url) {
-                    // Stripe
-                    window.location.href = payment.url;
-                } else if (payment.approval_url) {
+                if (payment.payment_method === 'paypal') {
                     // PayPal
-                    window.location.href = payment.approval_url;
+                    if (payment.approval_url) {
+                        window.location.href = payment.approval_url;
+                    }
                 }
             }
 
@@ -221,40 +212,16 @@ const Payment = () => {
                                 <h3 className="text-lg font-semibold text-slate-800 mb-6">Select Payment Method</h3>
 
                                 <div className="space-y-4">
-                                    {/* Razorpay Option */}
-                                    <label
-                                        className={`relative flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${selectedPayment === 'razorpay'
-                                            ? 'border-blue-500 bg-blue-50/30'
-                                            : 'border-gray-100 hover:border-gray-200'
-                                            }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            value="razorpay"
-                                            checked={selectedPayment === 'razorpay'}
-                                            onChange={() => setSelectedPayment('razorpay')}
-                                            className="mt-1"
-                                        />
-                                        <div className="ml-3">
-                                            <span className="block font-semibold text-slate-800">Razorpay (Indian Clients)</span>
-                                            <span className="text-xs text-gray-500 block mt-1">UPI, Credit/Debit Cards, NetBanking</span>
-                                        </div>
-                                    </label>
-
                                     {/* PayPal Option */}
                                     <label
-                                        className={`relative flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${selectedPayment === 'paypal'
-                                            ? 'border-[#0070BA] bg-blue-50/30'
-                                            : 'border-gray-100 hover:border-gray-200'
-                                            }`}
+                                        className="relative flex items-start p-4 rounded-xl border-2 border-[#0070BA] bg-blue-50/30 cursor-pointer transition-all duration-300"
                                     >
                                         <input
                                             type="radio"
                                             name="payment"
                                             value="paypal"
-                                            checked={selectedPayment === 'paypal'}
-                                            onChange={() => setSelectedPayment('paypal')}
+                                            checked={true}
+                                            readOnly
                                             className="mt-1"
                                         />
                                         <div className="ml-3">
@@ -268,10 +235,10 @@ const Payment = () => {
                                     <Button
                                         onClick={handlePayment}
                                         disabled={isProcessing}
-                                        className={`w-full py-4 text-lg font-semibold shadow-lg transition-all transform active:scale-95 ${selectedPayment === 'paypal' ? 'bg-[#0070BA] hover:bg-[#005ea6]' : 'btn-primary'} ${isProcessing ? 'opacity-75 cursor-not-allowed' : ''}`
+                                        className={`w-full py-4 text-lg font-semibold shadow-lg transition-all transform active:scale-95 bg-[#0070BA] hover:bg-[#005ea6] ${isProcessing ? 'opacity-75 cursor-not-allowed' : ''}`
                                         }>
                                         <CreditCard className="w-5 h-5 mr-2 inline" />
-                                        {isProcessing ? 'Processing...' : `Pay via ${selectedPayment === 'paypal' ? 'PayPal' : 'Razorpay'}`}
+                                        {isProcessing ? 'Processing...' : 'Pay via PayPal'}
                                     </Button>
 
                                     <div className="text-center mt-4">

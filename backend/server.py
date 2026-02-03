@@ -1039,27 +1039,17 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
 
         # Create payment based on method
         payment_result = None
-        if booking_data.payment_method == 'stripe':
-            payment_result = payment_service.create_stripe_payment(
-                pricing['amount'],
-                pricing['currency'],
-                booking.model_dump()
-            )
-        elif booking_data.payment_method == 'razorpay':
-            payment_result = payment_service.create_razorpay_order(
-                pricing['amount'],
-                pricing['currency'],
-                booking.model_dump()
-            )
-        elif booking_data.payment_method == 'paypal':
+        if booking_data.payment_method == 'paypal':
             payment_result = payment_service.create_paypal_payment(
                 pricing['amount'],
                 pricing['currency'],
                 booking.model_dump()
             )
-        
+        else:
+            raise HTTPException(status_code=400, detail=f"Payment method {booking_data.payment_method} is not supported. Use 'paypal'.")
+
         if not payment_result or not payment_result.get('success'):
-            raise HTTPException(status_code=500, detail="Failed to create payment")
+            raise HTTPException(status_code=500, detail=payment_result.get('error', "Failed to create payment"))
         
         return {
             'success': True,
@@ -1088,17 +1078,11 @@ async def verify_payment(verification: PaymentVerification):
         
         # Verify payment based on method
         payment_verified = None
-        if verification.payment_method == 'stripe':
-            payment_verified = payment_service.verify_stripe_payment(verification.session_id)
-        elif verification.payment_method == 'razorpay':
-            payment_verified = payment_service.verify_razorpay_payment(
-                verification.payment_id,
-                verification.order_id,
-                verification.signature
-            )
-        elif verification.payment_method == 'paypal':
+        if verification.payment_method == 'paypal':
             payment_verified = payment_service.verify_paypal_payment(verification.payment_id)
-        
+        else:
+             raise HTTPException(status_code=400, detail=f"Verification for {verification.payment_method} is not supported.")
+
         if not payment_verified or not payment_verified.get('success'):
             raise HTTPException(status_code=400, detail="Payment verification failed")
         
