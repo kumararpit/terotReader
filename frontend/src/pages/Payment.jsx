@@ -42,8 +42,11 @@ const Payment = () => {
 
     const { basePrice, emergencyFee, total } = calculateTotal();
 
+    const isCancelled = React.useRef(false);
+
     const handlePayment = async () => {
         setIsProcessing(true);
+        isCancelled.current = false; // Reset cancel state
         try {
             const baseUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
@@ -108,23 +111,40 @@ const Payment = () => {
 
             const response = await axios.post(`${baseUrl}/api/bookings/create`, payload);
 
+            if (isCancelled.current) {
+                console.log("Payment flow cancelled by user.");
+                return; // Stop if user cancelled
+            }
+
             if (response.data.success) {
                 const { payment } = response.data;
 
                 if (payment.payment_method === 'paypal') {
                     // PayPal
                     if (payment.approval_url) {
-                        window.location.href = payment.approval_url;
+                        localStorage.setItem('payment_method', 'paypal');
+                        // Also save booking_id if available to cover all bases, but URL param should suffice
+                        if (response.data.booking_id) {
+                            localStorage.setItem('booking_id', response.data.booking_id);
+                        }
+
+                        // Check cancel one last time before redirect
+                        if (!isCancelled.current) {
+                            window.location.href = payment.approval_url;
+                        }
                     }
                 }
             }
 
         } catch (error) {
+            if (isCancelled.current) return;
             console.error("Payment Error:", error);
             const msg = error.response?.data?.detail || "Payment initialization failed";
             toast.error(typeof msg === 'string' ? msg : "Payment failed");
         } finally {
-            setIsProcessing(false);
+            if (!isCancelled.current) {
+                setIsProcessing(false);
+            }
         }
     };
 
@@ -258,6 +278,36 @@ const Payment = () => {
 
                 </div>
             </main>
+
+            {/* Security Overlay */}
+            {isProcessing && (
+                <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center animate-in fade-in zoom-in duration-300">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-2">Secure Payment in Progress</h3>
+                        <p className="text-slate-600 mb-8">
+                            Please wait while we securely redirect you to PayPal. Do not refresh or close this page.
+                        </p>
+
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center justify-center gap-2 text-xs text-green-600 font-medium bg-green-50 py-2 rounded-lg">
+                                <ShieldCheck className="w-4 h-4" />
+                                256-bit SSL Enforced
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    isCancelled.current = true;
+                                    setIsProcessing(false);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 text-sm mt-4 underline decoration-dotted"
+                            >
+                                Cancel and return to options
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <Footer />
         </div>

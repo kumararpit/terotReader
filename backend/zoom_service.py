@@ -47,7 +47,7 @@ async def get_zoom_token():
         logger.error(f"Error fetching Zoom token: {e}")
         return None
 
-async def create_meeting(topic: str, start_time_str: str, duration: int = 40):
+async def create_meeting(topic: str, start_time_str: str, duration: int = 40, agenda: str = None):
     """
     Creates a Zoom meeting.
     start_time_str should be ISO format like "2026-03-05T15:00:00"
@@ -78,13 +78,16 @@ async def create_meeting(topic: str, start_time_str: str, duration: int = 40):
         "duration": duration,
         "timezone": "UTC",
         "settings": {
-            "host_video": True,
-            "participant_video": True,
+            "host_video": False,
+            "participant_video": False,
             "join_before_host": False,
             "mute_upon_entry": True,
             "waiting_room": True
         }
     }
+    
+    if agenda:
+        meeting_details["agenda"] = agenda
 
     try:
         async with httpx.AsyncClient() as client:

@@ -357,9 +357,9 @@ const Admin = () => {
     const [detailsOpen, setDetailsOpen] = useState(false);
 
     const fetchBookingDetails = async (gcalEventId) => {
+        setSelectedBooking(null); // Reset immediately
         setIsDetailsLoading(true);
         setDetailsOpen(true);
-        setSelectedBooking(null); // Reset
         try {
             const res = await axios.get(`${API}/bookings/gcal/${gcalEventId}`);
             setSelectedBooking(res.data);
@@ -815,14 +815,16 @@ const Admin = () => {
                                                                     <div
                                                                         key={slot.id}
                                                                         onClick={() => {
-                                                                            if (slot.is_booked && slot.type !== 'canceled') {
-                                                                                fetchBookingDetails(slot.id);
+                                                                            if (slot.is_booked) {
+                                                                                // Strip prefix for canceled slots to find by original booking_id
+                                                                                const lookupId = slot.type === 'canceled' ? slot.id.replace('canceled-', '') : slot.id;
+                                                                                fetchBookingDetails(lookupId);
                                                                             }
                                                                         }}
                                                                         className={`
                                                                             relative px-3 py-2 rounded-lg border text-sm font-medium shadow-sm flex items-center gap-2
                                                                             ${slot.type === 'canceled'
-                                                                                ? 'bg-gray-100 border-gray-200 text-gray-400'
+                                                                                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-pointer hover:bg-gray-200'
                                                                                 : slot.is_booked
                                                                                     ? 'bg-red-100 border-red-300 text-red-900 cursor-pointer hover:bg-red-200 transition-colors'
                                                                                     : 'bg-gray-100'}
@@ -863,7 +865,8 @@ const Admin = () => {
                                                                                 variant="ghost"
                                                                                 size="icon"
                                                                                 className="h-5 w-5 -mr-1 ml-1 text-gray-500 hover:text-red-600 hover:bg-white/50 rounded-full"
-                                                                                onClick={() => {
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
                                                                                     if (slot.is_booked) {
                                                                                         deleteBooking(slot.id);
                                                                                     } else {

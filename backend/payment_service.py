@@ -4,8 +4,23 @@ import paypalrestsdk
 import os
 import logging
 from typing import Dict, Any
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load environment variables
+load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+# Add File Handler for debugging
+try:
+    f_handler = logging.FileHandler('paypal_debug.log')
+    f_handler.setLevel(logging.INFO)
+    fmt = logging.Formatter('%(asctime)s - %(message)s')
+    f_handler.setFormatter(fmt)
+    logger.addHandler(f_handler)
+except Exception as e:
+    print(f"Failed to setup file logging: {e}")
 
 # Initialize payment gateways
 # stripe.api_key = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51dummy123456789')
@@ -18,9 +33,19 @@ logger = logging.getLogger(__name__)
 # )
 
 # PayPal Configuration
-# Mode should be 'live' for production, 'sandbox' for testing
+# Mode determination based on APP_ENV
+app_env = os.getenv('APP_ENV', 'development').lower()
+
+# STRICTLY enforce sandbox in development to avoid stale env vars causing 401
+if app_env == 'development':
+    paypal_mode = 'sandbox'
+    logger.info("Forcing Sandbox mode due to APP_ENV=development")
+else:
+    # In production, default to live but allow override
+    paypal_mode = os.getenv('PAYPAL_MODE', 'live')
+
 paypalrestsdk.configure({
-    "mode": os.getenv('PAYPAL_MODE', 'live'),
+    "mode": paypal_mode,
     "client_id": os.getenv('PAYPAL_CLIENT_ID', ''),
     "client_secret": os.getenv('PAYPAL_CLIENT_SECRET', '')
 })
@@ -34,6 +59,15 @@ class PaymentService:
         """Create PayPal payment"""
         try:
             pp_client = os.getenv('PAYPAL_CLIENT_ID', '')
+            # pp_mode = paypalrestsdk.api.default_api.mode # INVALID
+            app_env_debug = os.getenv('APP_ENV', 'unknown')
+            current_mode_override = os.getenv('PAYPAL_MODE', 'NOT_SET')
+            calculated_mode = 'live' if app_env_debug == 'production' else 'sandbox'
+            
+            logger.info(f"PAYPAL DEBUG: AppEnv={app_env_debug}") 
+            logger.info(f"PAYPAL DEBUG: OverrideMode={current_mode_override} (Calculated Default={calculated_mode})")
+            logger.info(f"PAYPAL DEBUG: ClientID (partial)={pp_client[:5]}...{pp_client[-5:] if pp_client else 'None'}")
+
             if not pp_client:
                 logger.error("PayPal Client ID not configured")
                 return {'success': False, 'error': "PayPal configuration missing"}
@@ -55,6 +89,9 @@ class PaymentService:
                 }]
             })
             
+            logger.info(f"PAYPAL DEBUG: Return URL: {FRONTEND_URL}/payment-success")
+            logger.info(f"PAYPAL DEBUG: Cancel URL: {FRONTEND_URL}/payment-cancel")
+            
             if payment.create():
                 approval_url = next(link.href for link in payment.links if link.rel == 'approval_url')
                 return {
@@ -74,6 +111,7 @@ class PaymentService:
     def verify_paypal_payment(payment_id: str):
         """Verify PayPal payment"""
         try:
+            logger.info(f"PAYPAL DEBUG: Verifying payment_id={payment_id}")
             # For testing with dummy ID if needed, but usually we want real verification
             if 'demo' in payment_id:
                  return {
@@ -86,6 +124,10 @@ class PaymentService:
 
             payment = paypalrestsdk.Payment.find(payment_id)
             if payment.execute({"payer_id": payment.payer.payer_info.payer_id}):
+                if payment.state != 'approved':
+                    logger.error(f"PayPal payment executed but state is {payment.state}")
+                    return {'success': False, 'error': f"Payment state is {payment.state}"}
+                    
                 return {
                     'success': True,
                     'payment_status': payment.state,

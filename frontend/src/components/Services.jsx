@@ -26,7 +26,7 @@ export const Services = () => {
             Choose Your <span className="text-[#FABFA6]">Spiritual Journey</span>
           </h2>
           <p className="body-text text-gray-400 max-w-2xl mx-auto mt-4">
-            Whether you seek written guidance or real-time consultation, I offer personalized readings 
+            Whether you seek written guidance or real-time consultation, I offer personalized readings
             to illuminate your path forward.
           </p>
         </div>

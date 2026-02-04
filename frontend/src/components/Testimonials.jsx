@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { testimonials as mockTestimonials } from '../mock';
 import { Button } from './ui/button';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, User } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '') + '/api';
@@ -67,21 +67,12 @@ export const Testimonials = () => {
                   "{testimonial.text}"
                 </p>
               </div>
-
-              <div className="relative z-10 pt-6 border-t border-slate-100 flex items-center">
-                <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-primary font-bold text-xl mr-4">
-                  {(testimonial.author || 'C').charAt(0)}
-                </div>
-                <div>
-                  <h4 className="font-heading font-bold text-slate-800">{testimonial.author || 'Happy Client'}</h4>
-                  <span className="text-sm text-slate-500 uppercase tracking-wider">Verified Client</span>
-                </div>
-              </div>
             </div>
+
           ))}
         </div>
 
       </div>
-    </section>
+    </section >
   );
 };

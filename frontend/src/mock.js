@@ -37,10 +37,10 @@ export const services = [
     title: "Live Readings",
     type: "Interactive Session",
     price: "66",
-    description: "Real-time tarot reading sessions via Zoom audio or video call, offering interactive and personalized guidance for your questions and concerns.",
+    description: "Real-time tarot reading sessions via Zoom audio call, offering interactive and personalized guidance for your questions and concerns.",
     icon: "Phone",
     features: [
-      "Predictions, guidance & counseling",
+      "Guidance, counselling and remedies",
       "Angel guidance & love messages",
       "Immediate clarity through live interaction",
       "3 follow-up questions included",

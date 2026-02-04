@@ -1,11 +1,15 @@
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
 import email_service
 from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from pathlib import Path
 import os
 import logging
-from pathlib import Path
+
+# Load environment variables as early as possible
+load_dotenv()
+
+from starlette.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
@@ -24,10 +28,6 @@ import auth
 from auth import Token, create_access_token, verify_password, get_password_hash
 import random
 import string
-
-
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
 
 # Logger Setup
 logging.basicConfig(
@@ -614,8 +614,10 @@ async def delete_testimonial(id: str):
 async def delete_booking(booking_id: str):
     # booking_id here is the Google Calendar Event ID (passed from frontend slot.id)
     try:
-        # 1. Soft Cancel in MongoDB (if exists)
-        # We try to find the booking linked to this GCal ID
+        # 1. Fetch booking details FIRST (to get email for notification)
+        booking = await db.bookings.find_one({"gcal_event_id": booking_id})
+        
+        # 2. Soft Cancel in MongoDB (if exists)
         result = await db.bookings.update_one(
             {"gcal_event_id": booking_id},
             {"$set": {"status": "canceled", "updated_at": datetime.now(timezone.utc)}}
@@ -623,10 +625,23 @@ async def delete_booking(booking_id: str):
         
         if result.modified_count > 0:
             logger.info(f"Soft canceled booking with GCal ID: {booking_id}")
+            
+            # 3. Send Cancellation Email (Refunding in 3-5 days)
+            if booking:
+                # Use BackgroundTask if we could inject it, but here we'll call directly or use fire-and-forget wrapper
+                # Ideally pass 'background_tasks' to this route but sticking to simple import for now
+                # Or use the global background task approach if possible? 
+                # Simplest: Just call it synchronous but wrapped in try/except so it doesn't block too much
+                # Better: Use FastAPI BackgroundTasks
+                try:
+                    email_service.send_booking_cancellation_email(booking)
+                except Exception as ex:
+                    logger.error(f"Failed to send cancellation email: {ex}")
+
         else:
             logger.warning(f"No DB booking found for GCal ID: {booking_id} (might be older booking or manual event)")
 
-        # 2. Hard Delete from Google Calendar (to free up slot)
+        # 4. Hard Delete from Google Calendar (to free up slot)
         calendar_service.delete_event(booking_id)
         
         return {"success": True}
@@ -1018,7 +1033,10 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
                     duration = 20
                 
                 logger.info(f"Scheduling Zoom meeting: {topic} at {start_time_iso}")
-                meeting_link = await zoom_service.create_meeting(topic, start_time_iso, duration)
+                
+                # Pass Situation/Context as Agenda
+                agenda = doc.get('situation_description', '')
+                meeting_link = await zoom_service.create_meeting(topic, start_time_iso, duration, agenda=agenda)
                 
                 if meeting_link:
                     # Update booking with meeting link
@@ -1062,7 +1080,7 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/bookings/verify-payment")
-async def verify_payment(verification: PaymentVerification):
+async def verify_payment(verification: PaymentVerification, background_tasks: BackgroundTasks):
     """Verify payment and send confirmation emails"""
     try:
         # Get booking
@@ -1078,6 +1096,8 @@ async def verify_payment(verification: PaymentVerification):
         
         # Verify payment based on method
         payment_verified = None
+        logger.info(f"VERIFY DEBUG: Receiving verification request: {verification}")
+        
         if verification.payment_method == 'paypal':
             payment_verified = payment_service.verify_paypal_payment(verification.payment_id)
         else:
@@ -1099,14 +1119,17 @@ async def verify_payment(verification: PaymentVerification):
         # Refresh booking data
         booking = await db.bookings.find_one({'booking_id': verification.booking_id}, {"_id": 0})
         
-        # Send confirmation emails
+        # Send confirmation emails in background
         import email_service
-        import zoom_service
-        email_service.send_booking_confirmation_to_client(
+        # import zoom_service # Unused?
+        
+        background_tasks.add_task(
+            email_service.send_booking_confirmation_to_client,
             booking,
             payment_verified
         )
-        email_service.send_booking_notification_to_tejashvini(
+        background_tasks.add_task(
+            email_service.send_booking_notification_to_tejashvini,
             booking,
             payment_verified
         )

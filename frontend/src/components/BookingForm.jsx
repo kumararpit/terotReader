@@ -181,13 +181,13 @@ export const BookingForm = ({ service, onSubmit }) => {
                 <option value="">Select Option</option>
                 {isDelivered ? (
                   <>
-                    <option value="3_questions">3 Questions</option>
-                    <option value="5_questions">5 Questions</option>
+                    <option value="3_questions">3 Questions - €22.00</option>
+                    <option value="5_questions">5 Questions - €33.00</option>
                   </>
                 ) : (
                   <>
-                    <option value="20_min">20 Minutes</option>
-                    <option value="40_min">40 Minutes</option>
+                    <option value="20_min">20 Minutes - €66.00</option>
+                    <option value="40_min">40 Minutes - €129.00</option>
                   </>
                 )}
               </select>
@@ -449,13 +449,15 @@ export const BookingForm = ({ service, onSubmit }) => {
 
             <div className="md:col-span-2 space-y-2">
               <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[var(--color-primary)]" /> Situation Description *
+                <FileText className="w-4 h-4 text-[var(--color-primary)]" /> {isLive ? 'Brief Situation Overview' : 'Your Story & Current Energy'} *
               </label>
               <textarea
                 name="situation"
                 required
                 className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none min-h-[150px]"
-                placeholder="Describe your situation in detail (Max 500 words)..."
+                placeholder={isLive
+                  ? "Share a short summary of your situation to give me context before our session. This allows our live reading to focus entirely on questions and answers."
+                  : "Describe your situation in your own words. This helps me understand your current energy and offer guidance that’s aligned with you."}
                 onChange={handleChange}
               ></textarea>
               <p className="text-xs text-gray-500 text-right">Max 500 words</p>

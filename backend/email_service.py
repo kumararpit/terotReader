@@ -10,6 +10,8 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+import base64
+from pdf_service import generate_invoice_pdf, generate_booking_details_pdf
 
 # Load env vars
 load_dotenv()
@@ -22,57 +24,10 @@ SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
-def generate_booking_pdf(booking: dict):
+def send_email(to_email: str, subject: str, body_html: str, attachments: list = None):
     """
-    Generates a PDF summary of the booking details.
-    """
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    elements = []
-    styles = getSampleStyleSheet()
-    
-    # Title
-    elements.append(Paragraph(f"Booking Confirmation", styles['Title']))
-    elements.append(Paragraph(f"Booking ID: {booking.get('booking_id', 'N/A')}", styles['Normal']))
-    elements.append(Spacer(1, 20))
-    
-    # Booking Details Table
-    data = [
-        ["Field", "Details"],
-        ["Full Name", booking.get('full_name', 'N/A')],
-        ["Email", booking.get('email', 'N/A')],
-        ["Phone", booking.get('phone', 'N/A')],
-        ["Service Type", booking.get('service_type', 'N/A')],
-        ["Date", booking.get('preferred_date', 'N/A')],
-        ["Time", booking.get('preferred_time', 'N/A')],
-        ["Questions", booking.get('questions', 'N/A')],
-        ["Situation", booking.get('situation_description', 'N/A')],
-        ["Payment Status", booking.get('payment_status', 'N/A')],
-        ["Amount", f"{booking.get('currency', '')} {booking.get('amount', '')}"]
-    ]
-    
-    # Styling the table
-    table = Table(data, colWidths=[150, 350])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-    ]))
-    
-    elements.append(table)
-    
-    # Build PDF
-    doc.build(elements)
-    buffer.seek(0)
-    return buffer.read()
-
-def send_email(to_email: str, subject: str, body_html: str, attachment_data=None, attachment_name="booking_details.pdf"):
-    """
-    Sends an email using SMTP, optionally with a PDF attachment.
+    Sends an email using SMTP with multiple attachments.
+    attachments: list of dicts {'name': str, 'data': bytes, 'mime': str (optional)}
     """
     if not SMTP_USER or not SMTP_PASSWORD:
         logger.warning("SMTP credentials not set. Email not sent.")
@@ -86,10 +41,18 @@ def send_email(to_email: str, subject: str, body_html: str, attachment_data=None
 
         msg.attach(MIMEText(body_html, 'html'))
 
-        if attachment_data:
-            part = MIMEApplication(attachment_data, Name=attachment_name)
-            part['Content-Disposition'] = f'attachment; filename="{attachment_name}"'
-            msg.attach(part)
+        if attachments:
+            for attachment in attachments:
+                name = attachment.get('name', 'attachment')
+                data = attachment.get('data')
+                
+                if not data:
+                    continue
+                    
+                # Basic MIME type detection or default
+                part = MIMEApplication(data, Name=name)
+                part['Content-Disposition'] = f'attachment; filename="{name}"'
+                msg.attach(part)
 
         server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
         server.starttls()
@@ -103,7 +66,7 @@ def send_email(to_email: str, subject: str, body_html: str, attachment_data=None
 
 def send_booking_confirmation_to_client(booking: dict, payment_info: dict = None, meeting_link: str = None):
     """
-    Sends confirmation email to the user.
+    Sends confirmation email to the user with multiple attachments.
     """
     subject = "Booking Confirmation - Tarot with Tejashvini"
     
@@ -149,108 +112,114 @@ def send_booking_confirmation_to_client(booking: dict, payment_info: dict = None
                 </ul>
                 
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-                
-                <!-- INVOICE SECTION -->
-                <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px;">
-                    <h3 style="margin-top: 0; color: #333;">INVOICE</h3>
-                    <p style="font-size: 14px; color: #666;">
-                        <strong>Invoice #:</strong> {booking.get('booking_id')}<br/>
-                        <strong>Date:</strong> {booking.get('created_at', '').split('T')[0]}<br/>
-                        <strong>Status:</strong> <span style="color: green; font-weight: bold;">PAID</span>
-                    </p>
-                    
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid #ddd; text-align: left;">
-                                <th style="padding: 8px 0;">Description</th>
-                                <th style="padding: 8px 0; text-align: right;">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="border-bottom: 1px solid #eee;">
-                                <td style="padding: 10px 0;">
-                                    {service_display}<br/>
-                                    <span style="font-size: 12px; color: #777;">Consultation Services</span>
-                                </td>
-                                <td style="padding: 10px 0; text-align: right;">
-                                    {currency} {amount}
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td style="padding: 15px 0; font-weight: bold;">TOTAL</td>
-                                <td style="padding: 15px 0; text-align: right; font-weight: bold; font-size: 16px;">
-                                    {currency} {amount}
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                <p>Please find attached:</p>
+                <ul>
+                    <li><strong>Invoice</strong></li>
+                    <li><strong>Booking Details</strong></li>
+                    {'<li><strong>Aura Image</strong></li>' if 'aura' in raw_service else ''}
+                </ul>
                 
                 <p style="margin-top: 30px; font-size: 12px; color: #888;">
-                    This is a computer-generated invoice. No signature is required.<br/>
                     Tarot with Tejashvini
                 </p>
-                
-                <p>We look forward to speaking with you.</p>
-                <p>Warm regards,<br/>Tejashvini</p>
             </div>
         </body>
     </html>
     """
-    # Use dynamic email from booking details
+    # Recipients
     recipient_email = booking.get('email')
     
-    # Generate PDF
+    # Prepare Attachments
+    attachments = []
+    
+    # 1. Invoice PDF
     try:
-        pdf_bytes = generate_booking_pdf(booking)
+        invoice_bytes = generate_invoice_pdf(booking, payment_info)
+        attachments.append({'name': 'invoice.pdf', 'data': invoice_bytes})
     except Exception as e:
-        logger.error(f"Failed to generate PDF: {e}")
-        pdf_bytes = None
+        logger.error(f"Failed to generate invoice: {e}")
+
+    # 2. Booking Details PDF
+    try:
+        details_bytes = generate_booking_details_pdf(booking)
+        attachments.append({'name': 'booking_details.pdf', 'data': details_bytes})
+    except Exception as e:
+        logger.error(f"Failed to generate booking details: {e}")
+
+    # 3. Aura Image (Separate Attachment)
+    aura_data = booking.get('aura_image')
+    if aura_data and 'aura' in raw_service.lower():
+        try:
+            # Check if base64
+            if aura_data.startswith('data:image'):
+                header, encoded = aura_data.split(",", 1)
+                image_bytes = base64.b64decode(encoded)
+                # Determine extension
+                ext = 'png'
+                if 'jpeg' in header or 'jpg' in header:
+                    ext = 'jpg'
+                
+                # Filename: username_aura_image.png
+                safe_name = booking.get('full_name', 'user').replace(' ', '_').lower()
+                filename = f"{safe_name}_aura_image.{ext}"
+                
+                attachments.append({'name': filename, 'data': image_bytes})
+            else:
+                pass # Handle URL or unsupported format if needed
+        except Exception as e:
+            logger.error(f"Failed to process aura image attachment: {e}")
 
     if recipient_email:
-        send_email(recipient_email, subject, body, attachment_data=pdf_bytes)
+        send_email(recipient_email, subject, body, attachments=attachments)
     else:
         logger.error("No recipient email found in booking details.")
-    
-    # Also notify Admin
-    send_booking_notification_to_tejashvini(booking, payment_info)
 
 def send_booking_notification_to_tejashvini(booking: dict, payment_info: dict = None):
     """
-    Sends alert to admin.
+    Sends alert to admin with same attachments.
     """
     if not ADMIN_EMAIL:
         logger.warning("ADMIN_EMAIL not set. Notification not sent.")
         return
 
-    subject = f"NEW BOOKING: {booking.get('full_name')}"
+    subject = f"NEW BOOKING: {booking.get('full_name')} - {booking.get('service_type')}"
     body = f"""
     <html>
         <body>
             <h2>New Booking Received</h2>
-            <ul>
-                <li><strong>Name:</strong> {booking.get('full_name')}</li>
-                <li><strong>Service:</strong> {booking.get('service_type')}</li>
-                <li><strong>Date:</strong> {booking.get('preferred_date')}</li>
-                <li><strong>Time:</strong> {booking.get('preferred_time')}</li>
-                <li><strong>Email:</strong> {booking.get('email')}</li>
-                <li><strong>Phone:</strong> {booking.get('phone')}</li>
-                <li><strong>Questions:</strong> {booking.get('questions')}</li>
-                <li><strong>Payment Status:</strong> {booking.get('payment_status', 'Pending')}</li>
-            </ul>
+            <p>See attachments for Invoice, Booking Details, and any Uploads.</p>
         </body>
     </html>
     """
-    # Generate PDF
+    
+    # Re-generate attachments (or pass them if we wanted to optimize, but regeneration is safer/stateless here)
+    attachments = []
+    
+    # 1. Invoice
     try:
-        pdf_bytes = generate_booking_pdf(booking)
-    except Exception as e:
-        logger.error(f"Failed to generate PDF: {e}")
-        pdf_bytes = None
+        attachments.append({'name': 'invoice.pdf', 'data': generate_invoice_pdf(booking, payment_info)})
+    except Exception: pass
+    
+    # 2. Details
+    try:
+         attachments.append({'name': 'booking_details.pdf', 'data': generate_booking_details_pdf(booking)})
+    except Exception: pass
+    
+    # 3. Aura
+    aura_data = booking.get('aura_image')
+    raw_service = booking.get('service_type', '')
+    if aura_data and 'aura' in raw_service.lower():
+         try:
+            if aura_data.startswith('data:image'):
+                header, encoded = aura_data.split(",", 1)
+                image_bytes = base64.b64decode(encoded)
+                ext = 'jpg' if 'jpeg' in header or 'jpg' in header else 'png'
+                safe_name = booking.get('full_name', 'user').replace(' ', '_').lower()
+                filename = f"{safe_name}_aura_image.{ext}"
+                attachments.append({'name': filename, 'data': image_bytes})
+         except: pass
 
-    send_email(ADMIN_EMAIL, subject, body, attachment_data=pdf_bytes)
+    send_email(ADMIN_EMAIL, subject, body, attachments=attachments)
 
 def send_password_reset_otp(email: str, otp: str):
     """
@@ -260,12 +229,51 @@ def send_password_reset_otp(email: str, otp: str):
     body = f"""
     <html>
         <body>
-            <h2>Password Reset Request</h2>
+             <h2>Password Reset Request</h2>
             <p>Your One-Time Password (OTP) to reset your admin password is:</p>
             <h1 style="color: #4f46e5; font-size: 32px; letter-spacing: 5px;">{otp}</h1>
-            <p>If you did not request this, please ignore this email.</p>
             <p>This code is valid for 10 minutes.</p>
         </body>
     </html>
     """
+    # No attachments for OTP
     send_email(email, subject, body)
+
+def send_booking_cancellation_email(booking: dict):
+    """
+    Sends a cancellation email to the client with refund information.
+    """
+    subject = "Important: Update regarding your booking with Tarot with Tejashvini"
+    
+    body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                <h2 style="color: #4f46e5;">Booking Cancellation</h2>
+                <p>Dear {booking.get('full_name')},</p>
+                
+                <p>We regret to inform you that your scheduled appointment for <strong>{booking.get('service_type').replace('-', ' ').title()}</strong> 
+                on <strong>{booking.get('preferred_date')} at {booking.get('preferred_time')}</strong> has been canceled.</p>
+                
+                <p>We sincerely apologize for any inconvenience this may cause.</p>
+                
+                <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                    <p style="margin: 0; font-weight: bold;">Refund Status:</p>
+                    <p style="margin: 5px 0 0 0;">A full refund has been initiated and will be processed within <strong style="color: #4f46e5;">3 to 5 business days</strong>.</p>
+                </div>
+                
+                <p>If you would like to reschedule or have any questions, please reply to this email.</p>
+                
+                <p style="margin-top: 30px; font-size: 12px; color: #888;">
+                    Tarot with Tejashvini
+                </p>
+            </div>
+        </body>
+    </html>
+    """
+    
+    recipient_email = booking.get('email')
+    if recipient_email:
+        send_email(recipient_email, subject, body)
+    else:
+        logger.warning(f"No email found for booking {booking.get('booking_id')}, cancellation email not sent.")
