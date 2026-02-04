@@ -25,7 +25,7 @@ export const Services = () => {
           <h2 className="section-heading text-white mt-6">
             Choose Your <span className="text-[#FABFA6]">Spiritual Journey</span>
           </h2>
-          <p className="body-text text-gray-400 max-w-2xl mx-auto mt-4">
+          <p className="body-text text-muted-foreground max-w-2xl mx-auto mt-4">
             Whether you seek written guidance or real-time consultation, I offer personalized readings
             to illuminate your path forward.
           </p>
@@ -59,14 +59,14 @@ export const Services = () => {
                 <h3 className="card-heading text-white mb-3 group-hover:text-[#FABFA6] transition-colors duration-300">
                   {service.title}
                 </h3>
-                <p className="body-text text-gray-400 mb-6 leading-relaxed">
+                <p className="body-text text-muted-foreground mb-6 leading-relaxed">
                   {service.description}
                 </p>
 
                 {/* Features List */}
                 <ul className="space-y-2">
                   {service.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start space-x-2 text-sm text-gray-400">
+                    <li key={idx} className="flex items-start space-x-2 text-sm text-muted-foreground">
                       <span className="text-[#F49E7D] mt-1">✦</span>
                       <span>{feature}</span>
                     </li>
@@ -77,9 +77,8 @@ export const Services = () => {
           })}
         </div>
 
-        {/* CTA Section */}
         <div className="mt-16 text-center">
-          <p className="text-gray-400 mb-6">Ready to begin your journey of self-discovery?</p>
+          <p className="text-muted-foreground mb-6">Ready to begin your journey of self-discovery?</p>
           <a href="mailto:bathejatejashvini@gmail.com">
             <button className="btn-primary bg-[#F49E7D] hover:bg-[#FABFA6] text-white rounded-full px-8 py-4 font-semibold uppercase text-sm tracking-wider transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#F49E7D]/50">
               Contact Me

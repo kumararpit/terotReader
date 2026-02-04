@@ -21,9 +21,10 @@ export const ServicesLight = () => {
           </span>
           <h2 className="text-4xl md:text-5xl font-heading font-medium text-primary mb-6">
             Guidance tailored to your <br />
-            <span className="italic font-light text-slate-500">inner journey.</span>
+            Guidance tailored to your <br />
+            <span className="italic font-light text-primary/80">inner journey.</span>
           </h2>
-          <p className="text-lg text-slate-600 font-light leading-relaxed">
+          <p className="text-lg text-primary/90 font-light leading-relaxed">
             Select the reading style that resonates most with your seeking heart.
           </p>
         </div>
@@ -48,7 +49,7 @@ export const ServicesLight = () => {
             return (
               <div
                 key={service.id}
-                className="group relative flex flex-col h-full bg-card rounded-[32px] overflow-hidden border border-border/40 hover:border-border/80 transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-slate-200/50"
+                className="group relative flex flex-col h-full bg-card rounded-[32px] overflow-hidden border border-border/40 hover:border-border/80 transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-primary/5"
               >
                 {/* Image Area - Top Half */}
                 <div className="relative h-72 w-full overflow-hidden">
@@ -72,18 +73,18 @@ export const ServicesLight = () => {
                     {service.title}
                   </h3>
 
-                  <p className="text-slate-600 mb-8 leading-relaxed font-light text-[15px]">
+                  <p className="text-primary/80 mb-8 leading-relaxed font-light text-[15px]">
                     {service.description}
                   </p>
 
                   {/* Divider */}
-                  <div className="w-full h-px bg-slate-100 mb-6" />
+                  <div className="w-full h-px bg-primary/5 mb-6" />
 
                   {/* Simple Features */}
                   <ul className="space-y-3 mb-8 flex-grow">
                     {service.features.slice(0, 3).map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm text-slate-500">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 block flex-shrink-0" />
+                      <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 mt-2 block flex-shrink-0" />
                         <span className="leading-relaxed font-light">{feature}</span>
                       </li>
                     ))}
@@ -92,7 +93,7 @@ export const ServicesLight = () => {
                   {/* Footer Action Area: Price Left, Link Right */}
                   <div className="mt-auto flex items-center justify-between pt-2 border-t border-transparent">
                     <div className="flex flex-row items-baseline gap-2">
-                      <span className="text-[11px] font-bold tracking-widest text-slate-400 uppercase">
+                      <span className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase">
                         Starting from
                       </span>
                       <span className="text-lg font-heading font-medium text-primary">
@@ -100,7 +101,7 @@ export const ServicesLight = () => {
                       </span>
                     </div>
 
-                    <Link to={`/booking/${service.id}`} className="group/btn inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-slate-600 transition-colors">
+                    <Link to={`/booking/${service.id}`} className="group/btn inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/70 transition-colors">
                       <span>Book Session</span>
                       <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
                     </Link>

@@ -27,7 +27,7 @@ export const About = () => {
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Heading */}
         <div className="text-center mb-16 fade-in-up">
-          <h2 className="text-4xl md:text-5xl font-heading text-slate-800 drop-shadow-sm font-medium">
+          <h2 className="text-4xl md:text-5xl font-heading text-primary drop-shadow-sm font-medium">
             Guiding you toward <br />
             <span className="text-primary italic">clarity and purpose</span>
           </h2>
@@ -51,7 +51,7 @@ export const About = () => {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   {/* Subtle Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                 </div>
 
                 {/* Floating "Badge" or accent */}
@@ -68,15 +68,15 @@ export const About = () => {
                   Meet Your Guide
                 </div>
 
-                <h3 className="text-3xl md:text-4xl font-heading text-slate-800 font-semibold leading-tight">
+                <h3 className="text-3xl md:text-4xl font-heading text-primary font-semibold leading-tight">
                   I'm Tejashvini Batheja
                 </h3>
 
-                <p className="text-xl text-slate-600 font-medium leading-relaxed italic border-l-4 border-primary/30 pl-6 py-2">
+                <p className="text-xl text-primary/80 font-medium leading-relaxed italic border-l-4 border-primary/30 pl-6 py-2">
                   "Helping you navigate life with clarity, confidence, and compassion."
                 </p>
 
-                <div className="space-y-4 text-slate-700 text-lg leading-relaxed font-normal opacity-90">
+                <div className="space-y-4 text-primary text-lg leading-relaxed font-normal opacity-90">
                   <p>
                     With 6 years of professional experience, I view tarot as a powerful tool for insight and self-reflection. My mission is to help you understand your present situation and recognize patterns that shape your journey.
                   </p>
@@ -92,7 +92,7 @@ export const About = () => {
           </div>
 
           {/* Feature Strip Footer */}
-          <div className="bg-slate-900/5 border-t border-white/40 p-8 md:px-12">
+          <div className="bg-primary/5 border-t border-white/40 p-8 md:px-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {features.map((item, index) => {
                 const Icon = item.icon;
@@ -101,7 +101,7 @@ export const About = () => {
                     <div className="flex-shrink-0 w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:bg-primary transition-all duration-300">
                       <Icon className="text-primary group-hover:text-white w-6 h-6 transition-colors duration-300" strokeWidth={1.5} />
                     </div>
-                    <span className="text-slate-700 font-medium text-sm lg:text-base leading-tight">
+                    <span className="text-primary font-medium text-sm lg:text-base leading-tight">
                       {item.text}
                     </span>
                   </div>

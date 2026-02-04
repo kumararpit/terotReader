@@ -48,7 +48,7 @@ const Booking = () => {
 
                     <button
                         onClick={() => navigate('/')}
-                        className="flex items-center text-gray-500 hover:text-[var(--color-primary)] transition-colors mb-8"
+                        className="flex items-center text-muted-foreground hover:text-[var(--color-primary)] transition-colors mb-8"
                     >
                         <ArrowLeft className="w-5 h-5 mr-2" />
                         Back to Services
@@ -58,7 +58,7 @@ const Booking = () => {
                         <h1 className="text-3xl md:text-4xl font-heading font-bold text-[var(--color-text-heading)] mb-4">
                             Book Your <span className="text-[var(--color-primary)]">{service.title}</span>
                         </h1>
-                        <p className="text-gray-600 max-w-2xl mx-auto">
+                        <p className="text-primary/80 max-w-2xl mx-auto">
                             Please fill out the form below to schedule your session. All information provided is strictly confidential.
                         </p>
                     </div>

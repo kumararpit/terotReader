@@ -46,7 +46,7 @@ export const Hero = () => {
           </p>
 
           {/* Description */}
-          <p className="body-large text-gray-300 mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <p className="body-large text-primary/80 mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.6s' }}>
             {siteInfo.description}
           </p>
 
@@ -65,7 +65,7 @@ export const Hero = () => {
           </div>
 
           {/* Languages */}
-          <div className="mt-12 flex items-center justify-center space-x-4 text-gray-400 text-sm animate-fade-in" style={{ animationDelay: '1s' }}>
+          <div className="mt-12 flex items-center justify-center space-x-4 text-primary/70 text-sm animate-fade-in" style={{ animationDelay: '1s' }}>
             <span>Available in:</span>
             {siteInfo.languages.map((lang, index) => (
               <span key={lang} className="text-[#7AB6F4] font-medium">

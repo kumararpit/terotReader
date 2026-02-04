@@ -4,67 +4,77 @@
 
 @layer base {
     :root {
-        /* Primary: Charcoal Black #1A1A1A -> 0 0% 10% */
-        --primary: 0 0% 10%;
-        --primary-foreground: 0 0% 98%;
+        /* Primary: Rich Pure Black #111111 -> 0 0% 7% */
+        --primary: 0 0% 7%;
+        --primary-foreground: 43 90% 38%;
+        /* Antique Gold #B8860B */
 
-        /* Background: Soft Off-White #F5F5F7 -> 240 5% 96% */
-        --background: 240 5% 96%;
+        /* Background: Warm Cream/Off-white #FCFAF8 -> 30 14% 98% */
+        --background: 30 14% 98%;
         --foreground: 0 0% 10%;
+        /* Deep Charcoal Black #1A1A1A */
 
-        /* Card: Pure White #FFFFFF -> 0 0% 100% */
-        --card: 0 0% 100%;
+        /* Card: Warm Cream/Off-white #FCFAF8 -> 30 14% 98% */
+        --card: 30 14% 98%;
         --card-foreground: 0 0% 10%;
+        /* Deep Charcoal #1A1A1A */
 
-        /* Popover: Pure White */
-        --popover: 0 0% 100%;
+        /* Popover: Warm Cream/Off-white */
+        --popover: 30 14% 98%;
         --popover-foreground: 0 0% 10%;
 
-        /* Secondary: Soft Grey #E5E5E5 -> 0 0% 90% */
-        --secondary: 0 0% 90%;
-        --secondary-foreground: 0 0% 10%;
+        /* Secondary: Antique Gold #B8860B -> 43 90% 38% */
+        --secondary: 43 90% 38%;
+        --secondary-foreground: 0 0% 7%;
+        /* Rich Pure Black #111111 */
 
-        /* Muted: Lighter Grey */
-        --muted: 0 0% 96%;
-        --muted-foreground: 0 0% 45%;
+        /* Muted: Soft Tan/Off-white similar to background */
+        --muted: 30 14% 96%;
+        --muted-foreground: 43 90% 38%;
+        /* Antique Gold #B8860B (replacing Light/Medium Grey) */
 
-        /* Accent: Subtly Soft Purple #E9E6F5 -> 254 35% 94% */
-        --accent: 254 35% 94%;
-        --accent-foreground: 254 35% 20%;
+        /* Accent: Antique Gold #B8860B */
+        --accent: 43 90% 38%;
+        --accent-foreground: 0 0% 7%;
 
         /* Destructive */
         --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 210 40% 98%;
+        --destructive-foreground: 30 14% 98%;
 
-        /* Border & Input: Soft Grey #E2E2E2 */
-        --border: 0 0% 89%;
-        --input: 0 0% 89%;
-        --ring: 0 0% 10%;
+        /* Border & Input: Antique Gold #B8860B */
+        --border: 43 90% 38%;
+        --input: 43 90% 38%;
+        --ring: 43 90% 38%;
 
         --radius: 0.5rem;
-        /* Slightly reduced for cleaner look */
     }
 
     .dark {
-        --background: 222.2 84% 4.9%;
-        --foreground: 210 40% 98%;
-        --card: 222.2 84% 4.9%;
-        --card-foreground: 210 40% 98%;
-        --popover: 222.2 84% 4.9%;
-        --popover-foreground: 210 40% 98%;
-        --primary: 210 40% 98%;
-        --primary-foreground: 222.2 47.4% 11.2%;
-        --secondary: 217.2 32.6% 17.5%;
-        --secondary-foreground: 210 40% 98%;
-        --muted: 217.2 32.6% 17.5%;
-        --muted-foreground: 215 20.2% 65.1%;
-        --accent: 217.2 32.6% 17.5%;
-        --accent-foreground: 210 40% 98%;
+        /* Update dark mode to also respect the "Anti-Grey" rule where possible, 
+           focusing on Rich Blacks and Golds */
+        --background: 0 0% 7%;
+        /* Rich Pure Black */
+        --foreground: 30 14% 98%;
+        /* Off-white */
+        --card: 0 0% 10%;
+        /* Deep Charcoal */
+        --card-foreground: 30 14% 98%;
+        --popover: 0 0% 10%;
+        --popover-foreground: 30 14% 98%;
+        --primary: 43 90% 38%;
+        /* Antique Gold */
+        --primary-foreground: 0 0% 7%;
+        --secondary: 0 0% 10%;
+        --secondary-foreground: 30 14% 98%;
+        --muted: 0 0% 10%;
+        --muted-foreground: 43 90% 38%;
+        --accent: 0 0% 10%;
+        --accent-foreground: 43 90% 38%;
         --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 210 40% 98%;
-        --border: 217.2 32.6% 17.5%;
-        --input: 217.2 32.6% 17.5%;
-        --ring: 212.7 26.8% 83.9%;
+        --destructive-foreground: 30 14% 98%;
+        --border: 43 90% 38%;
+        --input: 43 90% 38%;
+        --ring: 43 90% 38%;
     }
 }
 
@@ -74,7 +84,7 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground overflow-x-hidden;
     }
 
     h1,

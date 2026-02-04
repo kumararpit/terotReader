@@ -6,6 +6,8 @@ import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const [isOpen, setIsOpen] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -30,9 +32,9 @@ export const Header = () => {
           href={link.href}
           onClick={onLinkClick}
           className={`${mobile
-            ? 'block py-3 text-lg border-b border-gray-200'
-            : 'hover:text-blue-500 transition-colors duration-200'
-            } text-slate-600 font-medium`}
+            ? 'block py-3 text-lg border-b border-primary/5'
+            : 'hover:text-primary transition-colors duration-200'
+            } text-primary font-medium`}
         >
           {link.label}
         </a>
@@ -43,7 +45,7 @@ export const Header = () => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-transparent ${isScrolled
-        ? 'bg-white/80 backdrop-blur-md shadow-sm border-white/20'
+        ? 'bg-background/80 backdrop-blur-md shadow-sm border-primary/5'
         : 'bg-transparent'
         }`}
     >
@@ -65,16 +67,16 @@ export const Header = () => {
           </div>
 
           {/* Mobile Menu Trigger - Right Side */}
-          <Sheet>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden ml-auto">
-              <Button variant="ghost" size="icon" className="text-blue-500">
+              <Button variant="ghost" size="icon" className="text-primary">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-white text-slate-800 border-l border-gray-200 w-[280px]">
+            <SheetContent side="right" className="bg-background text-foreground border-l border-primary/5 w-[280px]">
               <nav className="flex flex-col space-y-4 mt-8">
-                <NavLinks mobile onLinkClick={() => document.querySelector('[data-state="open"]')?.click()} />
-                <a href="/#services" className="mt-4">
+                <NavLinks mobile onLinkClick={() => setIsOpen(false)} />
+                <a href="/#services" className="mt-4" onClick={() => setIsOpen(false)}>
                   <Button className="w-full py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full">
                     Contact Me
                   </Button>

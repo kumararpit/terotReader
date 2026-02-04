@@ -102,7 +102,7 @@ const PaymentSuccess = () => {
     const activeSegments = Math.ceil(timeLeft / 2);
 
     return (
-      <div className="min-h-screen bg-[#FAFBFC] flex items-center justify-center relative overflow-hidden">
+      <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/5 rounded-full blur-[120px] pointer-events-none" />
@@ -111,10 +111,10 @@ const PaymentSuccess = () => {
           <div className="relative w-48 h-48 mx-auto mb-8">
             {/* Countdown Text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-slate-700 font-mono tracking-wider">
+              <span className="text-3xl font-bold text-primary font-mono tracking-wider">
                 {formatTime(timeLeft)}
               </span>
-              <span className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Remaining</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Remaining</span>
             </div>
 
             {/* SVG Segments */}
@@ -136,8 +136,8 @@ const PaymentSuccess = () => {
               })}
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-3">Verifying Payment</h2>
-          <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
+          <h2 className="text-2xl font-bold text-primary mb-3">Verifying Payment</h2>
+          <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
             Please wait while we securely confirm your transaction details...
           </p>
         </div>
@@ -146,13 +146,13 @@ const PaymentSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFBFC] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Elements matching Payment.jsx */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-2xl w-full relative z-10">
-        <div className="bg-white/80 backdrop-blur-md border border-gray-100 shadow-2xl rounded-3xl p-8 md:p-12 text-center">
+        <div className="bg-card/80 backdrop-blur-md border border-primary/5 shadow-2xl rounded-3xl p-8 md:p-12 text-center">
           {/* Success Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center animate-in zoom-in duration-500">
@@ -161,7 +161,7 @@ const PaymentSuccess = () => {
           </div>
 
           {/* Success Message */}
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 font-heading">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4 font-heading">
             Payment Successful! ✨
           </h1>
           <p className="text-xl text-[#B8860B] mb-8 font-medium">
@@ -170,22 +170,22 @@ const PaymentSuccess = () => {
 
           {/* Booking Details */}
           {bookingDetails && (
-            <div className="bg-slate-50 border border-gray-100 rounded-2xl p-6 mb-8 text-left shadow-sm">
-              <h3 className="text-slate-800 font-semibold text-lg mb-4 flex items-center gap-2">
+            <div className="bg-primary/5 border border-primary/5 rounded-2xl p-6 mb-8 text-left shadow-sm">
+              <h3 className="text-primary font-semibold text-lg mb-4 flex items-center gap-2">
                 <span className="text-green-500">✓</span> Booking Details
               </h3>
-              <div className="space-y-3 text-slate-600">
-                <p className="flex justify-between border-b border-gray-100 pb-2">
+              <div className="space-y-3 text-primary/80">
+                <p className="flex justify-between border-b border-primary/10 pb-2">
                   <span>Booking Reference:</span>
-                  <span className="font-mono text-slate-800">{bookingDetails.booking_id.slice(0, 8)}...</span>
+                  <span className="font-mono text-primary">{bookingDetails.booking_id.slice(0, 8)}...</span>
                 </p>
-                <p className="flex justify-between border-b border-gray-100 pb-2">
+                <p className="flex justify-between border-b border-primary/10 pb-2">
                   <span>Service:</span>
-                  <span className="font-medium text-slate-800 capitalize">{bookingDetails.service_type.replace(/-/g, ' ')}</span>
+                  <span className="font-medium text-primary capitalize">{bookingDetails.service_type.replace(/-/g, ' ')}</span>
                 </p>
-                <p className="flex justify-between border-b border-gray-100 pb-2">
+                <p className="flex justify-between border-b border-primary/10 pb-2">
                   <span>Amount Paid:</span>
-                  <span className="font-medium text-slate-800">€{bookingDetails.amount?.toFixed(2)}</span>
+                  <span className="font-medium text-primary">€{bookingDetails.amount?.toFixed(2)}</span>
                 </p>
                 <p className="flex justify-between pt-1">
                   <span>Status:</span>
@@ -199,8 +199,8 @@ const PaymentSuccess = () => {
 
           {/* What's Next */}
           <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-6 mb-8 text-left">
-            <h3 className="text-slate-800 font-semibold text-lg mb-4">🔮 What's Next?</h3>
-            <ul className="space-y-3 text-slate-600">
+            <h3 className="text-primary font-semibold text-lg mb-4">🔮 What's Next?</h3>
+            <ul className="space-y-3 text-primary/80">
               <li className="flex items-start">
                 <span className="text-[#B8860B] mr-3 mt-1">•</span>
                 <span>Confirmation email sent to your inbox</span>
@@ -222,7 +222,7 @@ const PaymentSuccess = () => {
 
           {/* Contact Info - Phone Removed */}
           <div className="mb-8">
-            <p className="text-slate-500 mb-4">Questions? Feel free to reach out:</p>
+            <p className="text-muted-foreground mb-4">Questions? Feel free to reach out:</p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 text-sm">
               <a href="mailto:bathejatejashvini@gmail.com" className="flex items-center justify-center text-[#B8860B] hover:text-[#8B6508] transition-colors font-medium">
                 <Mail size={16} className="mr-2" />

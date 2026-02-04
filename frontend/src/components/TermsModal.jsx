@@ -10,18 +10,18 @@ export const TermsModal = ({ isOpen, onClose, onAccept }) => {
             <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
 
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-purple-50 to-white">
+                <div className="px-6 py-4 border-b border-primary/5 flex items-center justify-between bg-background">
                     <div className="flex items-center gap-2 text-[#3B2E5A]">
                         <ShieldAlert className="w-5 h-5 text-[var(--color-primary)]" />
                         <h3 className="text-xl font-heading font-semibold">Terms & Conditions</h3>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-gray-400" />
+                    <button onClick={onClose} className="p-2 hover:bg-primary/5 rounded-full transition-colors">
+                        <X className="w-5 h-5 text-muted-foreground" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto max-h-[60vh] space-y-4 text-sm text-gray-600 leading-relaxed">
+                <div className="p-6 overflow-y-auto max-h-[60vh] space-y-4 text-sm text-primary leading-relaxed">
                     <p>Please read the following terms and conditions carefully before booking a session:</p>
 
                     <ul className="list-disc pl-5 space-y-2">
@@ -33,11 +33,11 @@ export const TermsModal = ({ isOpen, onClose, onAccept }) => {
                         <li><strong>Accuracy:</strong> While we strive for accuracy, tarot readings are subject to interpretation and should be viewed as a tool for self-reflection.</li>
                     </ul>
 
-                    <p className="mt-4 text-xs text-gray-400">By clicking "Accept & Proceed", you acknowledge that you have read, understood, and agreed to these terms.</p>
+                    <p className="mt-4 text-xs text-muted-foreground">By clicking "Accept & Proceed", you acknowledge that you have read, understood, and agreed to these terms.</p>
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <div className="p-6 border-t border-primary/5 bg-background flex justify-end gap-3">
                     <Button variant="outline" onClick={onClose} className="px-6">
                         Decline
                     </Button>

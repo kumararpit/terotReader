@@ -33,12 +33,12 @@ export const Testimonials = () => {
 
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-heading text-slate-800 drop-shadow-sm flex items-center justify-center gap-4 mb-4">
+          <h2 className="text-4xl md:text-5xl font-heading text-primary drop-shadow-sm flex items-center justify-center gap-4 mb-4">
             <Sparkles className="text-primary w-8 h-8" fill="currentColor" />
             <span className="font-medium">Client Love</span>
             <Sparkles className="text-primary w-8 h-8" fill="currentColor" />
           </h2>
-          <p className="text-lg text-slate-600">Stories of clarity and connection</p>
+          <p className="text-lg text-primary/80">Stories of clarity and connection</p>
         </div>
 
         {/* 3-Card Grid Layout */}
@@ -46,7 +46,7 @@ export const Testimonials = () => {
           {data.slice(0, 3).map((testimonial, index) => (
             <div
               key={testimonial.id || index}
-              className="group relative p-8 rounded-[32px] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-2 flex flex-col"
+              className="group relative p-8 rounded-[32px] bg-card border border-primary/5 shadow-xl shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-2 flex flex-col"
             >
               {/* Quote Icon Background */}
               <div className="absolute top-6 right-6 text-secondary/50 group-hover:text-primary/10 transition-colors duration-500">
@@ -63,7 +63,7 @@ export const Testimonials = () => {
                   ))}
                 </div>
 
-                <p className="text-slate-600 text-lg leading-relaxed mb-6 font-medium italic">
+                <p className="text-primary/80 text-lg leading-relaxed mb-6 font-medium italic">
                   "{testimonial.text}"
                 </p>
               </div>

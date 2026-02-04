@@ -21,7 +21,7 @@ export const Pricing = () => {
           <h2 className="section-heading text-white mt-6">
             Investment in Your <span className="text-[#FFD700]">Spiritual Growth</span>
           </h2>
-          <p className="body-text text-gray-400 max-w-2xl mx-auto mt-4">
+          <p className="body-text text-muted-foreground max-w-2xl mx-auto mt-4">
             Transparent pricing for transformative guidance. All sessions require advance payment to confirm booking.
           </p>
         </div>
@@ -50,18 +50,17 @@ export const Pricing = () => {
                   {category.packages.map((pkg, idx) => (
                     <div
                       key={idx}
-                      className={`relative p-5 rounded-lg transition-all duration-300 ${
-                        pkg.popular
+                      className={`relative p-5 rounded-lg transition-all duration-300 ${pkg.popular
                           ? 'bg-black/20 border-2 border-current shadow-lg scale-105'
                           : 'bg-black/10 border border-current/30 hover:bg-black/15'
-                      }`}
+                        }`}
                     >
                       {pkg.popular && (
                         <Badge className="absolute -top-3 right-4 bg-black text-white rounded-full px-3 py-1 text-xs font-semibold uppercase">
                           Popular
                         </Badge>
                       )}
-                      
+
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-sm font-medium opacity-80 mb-1">
@@ -101,7 +100,7 @@ export const Pricing = () => {
               <Sparkles className="text-[#D4AF37] flex-shrink-0 mt-1" size={24} />
               <div>
                 <h4 className="text-white font-semibold text-lg mb-3">Important Information</h4>
-                <ul className="space-y-2 text-gray-400 text-sm">
+                <ul className="space-y-2 text-muted-foreground text-sm">
                   <li className="flex items-start">
                     <span className="text-[#D4AF37] mr-2">•</span>
                     <span>All delivered readings include 3 follow-up questions</span>

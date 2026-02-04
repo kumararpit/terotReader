@@ -149,7 +149,7 @@ const Payment = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAFBFC] flex flex-col relative overflow-hidden">
+        <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
             {/* Background Decorative Elements */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/5 rounded-full blur-[120px] pointer-events-none" />
@@ -158,56 +158,56 @@ const Payment = () => {
             <main className="flex-grow pt-32 pb-20">
                 <div className="container mx-auto px-4 max-w-5xl">
                     <div className="text-center mb-10">
-                        <h1 className="text-3xl font-heading font-bold text-slate-800">Checkout</h1>
-                        <p className="text-slate-600">Complete your secure booking</p>
+                        <h1 className="text-3xl font-heading font-bold text-primary">Checkout</h1>
+                        <p className="text-primary/80">Complete your secure booking</p>
                     </div>
 
                     <div className="grid md:grid-cols-12 gap-8">
                         {/* LEFT COLUMN: Summary & Breakdown */}
                         <div className="md:col-span-7 space-y-6">
                             {/* Service Details Card */}
-                            <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100">
-                                <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                            <div className="bg-card rounded-[24px] p-8 shadow-sm border border-primary/5">
+                                <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
                                     <ShieldCheck className="w-5 h-5 text-green-500" />
                                     Booking Summary
                                 </h2>
 
                                 <div className="space-y-4">
-                                    <div className="flex justify-between py-3 border-b border-gray-50">
-                                        <span className="text-gray-500">Service</span>
-                                        <span className="font-medium text-slate-800">{service?.title}</span>
+                                    <div className="flex justify-between py-3 border-b border-primary/5">
+                                        <span className="text-muted-foreground">Service</span>
+                                        <span className="font-medium text-primary">{service?.title}</span>
                                     </div>
 
                                     {bookingData?.sessionType && (
-                                        <div className="flex justify-between py-3 border-b border-gray-50">
-                                            <span className="text-gray-500">Option</span>
-                                            <span className="font-medium text-slate-800 capitalize">
+                                        <div className="flex justify-between py-3 border-b border-primary/5">
+                                            <span className="text-muted-foreground">Option</span>
+                                            <span className="font-medium text-primary capitalize">
                                                 {bookingData.sessionType.replace(/_/g, ' ')}
                                             </span>
                                         </div>
                                     )}
 
                                     {bookingData?.slot && (
-                                        <div className="flex justify-between py-3 border-b border-gray-50">
-                                            <span className="text-gray-500">Slot Date</span>
-                                            <span className="font-medium text-slate-800">
+                                        <div className="flex justify-between py-3 border-b border-primary/5">
+                                            <span className="text-muted-foreground">Slot Date</span>
+                                            <span className="font-medium text-primary">
                                                 {new Date(bookingData.slot).toLocaleString()}
                                             </span>
                                         </div>
                                     )}
 
-                                    <div className="flex justify-between py-3 border-b border-gray-50">
-                                        <span className="text-gray-500">Client Name</span>
-                                        <span className="font-medium text-slate-800">{bookingData?.name}</span>
+                                    <div className="flex justify-between py-3 border-b border-primary/5">
+                                        <span className="text-muted-foreground">Client Name</span>
+                                        <span className="font-medium text-primary">{bookingData?.name}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Pricing Card */}
-                            <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100">
-                                <h2 className="text-lg font-semibold text-slate-800 mb-4">Payment Breakdown</h2>
+                            <div className="bg-card rounded-[24px] p-8 shadow-sm border border-primary/5">
+                                <h2 className="text-lg font-semibold text-primary mb-4">Payment Breakdown</h2>
                                 <div className="space-y-3">
-                                    <div className="flex justify-between text-gray-600">
+                                    <div className="flex justify-between text-primary/80">
                                         <span>Base Fee</span>
                                         <span>€{basePrice.toFixed(2)}</span>
                                     </div>
@@ -217,8 +217,8 @@ const Payment = () => {
                                             <span>+€{emergencyFee.toFixed(2)}</span>
                                         </div>
                                     )}
-                                    <div className="border-t border-dashed border-gray-200 my-4"></div>
-                                    <div className="flex justify-between text-xl font-bold text-slate-800">
+                                    <div className="border-t border-dashed border-primary/20 my-4"></div>
+                                    <div className="flex justify-between text-xl font-bold text-primary">
                                         <span>Total to Pay</span>
                                         <span>€{total.toFixed(2)}</span>
                                     </div>
@@ -228,8 +228,8 @@ const Payment = () => {
 
                         {/* RIGHT COLUMN: Payment Method Selection */}
                         <div className="md:col-span-5 space-y-6">
-                            <div className="bg-white rounded-[24px] p-8 shadow-xl shadow-blue-900/5 border border-blue-100/50 sticky top-32">
-                                <h3 className="text-lg font-semibold text-slate-800 mb-6">Select Payment Method</h3>
+                            <div className="bg-card rounded-[24px] p-8 shadow-xl shadow-blue-900/5 border border-primary/5 sticky top-32">
+                                <h3 className="text-lg font-semibold text-primary mb-6">Select Payment Method</h3>
 
                                 <div className="space-y-4">
                                     {/* PayPal Option */}
@@ -245,8 +245,8 @@ const Payment = () => {
                                             className="mt-1"
                                         />
                                         <div className="ml-3">
-                                            <span className="block font-semibold text-slate-800">PayPal (International)</span>
-                                            <span className="text-xs text-gray-500 block mt-1">International Cards, PayPal Wallet</span>
+                                            <span className="block font-semibold text-primary">PayPal (International)</span>
+                                            <span className="text-xs text-muted-foreground block mt-1">International Cards, PayPal Wallet</span>
                                         </div>
                                     </label>
                                 </div>
@@ -262,12 +262,12 @@ const Payment = () => {
                                     </Button>
 
                                     <div className="text-center mt-4">
-                                        <button onClick={() => navigate(-1)} className="text-sm text-gray-400 hover:text-gray-600">
+                                        <button onClick={() => navigate(-1)} className="text-sm text-primary/60 hover:text-primary">
                                             Cancel Transaction
                                         </button>
                                     </div>
 
-                                    <div className="flex items-center justify-center gap-2 mt-6 text-xs text-gray-400">
+                                    <div className="flex items-center justify-center gap-2 mt-6 text-xs text-muted-foreground">
                                         <ShieldCheck className="w-3 h-3" />
                                         <span>256-bit SSL Secure Payment</span>
                                     </div>
@@ -281,11 +281,11 @@ const Payment = () => {
 
             {/* Security Overlay */}
             {isProcessing && (
-                <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center animate-in fade-in zoom-in duration-300">
+                <div className="fixed inset-0 z-50 bg-primary/95 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+                    <div className="bg-card rounded-2xl p-8 max-w-md w-full shadow-2xl text-center animate-in fade-in zoom-in duration-300">
                         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                        <h3 className="text-xl font-bold text-slate-800 mb-2">Secure Payment in Progress</h3>
-                        <p className="text-slate-600 mb-8">
+                        <h3 className="text-xl font-bold text-primary mb-2">Secure Payment in Progress</h3>
+                        <p className="text-primary/80 mb-8">
                             Please wait while we securely redirect you to PayPal. Do not refresh or close this page.
                         </p>
 
@@ -300,7 +300,7 @@ const Payment = () => {
                                     isCancelled.current = true;
                                     setIsProcessing(false);
                                 }}
-                                className="text-gray-400 hover:text-gray-600 text-sm mt-4 underline decoration-dotted"
+                                className="text-primary/60 hover:text-primary text-sm mt-4 underline decoration-dotted"
                             >
                                 Cancel and return to options
                             </button>

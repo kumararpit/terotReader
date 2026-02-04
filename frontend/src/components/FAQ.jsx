@@ -20,9 +20,9 @@ export const FAQ = () => {
           </span>
           <h2 className="text-4xl md:text-5xl font-heading font-medium text-primary mb-6">
             Seeking clarity? <br />
-            <span className="italic font-light text-slate-500">We have answers.</span>
+            <span className="italic font-light text-primary/70">We have answers.</span>
           </h2>
-          <p className="text-lg text-slate-600 font-light leading-relaxed">
+          <p className="text-lg text-primary/80 font-light leading-relaxed">
             Every journey begins with a question. Here are some of the most common things seekers ask before their first reading.
           </p>
         </div>
@@ -34,11 +34,11 @@ export const FAQ = () => {
               <AccordionItem
                 key={faq.id}
                 value={`item-${faq.id}`}
-                className="border-b border-slate-200/60 last:border-none"
+                className="border-b border-primary/10 last:border-none"
               >
                 <AccordionTrigger className="group py-6 text-left hover:no-underline transition-all duration-300">
                   <div className="flex items-center justify-between w-full">
-                    <span className="text-xl font-heading font-medium text-primary group-data-[state=open]:text-slate-900 pr-8 leading-snug">
+                    <span className="text-xl font-heading font-medium text-primary group-data-[state=open]:text-primary pr-8 leading-snug">
                       {faq.question}
                     </span>
                     {/* Icons removed as requested */}
@@ -46,7 +46,7 @@ export const FAQ = () => {
                 </AccordionTrigger>
 
                 <AccordionContent className="pb-8 pt-2">
-                  <p className="text-slate-600 leading-relaxed text-[16px] font-light max-w-2xl">
+                  <p className="text-primary/80 leading-relaxed text-[16px] font-light max-w-2xl">
                     {faq.answer}
                   </p>
                 </AccordionContent>
@@ -57,7 +57,7 @@ export const FAQ = () => {
 
         {/* Bottom CTA */}
         <div className="text-center mt-20 fade-in-up">
-          <p className="text-slate-500 font-light text-sm tracking-wide">
+          <p className="text-muted-foreground font-light text-sm tracking-wide">
             STILL HAVE QUESTIONS? <a href="mailto:bathejatejashvini@gmail.com" className="text-primary font-medium hover:opacity-70 border-b border-primary/20 pb-0.5 transition-all">REACH OUT DIRECTLY</a>
           </p>
         </div>

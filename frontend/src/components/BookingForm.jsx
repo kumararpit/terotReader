@@ -107,28 +107,28 @@ export const BookingForm = ({ service, onSubmit }) => {
 
         {/* Common Fields */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          <label className="text-sm font-medium text-primary flex items-center gap-2">
             <User className="w-4 h-4 text-[var(--color-primary)]" /> Full Name *
           </label>
           <input
             type="text"
             name="name"
             required
-            className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none transition-all"
+            className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
             placeholder="John Doe"
             onChange={handleChange}
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          <label className="text-sm font-medium text-primary flex items-center gap-2">
             <Mail className="w-4 h-4 text-[var(--color-primary)]" /> Email Address *
           </label>
           <input
             type="email"
             name="email"
             required
-            className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none transition-all"
+            className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
             placeholder="your@email.com"
             onChange={handleChange}
           />
@@ -137,27 +137,27 @@ export const BookingForm = ({ service, onSubmit }) => {
         {!isAura && (
           <>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <label className="text-sm font-medium text-primary flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[var(--color-primary)]" /> Date of Birth *
               </label>
               <input
                 type="date"
                 name="dob"
                 required
-                className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none"
+                className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 outline-none"
                 onChange={handleChange}
               />
               <p className="text-xs text-red-400 mt-1">* Must be 18+ to book</p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <label className="text-sm font-medium text-primary flex items-center gap-2">
                 <User className="w-4 h-4 text-[var(--color-primary)]" /> Gender *
               </label>
               <select
                 name="gender"
                 required
-                className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none"
+                className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 outline-none"
                 onChange={handleChange}
               >
                 <option value="">Select Gender</option>
@@ -169,13 +169,13 @@ export const BookingForm = ({ service, onSubmit }) => {
 
             {/* Session Type */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <label className="text-sm font-medium text-primary flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[var(--color-primary)]" /> Session Type *
               </label>
               <select
                 name="sessionType"
                 required
-                className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none"
+                className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 outline-none"
                 onChange={handleChange}
               >
                 <option value="">Select Option</option>
@@ -195,13 +195,13 @@ export const BookingForm = ({ service, onSubmit }) => {
 
             {/* Reading Focus */}
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <label className="text-sm font-medium text-primary flex items-center gap-2">
                 <Heart className="w-4 h-4 text-[var(--color-primary)]" /> Reading Focus *
               </label>
               <select
                 name="readingFocus"
                 required
-                className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none"
+                className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 outline-none"
                 onChange={handleChange}
               >
                 <option value="">Select Topic</option>
@@ -214,21 +214,21 @@ export const BookingForm = ({ service, onSubmit }) => {
 
             {/* Partner Details */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Partner/Other Person's Name (Optional)</label>
+              <label className="text-sm font-medium text-primary">Partner/Other Person's Name (Optional)</label>
               <input
                 type="text"
                 name="partnerName"
-                className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none"
+                className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 outline-none"
                 placeholder="If applicable"
                 onChange={handleChange}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Their DOB (Optional)</label>
+              <label className="text-sm font-medium text-primary">Their DOB (Optional)</label>
               <input
                 type="date"
                 name="partnerDob"
-                className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none"
+                className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 outline-none"
                 onChange={handleChange}
               />
             </div>
@@ -241,13 +241,13 @@ export const BookingForm = ({ service, onSubmit }) => {
 
             {/* Minimalist Upload Header */}
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <label className="text-sm font-medium text-primary flex items-center gap-2">
                 <Upload className="w-4 h-4 text-[var(--color-primary)]" /> Upload Your Photo *
               </label>
             </div>
 
             {/* Main Upload Box - Clean & Centered */}
-            <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8 hover:border-purple-400 hover:bg-purple-50/30 transition-all group cursor-pointer relative bg-white items-center justify-center flex flex-col gap-3">
+            <div className="border-2 border-dashed border-primary/20 rounded-2xl p-8 hover:border-purple-400 hover:bg-primary/5 transition-all group cursor-pointer relative bg-card items-center justify-center flex flex-col gap-3">
               <input
                 type="file"
                 name="picture"
@@ -276,23 +276,23 @@ export const BookingForm = ({ service, onSubmit }) => {
                   <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
                     <ShieldCheck className="w-8 h-8" />
                   </div>
-                  <p className="font-medium text-slate-800">Photo Uploaded Successfully</p>
-                  <p className="text-xs text-slate-500 mt-1">Ready to submit</p>
+                  <p className="font-medium text-primary">Photo Uploaded Successfully</p>
+                  <p className="text-xs text-muted-foreground mt-1">Ready to submit</p>
                 </div>
               ) : (
                 <div className="text-center group-hover:scale-105 transition-transform duration-300">
                   <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
                     <Smartphone className="w-7 h-7" />
                   </div>
-                  <p className="font-semibold text-slate-700">Click to upload your photo</p>
-                  <p className="text-xs text-slate-400 mt-1">Supports JPG/PNG (Max 5MB)</p>
+                  <p className="font-semibold text-primary">Click to upload your photo</p>
+                  <p className="text-xs text-muted-foreground mt-1">Supports JPG/PNG (Max 5MB)</p>
                 </div>
               )}
             </div>
 
             {/* Collapsible Guidelines */}
-            <details className="group rounded-xl border border-gray-100 bg-gray-50/50 open:bg-white open:shadow-sm open:border-purple-100 transition-all duration-300">
-              <summary className="flex items-center gap-3 p-4 cursor-pointer list-none text-sm font-medium text-slate-600 hover:text-purple-700 select-none">
+            <details className="group rounded-xl border border-primary/5 bg-primary/5 open:bg-card open:shadow-sm open:border-primary/10 transition-all duration-300">
+              <summary className="flex items-center gap-3 p-4 cursor-pointer list-none text-sm font-medium text-primary/80 hover:text-purple-700 select-none">
                 <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">i</div>
                 View Photo Guidelines & Example
                 <span className="ml-auto transform group-open:rotate-180 transition-transform duration-300">
@@ -300,7 +300,7 @@ export const BookingForm = ({ service, onSubmit }) => {
                 </span>
               </summary>
 
-              <div className="p-6 pt-0 border-t border-transparent group-open:border-gray-100 animate-in fade-in duration-300">
+              <div className="p-6 pt-0 border-t border-transparent group-open:border-primary/10 animate-in fade-in duration-300">
                 <div className="flex flex-col md:flex-row gap-6 mt-4">
                   {/* Reference Image */}
                   <div className="w-full md:w-32 flex-shrink-0">
@@ -311,13 +311,13 @@ export const BookingForm = ({ service, onSubmit }) => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <p className="text-[10px] text-center text-gray-400 mt-1">Reference Style</p>
+                    <p className="text-[10px] text-center text-muted-foreground mt-1">Reference Style</p>
                   </div>
 
                   {/* Text Rules */}
                   <div className="flex-1">
-                    <h4 className="font-bold text-slate-700 text-sm mb-2">For Best Results:</h4>
-                    <ul className="space-y-2 text-xs text-slate-600">
+                    <h4 className="font-bold text-primary text-sm mb-2">For Best Results:</h4>
+                    <ul className="space-y-2 text-xs text-primary/80">
                       <li className="flex items-start gap-2">
                         <span className="text-green-500 font-bold">✓</span>
                         Use a plain, light-colored background
@@ -354,7 +354,7 @@ export const BookingForm = ({ service, onSubmit }) => {
             <div className="space-y-2">
               {/* Booking Date Selection */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className="text-sm font-medium text-primary flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-[var(--color-primary)]" /> Select Booking Date *
                 </label>
                 <input
@@ -362,22 +362,22 @@ export const BookingForm = ({ service, onSubmit }) => {
                   name="bookingDate"
                   required
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none"
+                  className="w-full p-3 rounded-lg border border-primary/20 focus:ring-2 focus:ring-blue-200 outline-none"
                   onChange={handleChange}
                 />
               </div>
 
               <div className="space-y-4">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className="text-sm font-medium text-primary flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[var(--color-primary)]" /> Select Available Slot *
                 </label>
 
                 {loadingSlots ? (
-                  <div className="text-sm text-gray-500 italic">Loading slots...</div>
+                  <div className="text-sm text-muted-foreground italic">Loading slots...</div>
                 ) : !formData.sessionType ? (
-                  <div className="text-sm text-gray-500 italic">Please select a session type to view duration-specific slots.</div>
+                  <div className="text-sm text-muted-foreground italic">Please select a session type to view duration-specific slots.</div>
                 ) : !formData.bookingDate ? (
-                  <div className="text-sm text-gray-500 italic">Please select a date to view available slots.</div>
+                  <div className="text-sm text-muted-foreground italic">Please select a date to view available slots.</div>
                 ) : filteredSlots.length === 0 ? (
                   <div className="text-sm text-red-500 bg-red-50 p-4 rounded-lg border border-red-100">
                     No {formData.isEmergency ? 'emergency' : 'regular'} slots available for this date.
@@ -398,7 +398,7 @@ export const BookingForm = ({ service, onSubmit }) => {
                           }}
                           className={`p-3 rounded-lg border text-sm font-medium transition-all flex flex-col items-center justify-center ${formData.slot === slotValue
                             ? 'bg-blue-500 text-white border-blue-500 shadow-md'
-                            : 'bg-white text-gray-700 border-gray-200 hover:border-blue-500 hover:bg-blue-50'
+                            : 'bg-card text-primary border-primary/20 hover:border-blue-500 hover:bg-blue-50'
                             }`}
                         >
                           <div className="text-lg">{slot.time}</div>
@@ -418,9 +418,9 @@ export const BookingForm = ({ service, onSubmit }) => {
                 id="isEmergency"
                 checked={formData.isEmergency}
                 onChange={handleChange}
-                className="w-5 h-5 text-red-500 rounded focus:ring-red-500 border-gray-300"
+                className="w-5 h-5 text-red-500 rounded focus:ring-red-500 border-primary/20"
               />
-              <label htmlFor="isEmergency" className="text-sm text-gray-700 cursor-pointer">
+              <label htmlFor="isEmergency" className="text-sm text-primary cursor-pointer">
                 <span className="font-semibold text-red-600 block">Request Emergency Slot</span>
                 <span className="text-xs">Prioritized scheduling (Higher Rate). Includes next day slots.</span>
               </label>
@@ -433,34 +433,34 @@ export const BookingForm = ({ service, onSubmit }) => {
           <>
             {!isLive && (
               <div className="md:col-span-2 space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label className="text-sm font-medium text-primary flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-[var(--color-primary)]" /> Your Questions *
                 </label>
                 <textarea
                   name="questions"
                   required
-                  className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none min-h-[100px]"
+                  className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 outline-none min-h-[100px]"
                   placeholder="Type your questions here (Max 300 words)..."
                   onChange={handleChange}
                 ></textarea>
-                <p className="text-xs text-gray-500 text-right">Max 300 words</p>
+                <p className="text-xs text-muted-foreground text-right">Max 300 words</p>
               </div>
             )}
 
             <div className="md:col-span-2 space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <label className="text-sm font-medium text-primary flex items-center gap-2">
                 <FileText className="w-4 h-4 text-[var(--color-primary)]" /> {isLive ? 'Brief Situation Overview' : 'Your Story & Current Energy'} *
               </label>
               <textarea
                 name="situation"
                 required
-                className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 outline-none min-h-[150px]"
+                className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 outline-none min-h-[150px]"
                 placeholder={isLive
                   ? "Share a short summary of your situation to give me context before our session. This allows our live reading to focus entirely on questions and answers."
                   : "Describe your situation in your own words. This helps me understand your current energy and offer guidance that’s aligned with you."}
                 onChange={handleChange}
               ></textarea>
-              <p className="text-xs text-gray-500 text-right">Max 500 words</p>
+              <p className="text-xs text-muted-foreground text-right">Max 500 words</p>
             </div>
           </>
         )}
