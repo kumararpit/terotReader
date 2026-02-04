@@ -43,3 +43,7 @@ services:
         sync: false
       - key: GOOGLE_CREDENTIALS
         sync: false
+      - key: APP_ENV
+        value: production
+      - key: FRONTEND_URL
+        sync: false

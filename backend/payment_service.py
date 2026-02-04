@@ -33,16 +33,14 @@ except Exception as e:
 # )
 
 # PayPal Configuration
-# Mode determination based on APP_ENV
-app_env = os.getenv('APP_ENV', 'development').lower()
-
-# STRICTLY enforce sandbox in development to avoid stale env vars causing 401
-if app_env == 'development':
+if app_env == 'production':
+    paypal_mode = 'live'
+elif app_env == 'development':
     paypal_mode = 'sandbox'
-    logger.info("Forcing Sandbox mode due to APP_ENV=development")
 else:
-    # In production, default to live but allow override
-    paypal_mode = os.getenv('PAYPAL_MODE', 'live')
+    # Strict enforcement as requested: "if development then sandbox, else error" (implies invalid env should error)
+    logger.error(f"Invalid APP_ENV: {app_env}. PayPal requires 'development' or 'production'.")
+    raise ValueError(f"CRITICAL: Invalid APP_ENV '{app_env}'. Must be 'development' or 'production' for PayPal configuration.")
 
 paypalrestsdk.configure({
     "mode": paypal_mode,
@@ -105,7 +103,8 @@ class PaymentService:
                 return {'success': False, 'error': payment.error}
         except Exception as e:
             logger.error(f"PayPal payment error: {str(e)}")
-            return {'success': False, 'error': str(e)}
+            # Return generic error to user as requested
+            return {'success': False, 'error': "Technical Error: Unable to initiate payment. Please try again later."}
     
     @staticmethod
     def verify_paypal_payment(payment_id: str):

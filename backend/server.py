@@ -1000,6 +1000,29 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
                  # Fail booking if event creation fails
                  raise HTTPException(status_code=500, detail=f"Failed to create Calendar Event: {str(e)}")
         
+        # Booking save and notifications deferred until payment success
+
+        if booking_data.payment_method == 'paypal':
+            payment_result = payment_service.create_paypal_payment(
+                pricing['amount'],
+                pricing['currency'],
+                booking.model_dump()
+            )
+        else:
+            raise HTTPException(status_code=400, detail=f"Payment method {booking_data.payment_method} is not supported. Use 'paypal'.")
+
+        if not payment_result or not payment_result.get('success'):
+            # Payment Failed: Do NOT save booking, do NOT send emails.
+            # Log the specific error but show generic to user (although create_paypal_payment already genericizes it, we ensure here too).
+            error_msg = payment_result.get('error', "Technical Error: Unable to initiate payment.")
+            if "Technical Error" not in str(error_msg):
+                 logger.error(f"Payment Init Failed: {error_msg}")
+                 error_msg = "Technical Error: Unable to initiate payment. Please try again later."
+            
+            raise HTTPException(status_code=500, detail=error_msg)
+
+        # Payment Success! Proceed to save.
+        
         # Convert to dict and serialize datetime fields for MongoDB
         doc = booking.model_dump()
         doc['created_at'] = doc['created_at'].isoformat()
@@ -1055,29 +1078,20 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
         # Notify Admin
         background_tasks.add_task(send_booking_notification_to_tejashvini, doc)
 
-        # Create payment based on method
-        payment_result = None
-        if booking_data.payment_method == 'paypal':
-            payment_result = payment_service.create_paypal_payment(
-                pricing['amount'],
-                pricing['currency'],
-                booking.model_dump()
-            )
-        else:
-            raise HTTPException(status_code=400, detail=f"Payment method {booking_data.payment_method} is not supported. Use 'paypal'.")
-
-        if not payment_result or not payment_result.get('success'):
-            raise HTTPException(status_code=500, detail=payment_result.get('error', "Failed to create payment"))
-        
         return {
             'success': True,
             'booking_id': booking_id,
             'payment': payment_result
         }
         
+    except HTTPException as he:
+        # Re-raise HTTPExceptions (e.g. from payment fail check)
+        raise he
     except Exception as e:
         logger.error(f"Booking creation error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        # Generic technical error
+        raise HTTPException(status_code=500, detail="Technical Error: Unable to process booking. Please try again.")
+
 
 @api_router.post("/bookings/verify-payment")
 async def verify_payment(verification: PaymentVerification, background_tasks: BackgroundTasks):
