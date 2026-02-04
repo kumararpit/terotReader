@@ -41,7 +41,7 @@ def send_email(to_email: str, subject: str, body_html: str, attachments: list = 
 
         msg.attach(MIMEText(body_html, 'html'))
 
-        if attachments:
+        if attachments and len(attachments) > 0:
             for attachment in attachments:
                 name = attachment.get('name', 'attachment')
                 data = attachment.get('data')
@@ -54,7 +54,7 @@ def send_email(to_email: str, subject: str, body_html: str, attachments: list = 
                 part['Content-Disposition'] = f'attachment; filename="{name}"'
                 msg.attach(part)
 
-        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT) # Establish connection
         server.starttls()
         server.login(SMTP_USER, SMTP_PASSWORD)
         text = msg.as_string()

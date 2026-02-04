@@ -233,10 +233,16 @@ async def login_for_access_token(form_data: LoginRequest):
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(data: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+    logger.info(f"Forgot PW requested for: {data.email}")
     user = await db.users.find_one({"email": data.email})
+    
     if not user:
         # Don't reveal user existence for security, just pretend success
+        # BUT log it for Admin debugging
+        logger.warning(f"Forgot Password: User {data.email} NOT FOUND in DB. Ignoring.")
         return {"message": "If email exists, OTP sent"}
+    
+    logger.info(f"User found: {user.get('username')}. Generating OTP.")
     
     # Generate OTP
     otp = ''.join(random.choices(string.digits, k=6))
@@ -249,6 +255,7 @@ async def forgot_password(data: ForgotPasswordRequest, background_tasks: Backgro
     )
     
     # Send Email
+    logger.info(f"Queuing OTP email task for {data.email}")
     background_tasks.add_task(send_password_reset_otp, data.email, otp)
     return {"message": "If email exists, OTP sent"}
 
