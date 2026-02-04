@@ -33,6 +33,9 @@ except Exception as e:
 # )
 
 # PayPal Configuration
+# Mode determination based on APP_ENV
+app_env = os.getenv('APP_ENV', 'development').lower()
+
 if app_env == 'production':
     paypal_mode = 'live'
 elif app_env == 'development':
@@ -140,7 +143,5 @@ class PaymentService:
         except Exception as e:
             logger.error(f"PayPal verification error: {str(e)}")
             return {'success': False, 'error': str(e)}
-
-payment_service = PaymentService()
 
 payment_service = PaymentService()
