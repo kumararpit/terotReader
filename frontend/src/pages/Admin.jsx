@@ -313,6 +313,15 @@ const Admin = () => {
         return date < today;
     };
 
+    // Helper to check if a specific slot time is in the past
+    const isSlotPast = (slotTime) => {
+        const now = new Date();
+        const checkDate = new Date(selectedDate);
+        const [h, m] = slotTime.split(':');
+        checkDate.setHours(parseInt(h), parseInt(m), 0, 0);
+        return checkDate < now;
+    };
+
     const fetchTestimonials = React.useCallback(async () => {
         try {
             const res = await axios.get(`${API}/testimonials`);
@@ -859,8 +868,8 @@ const Admin = () => {
                                                                             </div>
                                                                         ) : null}
 
-                                                                        {/* Delete Button (Hide for Canceeled) */}
-                                                                        {slot.type !== 'canceled' && (
+                                                                        {/* Delete Button (Hide for Canceled or Past Slots) */}
+                                                                        {slot.type !== 'canceled' && !isSlotPast(slot.time) && (
                                                                             <Button
                                                                                 variant="ghost"
                                                                                 size="icon"

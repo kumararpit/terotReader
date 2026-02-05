@@ -8,6 +8,9 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
 import Booking from './pages/Booking';
 import Payment from './pages/Payment';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import CookiePolicy from './pages/CookiePolicy';
 import { Toaster } from 'sonner';
 
 // ScrollToTop Component
@@ -33,6 +36,9 @@ function App() {
           <Route path="/payment-cancel" element={<PaymentCancel />} />
           <Route path="/booking/:serviceId" element={<Booking />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/cookies" element={<CookiePolicy />} />
         </Routes>
       </BrowserRouter>
       <Toaster

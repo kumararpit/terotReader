@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { siteInfo } from '../mock';
 import { Mail, Youtube, Heart, Sparkles } from 'lucide-react';
 
@@ -36,9 +37,9 @@ export const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-white">Legal</h4>
             <nav className="flex flex-col space-y-2 text-primary-foreground">
-              <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
-              <a href="/cookies" className="hover:text-white transition-colors">Cookie Policy</a>
+              <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Terms of Service</Link>
+              <Link to="/cookies" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Cookie Policy</Link>
             </nav>
           </div>
 

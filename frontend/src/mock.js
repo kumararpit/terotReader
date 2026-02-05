@@ -8,7 +8,6 @@ export const siteInfo = {
   experience: "6 Years",
   languages: ["English", "Hindi"],
   email: "bathejatejashvini@gmail.com",
-  whatsapp: "+393286737879",
   social: {
     tiktok: "https://www.tiktok.com/@tejashvini.batheja?_r=1&_t=ZN-93BqlypD63y",
     youtube: "https://youtube.com/@divinedecode09?si=Vx09duXwMiNSsM4Q"
