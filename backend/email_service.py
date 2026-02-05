@@ -93,7 +93,8 @@ def send_booking_confirmation_to_client(booking: dict, payment_info: dict = None
         service_display = "Aura Scanning"
 
     # Handle Link
-    link_html = f'<a href="{meeting_link}">{meeting_link}</a>' if meeting_link else "<em>(Will be sent shortly)</em>"
+    final_link = meeting_link or booking.get('meeting_link')
+    link_html = f'<a href="{final_link}">{final_link}</a>' if final_link else "<em>(Will be sent shortly)</em>"
 
     body = f"""
     <html>
@@ -108,7 +109,7 @@ def send_booking_confirmation_to_client(booking: dict, payment_info: dict = None
                     <li><strong>Service:</strong> {service_display}</li>
                     <li><strong>Date:</strong> {booking.get('preferred_date')}</li>
                     <li><strong>Time:</strong> {booking.get('preferred_time')}</li>
-                    <li><strong>Zoom Meeting Link:</strong> {link_html}</li>
+                    {f'<li><strong>Zoom Meeting Link:</strong> {link_html}</li>' if 'live' in raw_service.lower() else ''}
                 </ul>
                 
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />

@@ -803,6 +803,29 @@ async def get_slots(date: Optional[str] = None, available_only: bool = False, ty
             
             if not is_conflict:
                 time_str = format_time(slot_start)
+                
+                # Check Minimum Buffer Time (User Requirement)
+                # "regular booking from next 12 hours"
+                # "emergency booking from next 6 hours"
+                try:
+                    now_loc = datetime.now(BUSINESS_TZ)
+                    slot_dt_iso = f"{date}T{time_str}:00"
+                    slot_dt = datetime.fromisoformat(slot_dt_iso).replace(tzinfo=BUSINESS_TZ)
+                    
+                    min_buffer_hours = 12
+                    if b_type == 'emergency':
+                        min_buffer_hours = 6
+                        
+                    min_allowed_time = now_loc + timedelta(hours=min_buffer_hours)
+                    
+                    if slot_dt < min_allowed_time:
+                       # logger.info(f"Slot {time_str} REJECTED (Too Soon: Needs {min_buffer_hours}h buffer)")
+                       current += 20
+                       continue
+                       
+                except Exception as e:
+                    logger.error(f"Error checking slot buffer: {e}")
+
                 # logger.info(f"Slot {time_str} ACCEPTED")
                 dynamic_slots.append(Slot(
                     id=f"gcal-{date}-{time_str}",
@@ -1147,7 +1170,8 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
         background_tasks.add_task(
             email_service.send_booking_confirmation_to_client,
             booking,
-            payment_verified
+            payment_verified,
+            booking.get('meeting_link')
         )
         background_tasks.add_task(
             email_service.send_booking_notification_to_tejashvini,

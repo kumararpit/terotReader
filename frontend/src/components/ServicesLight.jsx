@@ -81,7 +81,7 @@ export const ServicesLight = () => {
 
                   {/* Simple Features */}
                   <ul className="space-y-3 mb-8 flex-grow">
-                    {service.features.slice(0, 3).map((feature, idx) => (
+                    {service.features.slice(0, 5).map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">
                         <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 mt-2 block flex-shrink-0" />
                         <span className="leading-relaxed font-light">{feature}</span>
