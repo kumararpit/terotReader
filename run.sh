@@ -2,9 +2,9 @@
 
 # Function to kill background processes on exit
 cleanup() {
-    echo -e "\n🛑 Stopping processes..."
+    echo -e "\n🛑 Stopping services (FastAPI & React)..."
     # Kill all background jobs started by this shell
-    jobs -p | xargs -r kill
+    jobs -p | xargs -r kill 2>/dev/null
     exit
 }
 
@@ -17,7 +17,6 @@ INSTALL_DEPS=false
 
 # Simple argument parsing
 if [[ $# -eq 0 ]]; then
-    # Default behavior: start both if no flags provided
     START_BACKEND=true
     START_FRONTEND=true
 else
@@ -30,12 +29,20 @@ else
     done
 fi
 
-# --- 1. BACKEND ---
+# --- 1. BACKEND (FastAPI) ---
 if [ "$START_BACKEND" = true ]; then
-    echo "📂 Preparing Backend..."
-    cd backend
-    [ ! -d "venv" ] && python3 -m venv venv
+    echo "🐍 Preparing Backend..."
+    cd backend || exit
+    
+    # Create venv if missing
+    if [ ! -d "venv" ]; then
+        echo "🛠️ Creating virtual environment..."
+        python3 -m venv venv
+    fi
+    
+    # Activate the environment
     source venv/bin/activate
+    echo "✅ Virtual environment activated: $(which python)"
 
     if [ "$INSTALL_DEPS" = true ]; then
         echo "📦 Installing Backend dependencies..."
@@ -45,13 +52,14 @@ if [ "$START_BACKEND" = true ]; then
 
     echo "🚀 Starting Backend on port 8000..."
     uvicorn server:app --reload --port 8000 &
+    BACKEND_PID=$!
     cd ..
 fi
 
-# --- 2. FRONTEND ---
+# --- 2. FRONTEND (React) ---
 if [ "$START_FRONTEND" = true ]; then
-    echo "📂 Preparing Frontend..."
-    cd frontend
+    echo "⚛️ Preparing Frontend..."
+    cd frontend || exit
 
     if [ "$INSTALL_DEPS" = true ]; then
         echo "📦 Installing Frontend dependencies..."
@@ -60,8 +68,11 @@ if [ "$START_FRONTEND" = true ]; then
 
     echo "🌐 Launching Frontend at http://localhost:3000..."
     npm start &
+    FRONTEND_PID=$!
     cd ..
 fi
 
-# Keep script running if any background process started
+echo "🟢 All systems go! Press Ctrl+C to stop both servers."
+
+# Keep script running and wait for background processes
 wait

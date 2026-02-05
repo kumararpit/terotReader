@@ -39,7 +39,7 @@ export const services = [
     description: "Real-time tarot reading sessions via Zoom audio call, offering interactive and personalized guidance for your questions and concerns.",
     icon: "Phone",
     features: [
-      "Guidance, counselling and remedies",
+      "Predictions, guidance, counselling and remedies",
       "Angel guidance & love messages",
       "Immediate clarity through live interaction",
       "3 follow-up questions included",
@@ -134,7 +134,7 @@ export const faqs = [
   {
     id: 5,
     question: "What payment methods do you accept?",
-    answer: "I accept payments via UPI, PayPal, Razorpay, and Bank Transfer. Advance payment is required to confirm your session booking. You'll receive booking confirmation once payment is received."
+    answer: "I accept payments via PayPal. Advance payment is required to confirm your session booking. You'll receive booking confirmation once payment is received."
   },
   {
     id: 6,

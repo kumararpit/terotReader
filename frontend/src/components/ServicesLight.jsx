@@ -21,7 +21,6 @@ export const ServicesLight = () => {
           </span>
           <h2 className="text-4xl md:text-5xl font-heading font-medium text-primary mb-6">
             Guidance tailored to your <br />
-            Guidance tailored to your <br />
             <span className="italic font-light text-primary/80">inner journey.</span>
           </h2>
           <p className="text-lg text-primary/90 font-light leading-relaxed">
