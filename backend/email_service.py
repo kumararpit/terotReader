@@ -54,9 +54,14 @@ def send_email(to_email: str, subject: str, body_html: str, attachments: list = 
                 part['Content-Disposition'] = f'attachment; filename="{name}"'
                 msg.attach(part)
 
-        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT) # Establish connection
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
+        if SMTP_PORT == 465:
+            server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
+            server.login(SMTP_USER, SMTP_PASSWORD)
+        else:
+            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT) # Establish connection
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            
         text = msg.as_string()
         server.sendmail(SMTP_USER, to_email, text)
         server.quit()

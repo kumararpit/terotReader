@@ -45,9 +45,9 @@ if [ "$START_BACKEND" = true ]; then
     echo "✅ Virtual environment activated: $(which python)"
 
     if [ "$INSTALL_DEPS" = true ]; then
-        echo "📦 Installing Backend dependencies..."
+        echo "📦 Installing Backend dependencies from requirements.txt..."
         pip install --upgrade pip
-        pip install fastapi uvicorn motor pydantic python-dotenv stripe razorpay-python reportlab
+        pip install -r requirements.txt
     fi
 
     echo "🚀 Starting Backend on port 8000..."

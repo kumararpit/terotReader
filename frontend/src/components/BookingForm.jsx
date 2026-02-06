@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { Calendar, Clock, Upload, User, Mail, Heart, HelpCircle, FileText, Smartphone, ShieldCheck } from 'lucide-react';
+import dayjs, { getUserTimezone, formatInTimeZone } from '../lib/dateUtils';
+import { Calendar, Clock, Upload, User, Mail, Heart, HelpCircle, FileText, Smartphone, ShieldCheck, Globe } from 'lucide-react';
 import { Button } from './ui/button';
 
 export const BookingForm = ({ service, onSubmit }) => {
@@ -15,12 +16,14 @@ export const BookingForm = ({ service, onSubmit }) => {
     partnerDob: '',
     questions: '',
     situation: '',
-    slot: '',
+    slot: '', // Will store the original Slot object or unique ID
     email: '',
     picture: null,
     isEmergency: false,
     bookingDate: ''
   });
+
+  const [userTimezone, setUserTimezone] = useState(getUserTimezone());
 
   const handleChange = (e) => {
     const { name, value, files, type, checked } = e.target;
@@ -79,6 +82,17 @@ export const BookingForm = ({ service, onSubmit }) => {
             combined = [...combined, ...results[1].data];
           }
 
+          // DEBUG: Log slots before and after filter
+          console.log('Server returned slots:', combined);
+
+          // Filter out canceled slots as per user request
+          const filtered = combined.filter(s => s.type !== 'canceled');
+
+          if (combined.length !== filtered.length) {
+            console.log('Filtered out canceled slots:', combined.length - filtered.length);
+          }
+
+          combined = filtered;
           setAvailableSlots(combined);
 
         } catch (error) {
@@ -339,12 +353,6 @@ export const BookingForm = ({ service, onSubmit }) => {
                 </div>
               </div>
             </details>
-
-            {/* Questions for Aura (Optional or Specific?) - User didn't specify, but assume standard questions needed? 
-                Mock data says "Predictions...". Usually aura needs specific concerns. 
-                Let's keep the standard Text Areas for Aura too, but maybe simplified?
-                User only asked for Image Upload. Let's keep common text areas below.
-            */}
           </div>
         )}
 
@@ -368,9 +376,15 @@ export const BookingForm = ({ service, onSubmit }) => {
               </div>
 
               <div className="space-y-4">
-                <label className="text-sm font-medium text-primary flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[var(--color-primary)]" /> Select Available Slot *
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-primary flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[var(--color-primary)]" /> Select Available Slot ({userTimezone}) *
+                  </label>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Globe className="w-3 h-3" />
+                    <span>{userTimezone}</span>
+                  </div>
+                </div>
 
                 {loadingSlots ? (
                   <div className="text-sm text-muted-foreground italic">Loading slots...</div>
@@ -386,7 +400,28 @@ export const BookingForm = ({ service, onSubmit }) => {
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {filteredSlots.map((slot) => {
-                      const slotValue = `${slot.date}T${slot.time}`;
+                      // Logic to display slot time in USER Timezone
+
+                      let displayTime = slot.time;
+                      let utcIso = null;
+
+                      // Check if backend returned UTC ISO (Target State)
+                      if (slot.start_time_utc) {
+                        utcIso = slot.start_time_utc;
+                        displayTime = formatInTimeZone(utcIso, userTimezone, 'HH:mm');
+                      } else {
+                        // Fallback for current state (IST dates)
+                        // Construct ISO assuming IST (+05:30)
+                        const istTime = `${slot.date}T${slot.time}:00+05:30`;
+
+                        // Display in User Timezone
+                        displayTime = dayjs.utc(istTime).tz(userTimezone).format('HH:mm');
+
+                        // Prepare UTC for proper submission
+                        utcIso = dayjs(istTime).utc().format();
+                      }
+
+                      const slotValue = utcIso;
                       const isTomorrow = slot.date !== formData.bookingDate;
 
                       return (
@@ -401,7 +436,8 @@ export const BookingForm = ({ service, onSubmit }) => {
                             : 'bg-card text-primary border-primary/20 hover:border-blue-500 hover:bg-blue-50'
                             }`}
                         >
-                          <div className="text-lg">{slot.time}</div>
+                          <div className="text-lg">{displayTime}</div>
+                          <div className="text-[10px] opacity-70">({userTimezone.split('/')[1] || "Local"})</div>
                           {isTomorrow && <div className="text-xs font-bold text-amber-300">Next Day</div>}
                         </button>
                       );

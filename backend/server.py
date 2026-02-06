@@ -1,4 +1,6 @@
-from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
+from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Depends, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 import email_service
 from dotenv import load_dotenv
 from pathlib import Path
@@ -25,7 +27,7 @@ from payment_service import payment_service
 from email_service import send_password_reset_otp, send_booking_confirmation_to_client, send_booking_notification_to_tejashvini
 import zoom_service
 import auth
-from auth import Token, create_access_token, verify_password, get_password_hash
+from auth import Token, TokenData, create_access_token, verify_password, get_password_hash, SECRET_KEY, ALGORITHM
 import random
 import string
 
@@ -163,6 +165,7 @@ class Slot(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     date: str  # YYYY-MM-DD
     time: str  # HH:MM
+    start_time_utc: Optional[str] = None # ISO 8601 UTC
     type: str = "regular"  # 'regular' or 'emergency'
     is_booked: bool = False
     booked_by: Optional[str] = None  # booking_id
@@ -191,6 +194,30 @@ class ResetPasswordRequest(BaseModel):
     email: EmailStr
     otp: str
     new_password: str
+
+
+# --- Auth Dependency ---
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
+
+async def get_current_admin(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    
+    user = await db.users.find_one({"username": token_data.username})
+    if user is None:
+        raise credentials_exception
+    return user
 
 # --- Auth Routes ---
 
@@ -759,6 +786,7 @@ async def get_slots(date: Optional[str] = None, available_only: bool = False, ty
         return f"{h:02d}:{mn:02d}"
 
     # Iterate each Availability Block
+    seen_slots = set()
     for block in availability_blocks:
         current = block['start']
         b_end = block['end']
@@ -770,82 +798,61 @@ async def get_slots(date: Optional[str] = None, available_only: bool = False, ty
         # Usually this means stepping by 'Duration' OR 'Interval'. 
         # Standard booking is often "Slots every 30m". 
         # If duration is 40m, slots might be 10:00, 10:30, 11:00... 
-        # But here user said "Segment that block". 
-        # "For each *start time*... verify". 
-        # I will assume start times correspond to continuous packing (start += duration) 
-        # OR some granularity. 
-        # Let's use `duration` as the step for now to maximize efficiency/minimize overlap? 
-        # Or standard 20m interval? 
-        # Admin UI uses 20m default. 
-        # Let's align step with duration to prevent fragmentation? 
-        # Actually standard practice is interval (e.g. 15m or 30m). 
-        # I will stick to start += duration for simplest "packing".
-        
-        while current + duration <= b_end:
-            slot_start = current
-            slot_end = current + duration
-            
-            # Check Conflict with Busy Blocks
-            is_conflict = False
-            SESSION_BUFFER = 20
-            
-            for busy in busy_blocks:
-                # Add buffer to busy block: [Start - Buffer, End + Buffer]
-                # This ensures 20m gap between sessions
-                busy_start_buffered = busy['start'] - SESSION_BUFFER
-                busy_end_buffered = busy['end'] + SESSION_BUFFER
+        if is_avail:
+             # Create slots for this block
+            # Duration step
+            current_min = s_min
+            while current_min + duration <= e_min:
+                # Check if this sub-slot overlaps with any busy block
+                slot_start = current_min
+                slot_end = current_min + duration
                 
-                # Overlap Logic with Buffer
-                if (slot_start < busy_end_buffered) and (slot_end > busy_start_buffered):
-                    is_conflict = True
-                    # logger.info(f"Conflict with {busy.get('summary')} (Buffered: {format_time(busy_start_buffered)}-{format_time(busy_end_buffered)})")
-                    break
-            
-            if not is_conflict:
-                time_str = format_time(slot_start)
+                is_busy = False
+                for bb in busy_blocks:
+                    # Overlap logic: start < busy_end AND end > busy_start
+                    if slot_start < bb['end'] and slot_end > bb['start']:
+                        is_busy = True
+                        break
                 
-                # Check Minimum Buffer Time (User Requirement)
-                # "regular booking from next 12 hours"
-                # "emergency booking from next 6 hours"
-                try:
-                    now_loc = datetime.now(BUSINESS_TZ)
-                    slot_dt_iso = f"{date}T{time_str}:00"
-                    slot_dt = datetime.fromisoformat(slot_dt_iso).replace(tzinfo=BUSINESS_TZ)
+                if not is_busy:
+                    time_str = format_time(slot_start)
                     
-                    min_buffer_hours = 12
-                    if b_type == 'emergency':
-                        min_buffer_hours = 6
-                        
-                    min_allowed_time = now_loc + timedelta(hours=min_buffer_hours)
+                    # Calculate UTC Time for this slot
+                    # 1. Construct local time in Business TZ
+                    # We know 'date' and 'time_str'.
+                    # We need to rely on the fact that date is YYYY-MM-DD in Business TZ context if we assume simple calendar
+                    # BUT GCal returns ISO with offsets.
+                    # We used `to_minutes` which normalized to Business TZ.
+                    # So `slot_start` minutes is relative to Business TZ midnight.
                     
-                    if slot_dt < min_allowed_time:
-                       # logger.info(f"Slot {time_str} REJECTED (Too Soon: Needs {min_buffer_hours}h buffer)")
-                       current += 20
-                       continue
-                       
-                except Exception as e:
-                    logger.error(f"Error checking slot buffer: {e}")
+                    
+                    try:
+                        # Construct naive then localize
+                        dt_naive = datetime.fromisoformat(f"{date}T{time_str}:00")
+                        dt_aware = dt_naive.replace(tzinfo=BUSINESS_TZ)
+                        dt_utc = dt_aware.astimezone(timezone.utc)
+                        utc_iso = dt_utc.isoformat().replace('+00:00', 'Z')
+                    except Exception as ex:
+                        logger.error(f"Error calculating UTC for slot {time_str}: {ex}")
+                        utc_iso = None
 
-                # logger.info(f"Slot {time_str} ACCEPTED")
-                dynamic_slots.append(Slot(
-                    id=f"gcal-{date}-{time_str}",
-                    date=date,
-                    time=time_str,
-                    type=b_type,
-                    is_booked=False,
-                    duration=duration
-                ))
-            else:
-                # pass
-                # logger.info(f"Slot {format_time(slot_start)} REJECTED (Conflict)")
-                pass
-            
-            # Step forward
-            # Step forward by a fixed interval (e.g. 20m) instead of duration
-            # This allows flexible booking options (e.g. 10:00, 10:20, 10:40) even for 40m services
-            current += 20
+                    slot_key = f"{date}-{time_str}"
+                    if slot_key in seen_slots:
+                        current_min += duration
+                        continue
+                    seen_slots.add(slot_key)
 
-    # 4. If !available_only, add Busy Blocks as Slots
+                    dynamic_slots.append(Slot(
+                        date=date,
+                        time=time_str,
+                        start_time_utc=utc_iso,
+                        type=block_type,
+                        duration=duration
+                    ))
+
+                current_min += duration
+                
+
     if not available_only:
         for busy in busy_blocks:
              # Convert minutes to HH:MM
@@ -1003,7 +1010,13 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
                  duration_b = 40
              
              # Create GCal Event
-             start_dt_iso = f"{booking_data.preferred_date}T{booking_data.preferred_time}:00+05:30"
+             # Handle UTC or Legacy Time
+             p_time = booking_data.preferred_time
+             if 'Z' in p_time or '+' in p_time:
+                 start_dt_iso = f"{booking_data.preferred_date}T{p_time}"
+             else:
+                 # Fallback to IST if no timezone info
+                 start_dt_iso = f"{booking_data.preferred_date}T{p_time}:00+05:30"
              
              try:
                  dt = datetime.fromisoformat(start_dt_iso)
@@ -1188,6 +1201,27 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
     except Exception as e:
         logger.error(f"Payment verification error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/bookings/{booking_id}/resend-email")
+async def resend_email(
+    booking_id: str, 
+    background_tasks: BackgroundTasks,
+    current_user: str = Depends(get_current_admin)
+):
+    """Resend confirmation email for a booking (Admin only)"""
+    booking = await db.bookings.find_one({"booking_id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    # Send
+    background_tasks.add_task(
+        email_service.send_booking_confirmation_to_client,
+        booking,
+        None,
+        booking.get('meeting_link')
+    )
+    
+    return {"status": "queued", "message": f"Email queued for {booking.get('email')}"}
 
 @api_router.get("/bookings/{booking_id}")
 async def get_booking(booking_id: str):

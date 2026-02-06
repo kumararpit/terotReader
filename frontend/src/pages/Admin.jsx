@@ -382,7 +382,18 @@ const Admin = () => {
     };
 
     // Component for Booking Details
-    const BookingDetailsModal = () => (
+    const handleResendEmail = async () => {
+        if (!selectedBooking) return;
+        try {
+            await axios.post(`${API}/bookings/${selectedBooking.booking_id}/resend-email`);
+            toast.success("Confirmation email queued for resending");
+        } catch (error) {
+            console.error("Resend email failed:", error);
+            toast.error("Failed to resend email");
+        }
+    };
+
+    return (
         <AlertDialog open={detailsOpen} onOpenChange={setDetailsOpen}>
             <AlertDialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                 <AlertDialogHeader>
@@ -466,7 +477,14 @@ const Admin = () => {
 
                 <AlertDialogFooter className="sm:justify-between gap-4 border-t pt-4 mt-4">
                     <div className="flex gap-2">
-                        {/* Optional: Add Action buttons here if needed */}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                            onClick={handleResendEmail}
+                        >
+                            Resend Email
+                        </Button>
                     </div>
                     <AlertDialogCancel onClick={() => setDetailsOpen(false)}>Close</AlertDialogCancel>
                 </AlertDialogFooter>

@@ -9,3 +9,21 @@
 2026-02-06 01:24:40,483 - PAYPAL DEBUG: Return URL: http://localhost:3000/payment-success
 2026-02-06 01:24:40,483 - PAYPAL DEBUG: Cancel URL: http://localhost:3000/payment-cancel
 2026-02-06 01:24:54,868 - PAYPAL DEBUG: Verifying payment_id=PAYID-NGCPLAI2V2413064Y731904C
+2026-02-06 14:27:16,768 - PAYPAL DEBUG: AppEnv=development
+2026-02-06 14:27:16,769 - PAYPAL DEBUG: OverrideMode=sandbox (Calculated Default=sandbox)
+2026-02-06 14:27:16,769 - PAYPAL DEBUG: ClientID (partial)=AQ_19...30B6S
+2026-02-06 14:27:16,769 - PAYPAL DEBUG: Return URL: http://localhost:3000/payment-success
+2026-02-06 14:27:16,769 - PAYPAL DEBUG: Cancel URL: http://localhost:3000/payment-cancel
+2026-02-06 14:27:30,703 - PAYPAL DEBUG: Verifying payment_id=PAYID-NGC2Z3Y88P63751PD540011R
+2026-02-06 14:45:54,186 - PAYPAL DEBUG: AppEnv=development
+2026-02-06 14:45:54,188 - PAYPAL DEBUG: OverrideMode=live (Calculated Default=sandbox)
+2026-02-06 14:45:54,188 - PAYPAL DEBUG: ClientID (partial)=AQ_19...30B6S
+2026-02-06 14:45:54,189 - PAYPAL DEBUG: Return URL: http://localhost:3000/payment-success
+2026-02-06 14:45:54,189 - PAYPAL DEBUG: Cancel URL: http://localhost:3000/payment-cancel
+2026-02-06 14:46:11,545 - PAYPAL DEBUG: Verifying payment_id=PAYID-NGC3CTI64T040040E671470M
+2026-02-06 14:49:39,220 - PAYPAL DEBUG: AppEnv=development
+2026-02-06 14:49:39,220 - PAYPAL DEBUG: OverrideMode=live (Calculated Default=sandbox)
+2026-02-06 14:49:39,220 - PAYPAL DEBUG: ClientID (partial)=AQ_19...30B6S
+2026-02-06 14:49:39,221 - PAYPAL DEBUG: Return URL: http://localhost:3000/payment-success
+2026-02-06 14:49:39,221 - PAYPAL DEBUG: Cancel URL: http://localhost:3000/payment-cancel
+2026-02-06 14:49:49,207 - PAYPAL DEBUG: Verifying payment_id=PAYID-NGC3ELA4RX469008E6395057
