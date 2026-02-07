@@ -393,104 +393,7 @@ const Admin = () => {
         }
     };
 
-    return (
-        <AlertDialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-            <AlertDialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="flex justify-between items-center text-xl text-purple-900">
-                        Booking Details
-                        <Button variant="ghost" size="sm" onClick={() => setDetailsOpen(false)}>✕</Button>
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Complete information for this session.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
 
-                {isDetailsLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                    </div>
-                ) : selectedBooking ? (
-                    <div className="space-y-6 pt-2">
-                        {/* Header Info */}
-                        <div className="flex flex-col md:flex-row gap-4 justify-between bg-purple-50 p-4 rounded-lg">
-                            <div>
-                                <h3 className="font-bold text-lg text-gray-800">{selectedBooking.full_name}</h3>
-                                <div className="text-sm text-gray-600 flex flex-col gap-1 mt-1">
-                                    <span className="flex items-center gap-2"><MessageSquare className="w-3 h-3" /> {selectedBooking.email}</span>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold mb-2">
-                                    {selectedBooking.status.toUpperCase()}
-                                </span>
-                                <div className="text-sm text-gray-500">
-                                    {format(new Date(selectedBooking.preferred_date), 'PPP')}<br />
-                                    {selectedBooking.preferred_time}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Context */}
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
-                                <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.situation_description || 'No description provided.'}</p>
-                            </div>
-                        </div>
-
-                        {/* Aura Image if available */}
-                        {selectedBooking.aura_image && (
-                            <div>
-                                <h4 className="font-semibold text-gray-700 mb-2 text-sm uppercase tracking-wide flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-purple-500" /> Aura Photo
-                                </h4>
-                                <div className="border rounded-lg overflow-hidden bg-black/5 p-2 flex justify-center">
-                                    <img
-                                        src={selectedBooking.aura_image}
-                                        alt="Aura"
-                                        className="max-h-64 object-contain rounded-md shadow-sm"
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Meta Info */}
-                        <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 border-t pt-4">
-                            <div>
-                                <span className="block font-medium">Service Type:</span> {selectedBooking.service_type}
-                            </div>
-                            <div>
-                                <span className="block font-medium">Payment:</span> {selectedBooking.amount} {selectedBooking.currency} ({selectedBooking.payment_method})
-                            </div>
-                            <div>
-                                <span className="block font-medium">DOB:</span> {selectedBooking.date_of_birth}
-                            </div>
-                            <div>
-                                <span className="block font-medium">Gender:</span> {selectedBooking.gender}
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-8 text-gray-500">No details found.</div>
-                )}
-
-                <AlertDialogFooter className="sm:justify-between gap-4 border-t pt-4 mt-4">
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                            onClick={handleResendEmail}
-                        >
-                            Resend Email
-                        </Button>
-                    </div>
-                    <AlertDialogCancel onClick={() => setDetailsOpen(false)}>Close</AlertDialogCancel>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    );
 
     if (!isAuthenticated) {
         return (
@@ -1039,7 +942,102 @@ const Admin = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            <BookingDetailsModal />
+            <AlertDialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+                <AlertDialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex justify-between items-center text-xl text-purple-900">
+                            Booking Details
+                            <Button variant="ghost" size="sm" onClick={() => setDetailsOpen(false)}>✕</Button>
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Complete information for this session.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    {isDetailsLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                        </div>
+                    ) : selectedBooking ? (
+                        <div className="space-y-6 pt-2">
+                            {/* Header Info */}
+                            <div className="flex flex-col md:flex-row gap-4 justify-between bg-purple-50 p-4 rounded-lg">
+                                <div>
+                                    <h3 className="font-bold text-lg text-gray-800">{selectedBooking.full_name}</h3>
+                                    <div className="text-sm text-gray-600 flex flex-col gap-1 mt-1">
+                                        <span className="flex items-center gap-2"><MessageSquare className="w-3 h-3" /> {selectedBooking.email}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold mb-2">
+                                        {selectedBooking.status.toUpperCase()}
+                                    </span>
+                                    <div className="text-sm text-gray-500">
+                                        {format(new Date(selectedBooking.preferred_date), 'PPP')}<br />
+                                        {selectedBooking.preferred_time}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Context */}
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
+                                    <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.situation_description || 'No description provided.'}</p>
+                                </div>
+                            </div>
+
+                            {/* Aura Image if available */}
+                            {selectedBooking.aura_image && (
+                                <div>
+                                    <h4 className="font-semibold text-gray-700 mb-2 text-sm uppercase tracking-wide flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-purple-500" /> Aura Photo
+                                    </h4>
+                                    <div className="border rounded-lg overflow-hidden bg-black/5 p-2 flex justify-center">
+                                        <img
+                                            src={selectedBooking.aura_image}
+                                            alt="Aura"
+                                            className="max-h-64 object-contain rounded-md shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Meta Info */}
+                            <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 border-t pt-4">
+                                <div>
+                                    <span className="block font-medium">Service Type:</span> {selectedBooking.service_type}
+                                </div>
+                                <div>
+                                    <span className="block font-medium">Payment:</span> {selectedBooking.amount} {selectedBooking.currency} ({selectedBooking.payment_method})
+                                </div>
+                                <div>
+                                    <span className="block font-medium">DOB:</span> {selectedBooking.date_of_birth}
+                                </div>
+                                <div>
+                                    <span className="block font-medium">Gender:</span> {selectedBooking.gender}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">No details found.</div>
+                    )}
+
+                    <AlertDialogFooter className="sm:justify-between gap-4 border-t pt-4 mt-4">
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                                onClick={handleResendEmail}
+                            >
+                                Resend Email
+                            </Button>
+                        </div>
+                        <AlertDialogCancel onClick={() => setDetailsOpen(false)}>Close</AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div >
     );
 };
