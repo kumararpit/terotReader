@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -33,9 +33,9 @@ const PromotionsTab = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const [sRes, pRes, cRes] = await Promise.all([
@@ -52,7 +52,7 @@ const PromotionsTab = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [baseUrl]);
 
     const handleUpdateService = async (id, field, value) => {
         try {
