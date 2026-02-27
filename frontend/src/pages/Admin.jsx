@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Trash2, Plus, Calendar as CalendarIcon, MessageSquare, LogOut, Sparkles } from 'lucide-react';
+import { Trash2, Plus, Calendar as CalendarIcon, MessageSquare, LogOut, Sparkles, Globe, Menu, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Calendar } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import PromotionsTab from '../components/PromotionsTab';
+import dayjs, { getUserTimezone, formatInTimeZone } from '../lib/dateUtils';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,12 +22,19 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "../components/ui/alert-dialog";
+import {
+    Sheet,
+    SheetContent,
+    SheetTrigger,
+} from "../components/ui/sheet";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '');
 const API = `${BACKEND_URL}/api`;
 
 const Admin = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('admin_token'));
+    const [activeTab, setActiveTab] = useState('slots');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Auth Flow State
     const [needsSetup, setNeedsSetup] = useState(null);
@@ -54,8 +63,10 @@ const Admin = () => {
     };
 
     // Slot State
+    const DEFAULT_BUSINESS_TZ = "Europe/Rome";
+    const [activeTZ] = useState(() => dayjs.tz.guess() || DEFAULT_BUSINESS_TZ);
     const [slots, setSlots] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(dayjs().tz(activeTZ).toDate());
     const [newTime, setNewTime] = useState('');
     const [newSlotType, setNewSlotType] = useState('regular');
     const [isGenerating, setIsGenerating] = useState(false);
@@ -308,18 +319,21 @@ const Admin = () => {
 
     // Helper to check if date is in the past
     const isPastDate = (date) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return date < today;
+        const todayInTZ = dayjs().tz(activeTZ).startOf('day');
+        return dayjs(date).tz(activeTZ).isBefore(todayInTZ);
     };
 
     // Helper to check if a specific slot time is in the past
-    const isSlotPast = (slotTime) => {
-        const now = new Date();
-        const checkDate = new Date(selectedDate);
-        const [h, m] = slotTime.split(':');
-        checkDate.setHours(parseInt(h), parseInt(m), 0, 0);
-        return checkDate < now;
+    const isSlotPast = (slot) => {
+        // Use UTC if available, fallback to assuming Rome Time
+        let slotDateTime;
+        if (slot.start_time_utc) {
+            slotDateTime = dayjs.utc(slot.start_time_utc);
+        } else {
+            // Fallback for slots without UTC info: assume they are in Business TZ (Rome)
+            slotDateTime = dayjs.tz(`${slot.date}T${slot.time}`, activeTZ);
+        }
+        return slotDateTime.isBefore(dayjs().tz(activeTZ));
     };
 
     const fetchTestimonials = React.useCallback(async () => {
@@ -397,135 +411,224 @@ const Admin = () => {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#f6f1ff] relative overflow-hidden">
-                {/* Mystical Background Elements */}
-                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,#ece4ff_0%,transparent_70%)]" />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#9d80d6] opacity-10 blur-[100px] rounded-full" />
-                <div className="absolute top-20 left-20 w-72 h-72 bg-[#b9a3e6] opacity-20 blur-[80px] rounded-full" />
+            <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+                {/* Subtle Background Elements */}
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(184,134,11,0.05)_0%,transparent_70%)]" />
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary opacity-5 blur-[100px] rounded-full" />
+                <div className="absolute top-20 left-20 w-72 h-72 bg-secondary opacity-5 blur-[80px] rounded-full" />
 
-                <Card className="w-full max-w-md relative z-10 border-white/60 bg-white/80 shadow-2xl backdrop-blur-xl">
+                <Card className="w-full max-w-md relative z-10 border-primary/10 bg-white/80 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl">
                     <CardHeader className="space-y-1">
-                        <div className="mx-auto w-14 h-14 bg-gradient-to-br from-[#b9a3e6] to-[#9d80d6] rounded-full flex items-center justify-center mb-4 shadow-lg ring-4 ring-white/50">
-                            <Sparkles className="text-white h-7 w-7" />
+                        <div className="mx-auto w-14 h-14 bg-primary rounded-full flex items-center justify-center mb-4 shadow-lg ring-4 ring-secondary/20">
+                            <Sparkles className="text-secondary h-7 w-7" />
                         </div>
-                        <CardTitle className="text-center font-serif text-3xl text-[#3f3660]">
-                            {needsSetup ? 'Setup Admin' : authView === 'login' ? 'Admin Portal' : authView === 'forgot' ? 'Reset Password' : 'New Password'}
+                        <CardTitle className="text-center font-heading text-3xl text-primary">
+                            {needsSetup ? 'First Time Setup' : authView === 'login' ? 'Portal Access' : authView === 'forgot' ? 'Find Account' : 'Security Reset'}
                         </CardTitle>
-                        <CardDescription className="text-center text-gray-500">
-                            {needsSetup ? 'Create your admin account to get started' :
-                                authView === 'login' ? 'Enter your credentials to access the dashboard' :
-                                    authView === 'forgot' ? 'Enter your email to receive an OTP' :
-                                        'Enter the OTP sent to your email'}
+                        <CardDescription className="text-center text-muted-foreground">
+                            {needsSetup ? 'Establish your administrator credentials' :
+                                authView === 'login' ? 'Authenticate to access the command center' :
+                                    authView === 'forgot' ? 'Verification code will be dispatched to your email' :
+                                        'Provide the security code sent to you'}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         {needsSetup ? (
                             <form onSubmit={handleSetup} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-[#3f3660]">Username</Label>
-                                    <Input required value={setupData.username} onChange={e => setSetupData({ ...setupData, username: e.target.value })} placeholder="admin" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                    <Label className="text-primary/70">Username</Label>
+                                    <Input required value={setupData.username} onChange={e => setSetupData({ ...setupData, username: e.target.value })} placeholder="admin" className="bg-background/50 border-primary/10 focus:border-secondary focus:ring-secondary/20 transition-all" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-[#3f3660]">Email</Label>
-                                    <Input required type="email" value={setupData.email} onChange={e => setSetupData({ ...setupData, email: e.target.value })} placeholder="admin@example.com" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                    <Label className="text-primary/70">Email Address</Label>
+                                    <Input required type="email" value={setupData.email} onChange={e => setSetupData({ ...setupData, email: e.target.value })} placeholder="admin@example.com" className="bg-background/50 border-primary/10 focus:border-secondary focus:ring-secondary/20 transition-all" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-[#3f3660]">Password</Label>
-                                    <Input required type="password" value={setupData.password} onChange={e => setSetupData({ ...setupData, password: e.target.value })} placeholder="••••••••" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                    <Label className="text-primary/70">Access Password</Label>
+                                    <Input required type="password" value={setupData.password} onChange={e => setSetupData({ ...setupData, password: e.target.value })} placeholder="••••••••" className="bg-background/50 border-primary/10 focus:border-secondary focus:ring-secondary/20 transition-all" />
                                 </div>
-                                <Button type="submit" className="w-full bg-gradient-to-r from-[#b9a3e6] to-[#9d80d6] hover:opacity-90 transition-opacity text-white font-semibold py-5" disabled={isLoading}>{isLoading ? 'Creating...' : 'Create Account'}</Button>
+                                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-xl shadow-md transition-all" disabled={isLoading}>{isLoading ? 'Configuring...' : 'Initialize Admin'}</Button>
                             </form>
                         ) : authView === 'forgot' ? (
                             <form onSubmit={handleForgotPassword} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-[#3f3660]">Registered Email</Label>
-                                    <Input required type="email" value={resetData.email} onChange={e => setResetData({ ...resetData, email: e.target.value })} placeholder="admin@example.com" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                    <Label className="text-primary/70">Verified Email Address</Label>
+                                    <Input required type="email" value={resetData.email} onChange={e => setResetData({ ...resetData, email: e.target.value })} placeholder="admin@example.com" className="bg-background/50 border-primary/10 focus:border-secondary transition-all" />
                                 </div>
-                                <Button type="submit" className="w-full bg-gradient-to-r from-[#b9a3e6] to-[#9d80d6] hover:opacity-90" disabled={isLoading}>{isLoading ? 'Sending...' : 'Send OTP'}</Button>
-                                <Button type="button" variant="ghost" className="w-full text-[#6b6680] hover:text-[#3f3660]" onClick={() => setAuthView('login')}>Back to Login</Button>
+                                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-xl shadow-md transition-all" disabled={isLoading}>{isLoading ? 'Processing...' : 'Request Access Code'}</Button>
+                                <Button type="button" variant="ghost" className="w-full text-muted-foreground hover:text-primary" onClick={() => setAuthView('login')}>Return to Login</Button>
                             </form>
                         ) : authView === 'reset' ? (
                             <form onSubmit={handleResetPassword} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label className="text-[#3f3660]">Enter OTP</Label>
-                                    <Input required value={resetData.otp} onChange={e => setResetData({ ...resetData, otp: e.target.value })} placeholder="123456" className="text-center text-2xl tracking-widest bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" maxLength={6} />
+                                    <Label className="text-primary/70">Security Code</Label>
+                                    <Input required value={resetData.otp} onChange={e => setResetData({ ...resetData, otp: e.target.value })} placeholder="123456" className="text-center text-2xl tracking-[0.5em] bg-background/50 border-primary/10 focus:border-secondary transition-all" maxLength={6} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-[#3f3660]">New Password</Label>
-                                    <Input required type="password" value={resetData.newPassword} onChange={e => setResetData({ ...resetData, newPassword: e.target.value })} placeholder="••••••••" className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]" />
+                                    <Label className="text-primary/70">New Access Password</Label>
+                                    <Input required type="password" value={resetData.newPassword} onChange={e => setResetData({ ...resetData, newPassword: e.target.value })} placeholder="••••••••" className="bg-background/50 border-primary/10 focus:border-secondary transition-all" />
                                 </div>
-                                <Button type="submit" className="w-full bg-gradient-to-r from-[#b9a3e6] to-[#9d80d6] hover:opacity-90" disabled={isLoading}>{isLoading ? 'Updating...' : 'Set New Password'}</Button>
-                                <Button type="button" variant="ghost" className="w-full text-[#6b6680] hover:text-[#3f3660]" onClick={() => setAuthView('login')}>Back to Login</Button>
+                                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-xl shadow-md transition-all" disabled={isLoading}>{isLoading ? 'Updating...' : 'Set New Password'}</Button>
+                                <Button type="button" variant="ghost" className="w-full text-muted-foreground hover:text-primary" onClick={() => setAuthView('login')}>Return to Login</Button>
                             </form>
                         ) : (
                             <form onSubmit={handleLogin} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="username" className="text-[#3f3660]">Username</Label>
+                                    <Label htmlFor="username" className="text-primary/70">Username</Label>
                                     <Input
                                         id="username"
                                         type="text"
                                         placeholder="admin"
                                         value={credentials.username}
                                         onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                                        className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]"
+                                        className="bg-background/50 border-primary/10 focus:border-secondary transition-all"
                                         required
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="password" className="text-[#3f3660]">Password</Label>
+                                    <div className="flex justify-between items-center">
+                                        <Label htmlFor="password" className="text-primary/70">Access Password</Label>
+                                        <button type="button" onClick={() => setAuthView('forgot')} className="text-xs text-secondary hover:text-secondary/80 font-medium transition-colors">Forgot?</button>
+                                    </div>
                                     <Input
                                         id="password"
                                         type="password"
                                         placeholder="••••••••"
                                         value={credentials.password}
                                         onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                                        className="bg-white/50 border-[#b9a3e6]/30 focus:border-[#9d80d6]"
+                                        className="bg-background/50 border-primary/10 focus:border-secondary transition-all"
                                         required
                                     />
                                 </div>
-                                <div className="text-right">
-                                    <button type="button" onClick={() => setAuthView('forgot')} className="text-xs text-[#9d80d6] hover:text-[#3f3660] font-medium hover:underline">Forgot Password?</button>
-                                </div>
                                 <Button
                                     type="submit"
-                                    className="w-full bg-gradient-to-r from-[#b9a3e6] to-[#9d80d6] hover:opacity-90 text-white shadow-md transition-all duration-200 py-5"
+                                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-xl shadow-md transition-all mt-4"
                                     disabled={isLoading}
                                 >
-                                    {isLoading ? 'Authenticating...' : 'Sign In'}
+                                    {isLoading ? 'Verifying...' : 'Access Dashboard'}
                                 </Button>
                             </form>
                         )}
                     </CardContent>
                 </Card>
-
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[var(--bg-primary)] p-8">
-            <div className="max-w-6xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold font-heading text-[var(--color-black)]">
-                        Admin Dashboard
-                    </h1>
-                    <Button variant="outline" onClick={handleLogout}>
-                        <LogOut className="mr-2 h-4 w-4" /> Logout
-                    </Button>
-                </div>
+        <div className="min-h-screen bg-background font-sans">
+            <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-primary/5 bg-background/80 backdrop-blur-md shadow-sm">
+                <div className="container mx-auto px-4">
+                    <div className="flex items-center justify-between h-20">
+                        {/* Logo/Title for Mobile */}
+                        <div className="md:hidden flex items-center gap-2">
+                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-md ring-2 ring-secondary/20">
+                                <Sparkles className="text-secondary h-4 w-4" />
+                            </div>
+                            <span className="font-heading font-bold text-primary text-xl">Admin</span>
+                        </div>
 
-                <Tabs defaultValue="slots" className="space-y-6">
-                    <TabsList className="bg-white p-1 rounded-lg border border-[var(--color-grey)]">
-                        <TabsTrigger value="slots" className="px-8 data-[state=active]:bg-[var(--color-soft-blue)]">
-                            <CalendarIcon className="mr-2 h-4 w-4" /> Manage Slots
-                        </TabsTrigger>
-                        <TabsTrigger value="testimonials" className="px-8 data-[state=active]:bg-[var(--color-soft-lavender)]">
-                            <MessageSquare className="mr-2 h-4 w-4" /> Testimonials
-                        </TabsTrigger>
-                    </TabsList>
+                        <nav className="hidden md:flex items-center space-x-8">
+                            {[
+                                { id: 'slots', label: 'Manage Slots' },
+                                { id: 'testimonials', label: 'Testimonials' },
+                                { id: 'promotions', label: 'Promotions' }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`text-sm font-medium transition-colors duration-200 ${activeTab === tab.id
+                                        ? 'text-primary border-b-2 border-primary'
+                                        : 'text-primary/60 hover:text-primary'
+                                        } h-20 px-1`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </nav>
+
+                        <div className="flex items-center gap-4 lg:gap-6">
+                            <div className="hidden lg:flex flex-col text-right text-[10px] text-primary/40 leading-tight">
+                                <span className="flex items-center justify-end gap-1">
+                                    <CalendarIcon className="w-3 h-3" />
+                                    Timezone: <strong className="text-primary/70">{activeTZ}</strong>
+                                </span>
+                            </div>
+                            <Button
+                                onClick={handleLogout}
+                                className="hidden md:flex px-8 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground border-none shadow-md hover:shadow-lg transition-all text-xs"
+                            >
+                                <LogOut className="w-4 h-4 mr-2" />
+                                Logout
+                            </Button>
+
+                            {/* Mobile Menu Trigger */}
+                            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                                <SheetTrigger asChild className="md:hidden ml-auto">
+                                    <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+                                        <Menu className="h-6 w-6" />
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="right" className="bg-background text-foreground border-l border-primary/5 w-[280px] p-0">
+                                    <div className="p-6 space-y-8 mt-12">
+                                        <div className="space-y-4">
+                                            <p className="text-[10px] uppercase font-bold text-primary/40 tracking-widest pl-2">Navigation</p>
+                                            {[
+                                                { id: 'slots', label: 'Manage Slots', icon: CalendarIcon },
+                                                { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+                                                { id: 'promotions', label: 'Promotions', icon: Sparkles }
+                                            ].map((tab) => (
+                                                <button
+                                                    key={tab.id}
+                                                    onClick={() => {
+                                                        setActiveTab(tab.id);
+                                                        setIsMobileMenuOpen(false);
+                                                    }}
+                                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === tab.id
+                                                        ? 'bg-primary text-primary-foreground shadow-md font-bold scale-[1.02]'
+                                                        : 'text-primary/60 hover:bg-primary/5 hover:text-primary'
+                                                        }`}
+                                                >
+                                                    <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-secondary' : ''}`} />
+                                                    <span className="text-sm">{tab.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="space-y-4 pt-4 border-t border-primary/5">
+                                            <p className="text-[10px] uppercase font-bold text-primary/40 tracking-widest pl-2">Settings</p>
+                                            <div className="px-4 py-3 bg-primary/5 rounded-xl space-y-1">
+                                                <div className="flex items-center gap-2 text-xs text-primary/60">
+                                                    <CalendarIcon className="w-3 h-3" />
+                                                    <span>Timezone</span>
+                                                </div>
+                                                <p className="text-xs font-bold text-primary">{activeTZ}</p>
+                                            </div>
+                                            <Button
+                                                onClick={() => {
+                                                    handleLogout();
+                                                    setIsMobileMenuOpen(false);
+                                                }}
+                                                variant="outline"
+                                                className="w-full justify-start gap-3 px-4 py-3 rounded-xl border-primary/10 text-destructive hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20"
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                <span className="text-sm font-medium">Logout</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main className="container mx-auto px-4 pt-28 pb-8">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
 
                     <TabsContent value="slots">
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Left Column: Controls */}
                             <div className="space-y-6">
                                 {/* 1. Date Selection */}
@@ -593,12 +696,12 @@ const Admin = () => {
                                                 const type = document.getElementById('genType').value;
                                                 setAvailability(start, end, type);
                                             }}
-                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all text-xs md:text-sm"
                                             disabled={isPastDate(selectedDate)}
-                                            title={isPastDate(selectedDate) ? "Cannot set availability for past dates" : "Set availability range"}
+                                            title={isPastDate(selectedDate) ? "Cannot set availability for past dates" : `Set availability in Business Time (Rome)`}
                                         >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {isPastDate(selectedDate) ? 'Cannot Modify Past' : 'Set Availability'}
+                                            {isPastDate(selectedDate) ? 'Past Date' : 'Establish Availability'}
                                         </Button>
                                     </CardContent>
                                 </Card>
@@ -643,39 +746,38 @@ const Admin = () => {
                                                     : 0;
 
                                                 return (
-                                                    <div key={availWindow.id} className="border rounded-md p-3 text-sm">
-                                                        <div className="flex justify-between mb-1 items-center">
+                                                    <div key={availWindow.id} className="border rounded-lg p-3 text-sm bg-gray-50">
+                                                        <div className="flex justify-between mb-3 items-center">
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`font-bold ${availWindow.type === 'emergency' ? 'text-amber-600' : 'text-green-600'}`}>
+                                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${availWindow.type === 'emergency' ? 'bg-orange-100 text-orange-700' : 'bg-primary/5 text-primary/70'}`}>
                                                                     {availWindow.type === 'emergency' ? 'EMERGENCY' : 'REGULAR'}
                                                                 </span>
-                                                                <span className="text-gray-500">{availWindow.start_time} - {availWindow.end_time}</span>
+                                                                <span className="text-primary/60 font-medium">{availWindow.start_time} - {availWindow.end_time}</span>
                                                             </div>
                                                             <div className="flex gap-1">
                                                                 <button
-                                                                    className="h-6 w-6 text-gray-400 hover:text-red-600 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                                                                    className="h-7 w-7 text-primary/20 hover:text-destructive flex items-center justify-center rounded-full hover:bg-destructive/5 transition-all"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         deleteAvailability(availWindow.id);
                                                                     }}
-                                                                    title="Delete"
+                                                                    title="Remove Window"
                                                                 >
-                                                                    <Trash2 className="h-3 w-3" />
+                                                                    <Trash2 className="h-3.5 w-3.5" />
                                                                 </button>
                                                             </div>
                                                         </div>
 
-                                                        {/* Bar */}
-                                                        <div className="h-4 w-full bg-gray-100 rounded-full overflow-hidden flex border border-gray-200">
+                                                        {/* Utilization Bar */}
+                                                        <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden mt-2">
                                                             <div
-                                                                className="h-full bg-red-500 transition-all duration-500"
+                                                                className="h-full bg-primary transition-all duration-500"
                                                                 style={{ width: `${utilizationPercent}%` }}
-                                                                title={`Booked: ${bookedMinutes}m`}
                                                             />
                                                         </div>
-                                                        <div className="flex justify-between mt-1 text-xs text-gray-400">
-                                                            <span>Booked: {Math.round(bookedMinutes)}m</span>
-                                                            <span>Free: {Math.max(0, totalWindowMinutes - bookedMinutes)}m</span>
+                                                        <div className="flex justify-between mt-1 text-[10px] uppercase font-bold text-gray-400">
+                                                            <span>Occupied: {Math.round(bookedMinutes)}m</span>
+                                                            <span>Available: {Math.max(0, totalWindowMinutes - bookedMinutes)}m</span>
                                                         </div>
                                                     </div>
                                                 );
@@ -694,15 +796,25 @@ const Admin = () => {
                                             Visualizing {format(selectedDate, 'PPP')}
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent className="flex-1 overflow-y-auto">
-                                        <div className="relative border-l-2 border-gray-200 ml-4 space-y-0 pb-12">
+                                    <CardContent className="flex-1 overflow-y-auto p-3 md:p-6">
+                                        <div className="relative border-l-2 border-gray-200 ml-6 md:ml-4 space-y-0 pb-12">
                                             {Array.from({ length: 24 }).map((_, hour) => {
                                                 const hourStr = hour.toString().padStart(2, '0') + ":00";
 
-                                                // Filter slots in this hour
-                                                // User Request: Only show Booked/Busy slots. Hide granular "Available" slots.
-                                                // The "Window" is already visualized by the background color.
-                                                const slotsInHour = slots.filter(s => s.time.startsWith(hour.toString().padStart(2, '0') + ":") && s.is_booked);
+                                                // Filter slots in this hour based on LOCAL browser time
+                                                const slotsInHour = slots.filter(s => {
+                                                    if (!s.is_booked) return false;
+
+                                                    let slotDateTime;
+                                                    if (s.start_time_utc) {
+                                                        slotDateTime = dayjs.utc(s.start_time_utc).tz(activeTZ);
+                                                    } else {
+                                                        // Fallback for legacy slots
+                                                        slotDateTime = dayjs.tz(`${s.date}T${s.time}`, activeTZ);
+                                                    }
+
+                                                    return slotDateTime.hour() === hour;
+                                                });
 
                                                 return (
                                                     <div key={hour} className={`relative pl-8 py-4 group hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${getWindowForHour(hour) ? (
@@ -762,14 +874,17 @@ const Admin = () => {
                                                                     >
                                                                         <div className="flex flex-col leading-tight">
                                                                             <span className={`font-bold ${slot.type === 'canceled' ? 'line-through decoration-2 decoration-gray-400' : ''}`}>
-                                                                                {slot.time} <span className="text-[10px] font-normal opacity-75">({slot.duration || 20}m)</span>
+                                                                                {slot.start_time_utc
+                                                                                    ? dayjs.utc(slot.start_time_utc).tz(activeTZ).format('HH:mm')
+                                                                                    : slot.time
+                                                                                } <span className="text-[10px] font-normal opacity-75">({slot.duration || 20}m)</span>
                                                                             </span>
                                                                         </div>
 
                                                                         {/* Stickers/Tags */}
                                                                         {slot.type === 'canceled' ? (
                                                                             <div className="flex flex-col items-start gap-1">
-                                                                                <span className="text-[9px] bg-gray-400 text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
+                                                                                <span className="text-[9px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
                                                                                     CANCELED
                                                                                 </span>
                                                                                 <span className="text-[10px] truncate max-w-[150px]">
@@ -778,7 +893,7 @@ const Admin = () => {
                                                                             </div>
                                                                         ) : slot.is_booked ? (
                                                                             <div className="flex flex-col items-start gap-1">
-                                                                                <span className="text-[9px] bg-red-600 text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
+                                                                                <span className="text-[9px] bg-secondary text-primary px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
                                                                                     {slot.booked_by && !slot.booked_by.startsWith('BOOKED') ? 'BUSY' : 'BOOKED'}
                                                                                 </span>
                                                                                 {slot.booked_by && (
@@ -790,11 +905,11 @@ const Admin = () => {
                                                                         ) : null}
 
                                                                         {/* Delete Button (Hide for Canceled or Past Slots) */}
-                                                                        {slot.type !== 'canceled' && !isSlotPast(slot.time) && (
+                                                                        {slot.type !== 'canceled' && !isSlotPast(slot) && (
                                                                             <Button
                                                                                 variant="ghost"
                                                                                 size="icon"
-                                                                                className="h-5 w-5 -mr-1 ml-1 text-gray-500 hover:text-red-600 hover:bg-white/50 rounded-full"
+                                                                                className="h-5 w-5 -mr-1 ml-1 text-primary/40 hover:text-destructive hover:bg-destructive/5 rounded-full"
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
                                                                                     if (slot.is_booked) {
@@ -822,7 +937,7 @@ const Admin = () => {
                     </TabsContent>
 
                     <TabsContent value="testimonials">
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Add Testimonial */}
                             <div className="space-y-6">
                                 <Card>
@@ -861,7 +976,7 @@ const Admin = () => {
                                                     required
                                                 />
                                             </div>
-                                            <Button type="submit" className="w-full">
+                                            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md transition-all">
                                                 <Plus className="mr-2 h-4 w-4" /> Add Testimonial
                                             </Button>
                                         </form>
@@ -878,19 +993,22 @@ const Admin = () => {
                                     <CardContent>
                                         <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                                             {testimonials.map((t) => (
-                                                <div key={t.id} className="bg-white p-4 rounded-lg border border-[var(--color-grey)] shadow-sm relative group">
-                                                    <p className="text-[var(--color-dark-grey)] text-sm mb-3">"{t.text}"</p>
+                                                <div key={t.id} className="bg-background/80 backdrop-blur-sm p-5 rounded-2xl border border-primary/10 shadow-sm relative group hover:border-secondary/50 transition-all">
+                                                    <p className="text-primary/70 text-sm mb-4 italic leading-relaxed">"{t.text}"</p>
                                                     <div className="flex justify-between items-center">
-                                                        <span className="font-bold text-[var(--color-deep-blue)] text-sm">- {t.author}</span>
-                                                        <div className="flex items-center space-x-2">
-                                                            <span className="text-yellow-400 text-sm">★ {t.rating}</span>
+                                                        <span className="font-heading font-bold text-primary text-sm tracking-wide">- {t.author}</span>
+                                                        <div className="flex items-center space-x-3">
+                                                            <div className="flex items-center gap-1 text-secondary">
+                                                                <span className="text-sm font-bold">{t.rating}</span>
+                                                                <Sparkles className="w-3.5 h-3.5" />
+                                                            </div>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-6 w-6 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                className="h-7 w-7 text-destructive/40 opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/5 transition-all rounded-full"
                                                                 onClick={() => deleteTestimonial(t.id)}
                                                             >
-                                                                <Trash2 className="h-3 w-3" />
+                                                                <Trash2 className="h-4 w-4" />
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -902,142 +1020,146 @@ const Admin = () => {
                             </div>
                         </div>
                     </TabsContent>
+
+                    <TabsContent value="promotions">
+                        <PromotionsTab />
+                    </TabsContent>
                 </Tabs>
-            </div>
 
-            <AlertDialog open={!!overlapData} onOpenChange={(open) => !open && setOverlapData(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Overlap Detected</AlertDialogTitle>
-                        <AlertDialogDescription className="space-y-4">
-                            <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-100">
-                                <p className="font-semibold mb-1">Conflicts with existing blocks:</p>
-                                <ul className="list-disc list-inside">
-                                    {overlapData?.detail?.overlaps?.map((o, i) => (
-                                        <li key={i}>{o}</li>
-                                    ))}
-                                </ul>
+                <AlertDialog open={!!overlapData} onOpenChange={(open) => !open && setOverlapData(null)}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Overlap Detected</AlertDialogTitle>
+                            <AlertDialogDescription className="space-y-4">
+                                <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-100">
+                                    <p className="font-semibold mb-1">Conflicts with existing blocks:</p>
+                                    <ul className="list-disc list-inside">
+                                        {overlapData?.detail?.overlaps?.map((o, i) => (
+                                            <li key={i}>{o}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="p-3 bg-green-50 text-green-700 rounded-md text-sm border border-green-100">
+                                    <p className="font-semibold mb-1">Proposed Available Slots:</p>
+                                    <p>We can instead add availability for:</p>
+                                    <ul className="list-disc list-inside mt-1 font-mono">
+                                        {overlapData?.detail?.proposed_segments?.map((s, i) => (
+                                            <li key={i}>{s.start_time} - {s.end_time}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <p className="font-medium text-gray-900">
+                                    Do you want to proceed with adding only the available slots?
+                                </p>
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleOverlapConfirm} className="bg-green-600 hover:bg-green-700">
+                                Confirm & Add
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                <AlertDialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+                    <AlertDialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="flex justify-between items-center text-xl text-purple-900">
+                                Booking Details
+                                <Button variant="ghost" size="sm" onClick={() => setDetailsOpen(false)}>✕</Button>
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Complete information for this session.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+
+                        {isDetailsLoading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                             </div>
-
-                            <div className="p-3 bg-green-50 text-green-700 rounded-md text-sm border border-green-100">
-                                <p className="font-semibold mb-1">Proposed Available Slots:</p>
-                                <p>We can instead add availability for:</p>
-                                <ul className="list-disc list-inside mt-1 font-mono">
-                                    {overlapData?.detail?.proposed_segments?.map((s, i) => (
-                                        <li key={i}>{s.start_time} - {s.end_time}</li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            <p className="font-medium text-gray-900">
-                                Do you want to proceed with adding only the available slots?
-                            </p>
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleOverlapConfirm} className="bg-green-600 hover:bg-green-700">
-                            Confirm & Add
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-            <AlertDialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-                <AlertDialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="flex justify-between items-center text-xl text-purple-900">
-                            Booking Details
-                            <Button variant="ghost" size="sm" onClick={() => setDetailsOpen(false)}>✕</Button>
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Complete information for this session.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-
-                    {isDetailsLoading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                        </div>
-                    ) : selectedBooking ? (
-                        <div className="space-y-6 pt-2">
-                            {/* Header Info */}
-                            <div className="flex flex-col md:flex-row gap-4 justify-between bg-purple-50 p-4 rounded-lg">
-                                <div>
-                                    <h3 className="font-bold text-lg text-gray-800">{selectedBooking.full_name}</h3>
-                                    <div className="text-sm text-gray-600 flex flex-col gap-1 mt-1">
-                                        <span className="flex items-center gap-2"><MessageSquare className="w-3 h-3" /> {selectedBooking.email}</span>
+                        ) : selectedBooking ? (
+                            <div className="space-y-6 pt-2">
+                                {/* Header Info */}
+                                <div className="flex flex-col md:flex-row gap-4 justify-between bg-purple-50 p-4 rounded-lg">
+                                    <div>
+                                        <h3 className="font-bold text-lg text-gray-800">{selectedBooking.full_name}</h3>
+                                        <div className="text-sm text-gray-600 flex flex-col gap-1 mt-1">
+                                            <span className="flex items-center gap-2"><MessageSquare className="w-3 h-3" /> {selectedBooking.email}</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold mb-2">
+                                            {selectedBooking.status.toUpperCase()}
+                                        </span>
+                                        <div className="text-sm text-gray-500">
+                                            {format(new Date(selectedBooking.preferred_date), 'PPP')}<br />
+                                            {selectedBooking.preferred_time}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold mb-2">
-                                        {selectedBooking.status.toUpperCase()}
-                                    </span>
-                                    <div className="text-sm text-gray-500">
-                                        {format(new Date(selectedBooking.preferred_date), 'PPP')}<br />
-                                        {selectedBooking.preferred_time}
+
+                                {/* Context */}
+                                <div className="space-y-4">
+                                    <div>
+                                        <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
+                                        <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.situation_description || 'No description provided.'}</p>
+                                    </div>
+                                </div>
+
+                                {/* Aura Image if available */}
+                                {selectedBooking.aura_image && (
+                                    <div>
+                                        <h4 className="font-semibold text-gray-700 mb-2 text-sm uppercase tracking-wide flex items-center gap-2">
+                                            <Sparkles className="w-4 h-4 text-purple-500" /> Aura Photo
+                                        </h4>
+                                        <div className="border rounded-lg overflow-hidden bg-black/5 p-2 flex justify-center">
+                                            <img
+                                                src={selectedBooking.aura_image}
+                                                alt="Aura"
+                                                className="max-h-64 object-contain rounded-md shadow-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Meta Info */}
+                                <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 border-t pt-4">
+                                    <div>
+                                        <span className="block font-medium">Service Type:</span> {selectedBooking.service_type}
+                                    </div>
+                                    <div>
+                                        <span className="block font-medium">Payment:</span> {selectedBooking.amount} {selectedBooking.currency} ({selectedBooking.payment_method})
+                                    </div>
+                                    <div>
+                                        <span className="block font-medium">DOB:</span> {selectedBooking.date_of_birth}
+                                    </div>
+                                    <div>
+                                        <span className="block font-medium">Gender:</span> {selectedBooking.gender}
                                     </div>
                                 </div>
                             </div>
+                        ) : (
+                            <div className="text-center py-8 text-gray-500">No details found.</div>
+                        )}
 
-                            {/* Context */}
-                            <div className="space-y-4">
-                                <div>
-                                    <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
-                                    <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.situation_description || 'No description provided.'}</p>
-                                </div>
+                        <AlertDialogFooter className="sm:justify-between gap-4 border-t pt-4 mt-4">
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                                    onClick={handleResendEmail}
+                                >
+                                    Resend Email
+                                </Button>
                             </div>
-
-                            {/* Aura Image if available */}
-                            {selectedBooking.aura_image && (
-                                <div>
-                                    <h4 className="font-semibold text-gray-700 mb-2 text-sm uppercase tracking-wide flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4 text-purple-500" /> Aura Photo
-                                    </h4>
-                                    <div className="border rounded-lg overflow-hidden bg-black/5 p-2 flex justify-center">
-                                        <img
-                                            src={selectedBooking.aura_image}
-                                            alt="Aura"
-                                            className="max-h-64 object-contain rounded-md shadow-sm"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Meta Info */}
-                            <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 border-t pt-4">
-                                <div>
-                                    <span className="block font-medium">Service Type:</span> {selectedBooking.service_type}
-                                </div>
-                                <div>
-                                    <span className="block font-medium">Payment:</span> {selectedBooking.amount} {selectedBooking.currency} ({selectedBooking.payment_method})
-                                </div>
-                                <div>
-                                    <span className="block font-medium">DOB:</span> {selectedBooking.date_of_birth}
-                                </div>
-                                <div>
-                                    <span className="block font-medium">Gender:</span> {selectedBooking.gender}
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">No details found.</div>
-                    )}
-
-                    <AlertDialogFooter className="sm:justify-between gap-4 border-t pt-4 mt-4">
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                                onClick={handleResendEmail}
-                            >
-                                Resend Email
-                            </Button>
-                        </div>
-                        <AlertDialogCancel onClick={() => setDetailsOpen(false)}>Close</AlertDialogCancel>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+                            <AlertDialogCancel onClick={() => setDetailsOpen(false)}>Close</AlertDialogCancel>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </main>
         </div >
     );
 };

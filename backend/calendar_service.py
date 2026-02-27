@@ -73,11 +73,11 @@ class CalendarService:
 
     def fetch_primary_timezone(self):
         """Fetches the timezone setting of the primary calendar."""
-        self.primary_time_zone = 'Asia/Kolkata' # Default fallback
+        self.primary_time_zone = 'Europe/Rome' # Default fallback
         if not self.service: return
         try:
             calendar = self.service.calendars().get(calendarId='primary').execute()
-            self.primary_time_zone = calendar.get('timeZone', 'Asia/Kolkata')
+            self.primary_time_zone = calendar.get('timeZone', 'Europe/Rome')
             logger.info(f"Primary Calendar Timezone detected: {self.primary_time_zone}")
         except HttpError as err:
             logger.error(f"Error fetching calendar timezone: {err}")

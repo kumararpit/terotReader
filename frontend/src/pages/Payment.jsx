@@ -14,33 +14,125 @@ const Payment = () => {
     const [selectedPayment, setSelectedPayment] = React.useState('paypal');
     const [isProcessing, setIsProcessing] = React.useState(false);
 
+    // Dynamic Pricing State
+    const [pricingMap, setPricingMap] = React.useState({});
+    const [globalCampaign, setGlobalCampaign] = React.useState(null);
+    const [promoCode, setPromoCode] = React.useState('');
+    const [appliedPromo, setAppliedPromo] = React.useState(null);
+    const [promoLoading, setPromoLoading] = React.useState(false);
+
     useEffect(() => {
-        if (!location.state) {
-            navigate('/');
+        const fetchPricing = async () => {
+            const baseUrl = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '') || 'http://localhost:8000';
+            try {
+                const [sRes, cRes] = await Promise.all([
+                    axios.get(`${baseUrl}/api/services`),
+                    axios.get(`${baseUrl}/api/campaign`)
+                ]);
+                const pMap = {};
+                sRes.data.forEach(s => pMap[s.key] = s);
+                setPricingMap(pMap);
+                setGlobalCampaign(cRes.data);
+            } catch (e) {
+                console.error("Pricing fetch error", e);
+            }
+        };
+        fetchPricing();
+    }, []);
+
+    const handleVerifyPromo = async () => {
+        if (!promoCode) return;
+        setPromoLoading(true);
+        try {
+            const baseUrl = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '') || 'http://localhost:8000';
+            const res = await axios.post(`${baseUrl}/api/bookings/verify-code`, { code: promoCode, service_type: 'any' });
+            if (res.data.valid) {
+                setAppliedPromo(res.data);
+                toast.success("Promo code applied!");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.detail || "Invalid promo code");
+            setAppliedPromo(null);
+        } finally {
+            setPromoLoading(false);
         }
-    }, [location, navigate]);
+    };
 
     const calculateTotal = () => {
         let basePrice = 0;
+        let currency = 'EUR';
         let isEmergency = bookingData?.isEmergency || false;
 
+        // Determine Service Key
+        let serviceKey = '';
         if (service?.title?.includes('Delivered')) {
-            if (bookingData?.sessionType === '3_questions') basePrice = 22;
-            if (bookingData?.sessionType === '5_questions') basePrice = 33;
+            if (bookingData?.sessionType === '3_questions') serviceKey = 'delivered-3';
+            if (bookingData?.sessionType === '5_questions') serviceKey = 'delivered-5';
         } else if (service?.title?.includes('Live')) {
-            if (bookingData?.sessionType === '20_min') basePrice = 66;
-            if (bookingData?.sessionType === '40_min') basePrice = 129;
+            if (bookingData?.sessionType === '20_min') serviceKey = 'live-20';
+            if (bookingData?.sessionType === '40_min') serviceKey = 'live-40';
         } else if (service?.title?.includes('Aura')) {
-            basePrice = 15;
+            serviceKey = 'aura';
         }
 
-        const emergencyFee = isEmergency ? basePrice * 0.30 : 0;
-        const total = basePrice + emergencyFee;
+        // Get Dynamic Price or Fallback
+        if (pricingMap[serviceKey]) {
+            basePrice = pricingMap[serviceKey].amount;
+            currency = pricingMap[serviceKey].currency;
+        } else {
+            // Fallback Logic (Mock)
+            if (serviceKey === 'delivered-3') basePrice = 22;
+            if (serviceKey === 'delivered-5') basePrice = 33;
+            if (serviceKey === 'live-20') basePrice = 66;
+            if (serviceKey === 'live-40') basePrice = 129;
+            if (serviceKey === 'aura') basePrice = 15;
+        }
 
-        return { basePrice, emergencyFee, total };
+        let final = basePrice;
+        let globalDiscountAmount = 0;
+        let promoDiscountAmount = 0;
+
+        // 1. Promo Code (Priority)
+        if (appliedPromo) {
+            if (appliedPromo.discount_type === 'percentage') {
+                promoDiscountAmount = basePrice * (appliedPromo.discount_value / 100);
+            } else {
+                promoDiscountAmount = appliedPromo.discount_value;
+            }
+            final = basePrice - promoDiscountAmount;
+        }
+        // 2. Global Campaign (Only if no promo applied)
+        else if (globalCampaign && globalCampaign.is_active) {
+            const expiry = new Date(globalCampaign.expiry_date);
+            if (expiry > new Date()) {
+                globalDiscountAmount = basePrice * (globalCampaign.discount_percentage / 100);
+                final = basePrice - globalDiscountAmount;
+            }
+        }
+
+        // 3. Emergency Fee (Calculated on current final? Or Base? Usually Base + Fee. 
+        // Logic in backend implementation was: Base - Global - Promo. THEN + Emergency Fee (if backend logic matches).
+        // Wait, checking server.py create_booking:
+        // final_amount = base - discounts...
+        // if is_emergency: booking.amount = round(booking.amount * 1.30, 2)
+        // Checks line 1096 in server.py (updated version).
+        // It applies 30% SURCHARGE on the DISCOUNTED price??
+        // "booking.amount = round(booking.amount * 1.30, 2)"
+        // Yes, it takes the final `booking.amount` (which includes discounts) and adds 30%.
+        // This favors the user (smaller surcharge). Let's match that logic.
+
+        let emergencyFee = 0;
+        if (isEmergency) {
+            emergencyFee = final * 0.30;
+            final += emergencyFee;
+        }
+
+        if (final < 0) final = 0;
+
+        return { basePrice, globalDiscountAmount, promoDiscountAmount, emergencyFee, total: final, currency };
     };
 
-    const { basePrice, emergencyFee, total } = calculateTotal();
+    const { basePrice, globalDiscountAmount, promoDiscountAmount, emergencyFee, total, currency } = calculateTotal();
 
     const isCancelled = React.useRef(false);
 
@@ -96,7 +188,8 @@ const Payment = () => {
                 reading_focus: bookingData.readingFocus || null,
                 payment_method: selectedPayment,
                 is_emergency: bookingData.isEmergency || false,
-                aura_image: bookingData.auraImage || null
+                aura_image: bookingData.auraImage || null,
+                promo_code: appliedPromo ? appliedPromo.code : null
             };
 
             // Quick fix for missing email in non-Aura forms if valid
@@ -209,18 +302,57 @@ const Payment = () => {
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-primary/80">
                                         <span>Base Fee</span>
-                                        <span>€{basePrice.toFixed(2)}</span>
+                                        <span>{currency === 'EUR' ? '€' : currency}{basePrice.toFixed(2)}</span>
                                     </div>
+
+                                    {globalDiscountAmount > 0 && (
+                                        <div className="flex justify-between text-green-600">
+                                            <span>{globalCampaign.message || `Global Discount (${globalCampaign.discount_percentage}%)`}</span>
+                                            <span>-{currency === 'EUR' ? '€' : currency}{globalDiscountAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    {appliedPromo && (
+                                        <div className="flex justify-between text-green-600">
+                                            <span>Promo Code ({appliedPromo.code})</span>
+                                            <span>-{currency === 'EUR' ? '€' : currency}{promoDiscountAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
                                     {emergencyFee > 0 && (
                                         <div className="flex justify-between text-red-500">
                                             <span>Emergency Priority (30%)</span>
-                                            <span>+€{emergencyFee.toFixed(2)}</span>
+                                            <span>+{currency === 'EUR' ? '€' : currency}{emergencyFee.toFixed(2)}</span>
                                         </div>
                                     )}
                                     <div className="border-t border-dashed border-primary/20 my-4"></div>
                                     <div className="flex justify-between text-xl font-bold text-primary">
                                         <span>Total to Pay</span>
-                                        <span>€{total.toFixed(2)}</span>
+                                        <span>{currency === 'EUR' ? '€' : currency}{total.toFixed(2)}</span>
+                                    </div>
+
+                                    {/* Promo Input */}
+                                    <div className="pt-4 border-t mt-4">
+                                        <label className="text-xs font-medium text-primary mb-1 block">Have a Promo Code?</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                className="flex-1 p-2 rounded-lg border border-primary/20 text-sm uppercase"
+                                                placeholder="ENTER CODE"
+                                                value={promoCode}
+                                                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                                                disabled={!!appliedPromo}
+                                            />
+                                            {appliedPromo ? (
+                                                <Button size="sm" variant="outline" onClick={() => { setAppliedPromo(null); setPromoCode(''); }}>
+                                                    Remove
+                                                </Button>
+                                            ) : (
+                                                <Button size="sm" onClick={handleVerifyPromo} disabled={promoLoading || !promoCode}>
+                                                    {promoLoading ? '...' : 'Apply'}
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

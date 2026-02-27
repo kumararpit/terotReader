@@ -11,6 +11,7 @@ import Payment from './pages/Payment';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import CookiePolicy from './pages/CookiePolicy';
+import OfferModal from './components/OfferModal';
 import { Toaster } from 'sonner';
 
 // ScrollToTop Component
@@ -29,6 +30,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <ScrollToTop />
+        <OfferModal />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/admin" element={<Admin />} />

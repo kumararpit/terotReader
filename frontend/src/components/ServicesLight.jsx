@@ -1,9 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Video, Sparkles, ArrowRight, Stars } from 'lucide-react';
+import axios from 'axios';
+import { Mail, Video, Sparkles, ArrowRight } from 'lucide-react';
 import { services } from '../mock';
 
 export const ServicesLight = () => {
+  const [pricingMap, setPricingMap] = useState({});
+  const [globalCampaign, setGlobalCampaign] = useState(null);
+
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        let baseURL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+        baseURL = baseURL.replace(/\/api\/?$/, '').replace(/\/$/, '');
+
+        const [sRes, cRes] = await Promise.all([
+          axios.get(`${baseURL}/api/services`),
+          axios.get(`${baseURL}/api/campaign`)
+        ]);
+
+        const pMap = {};
+        sRes.data.forEach(s => pMap[s.key] = s);
+        setPricingMap(pMap);
+        setGlobalCampaign(cRes.data);
+      } catch (e) {
+        console.error("Failed to fetch pricing for services", e);
+      }
+    };
+    fetchPricing();
+  }, []);
+
+  const getStartingPrice = (serviceTitle) => {
+    let relevantKeys = [];
+    if (serviceTitle.includes('Delivered')) relevantKeys = ['delivered-3', 'delivered-5'];
+    else if (serviceTitle.includes('Live')) relevantKeys = ['live-20', 'live-40'];
+    else if (serviceTitle.includes('Aura')) relevantKeys = ['aura'];
+
+    let prices = relevantKeys
+      .map(k => pricingMap[k]?.amount)
+      .filter(a => a !== undefined);
+
+    if (prices.length === 0) return null;
+
+    let minPrice = Math.min(...prices);
+
+    // Apply Global Campaign if active
+    if (globalCampaign && globalCampaign.is_active) {
+      const expiry = new Date(globalCampaign.expiry_date);
+      if (expiry > new Date()) {
+        minPrice = minPrice * (1 - globalCampaign.discount_percentage / 100);
+      }
+    }
+
+    return minPrice.toFixed(2);
+  };
+
   const iconMap = {
     Mail: Mail,
     Phone: Video,
@@ -96,7 +147,7 @@ export const ServicesLight = () => {
                         Starting from
                       </span>
                       <span className="text-lg font-heading font-medium text-primary">
-                        €{service.price}
+                        €{getStartingPrice(service.title) || service.price}
                       </span>
                     </div>
 

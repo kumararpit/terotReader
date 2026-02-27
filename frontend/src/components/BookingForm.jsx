@@ -20,8 +20,55 @@ export const BookingForm = ({ service, onSubmit }) => {
     email: '',
     picture: null,
     isEmergency: false,
+    isEmergency: false,
     bookingDate: ''
   });
+
+  const [pricingMap, setPricingMap] = useState({});
+  const [globalCampaign, setGlobalCampaign] = useState(null);
+
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const baseUrl = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '') || 'http://localhost:8000';
+        const [sRes, cRes] = await Promise.all([
+          axios.get(`${baseUrl}/api/services`),
+          axios.get(`${baseUrl}/api/campaign`)
+        ]);
+
+        const pMap = {};
+        sRes.data.forEach(s => pMap[s.key] = s);
+        setPricingMap(pMap);
+        setGlobalCampaign(cRes.data);
+      } catch (e) {
+        console.error("Failed to fetch pricing", e);
+      }
+    };
+    fetchPricing();
+  }, []);
+
+  const getPriceDisplay = (key) => {
+    const service = pricingMap[key];
+    if (!service) return "Loading...";
+
+    let amount = service.amount;
+    let original = null;
+
+    if (globalCampaign && globalCampaign.is_active) {
+      const expiry = new Date(globalCampaign.expiry_date);
+      if (expiry > new Date()) {
+        original = amount;
+        amount = amount * (1 - globalCampaign.discount_percentage / 100);
+      }
+    }
+
+    const currency = service.currency === 'EUR' ? '€' : service.currency;
+
+    if (original) {
+      return `${currency}${amount.toFixed(2)} (was ${currency}${original.toFixed(2)})`;
+    }
+    return `${currency}${amount.toFixed(2)}`;
+  };
 
   const [userTimezone, setUserTimezone] = useState(getUserTimezone());
 
@@ -195,13 +242,13 @@ export const BookingForm = ({ service, onSubmit }) => {
                 <option value="">Select Option</option>
                 {isDelivered ? (
                   <>
-                    <option value="3_questions">3 Questions - €22.00</option>
-                    <option value="5_questions">5 Questions - €33.00</option>
+                    <option value="3_questions">3 Questions - {getPriceDisplay('delivered-3')}</option>
+                    <option value="5_questions">5 Questions - {getPriceDisplay('delivered-5')}</option>
                   </>
                 ) : (
                   <>
-                    <option value="20_min">20 Minutes - €66.00</option>
-                    <option value="40_min">40 Minutes - €129.00</option>
+                    <option value="20_min">20 Minutes - {getPriceDisplay('live-20')}</option>
+                    <option value="40_min">40 Minutes - {getPriceDisplay('live-40')}</option>
                   </>
                 )}
               </select>
@@ -410,15 +457,14 @@ export const BookingForm = ({ service, onSubmit }) => {
                         utcIso = slot.start_time_utc;
                         displayTime = formatInTimeZone(utcIso, userTimezone, 'HH:mm');
                       } else {
-                        // Fallback for current state (IST dates)
-                        // Construct ISO assuming IST (+05:30)
-                        const istTime = `${slot.date}T${slot.time}:00+05:30`;
+                        // Fallback: Construct ISO assuming Business Time (Europe/Rome)
+                        const businessTime = dayjs.tz(`${slot.date}T${slot.time}:00`, "Europe/Rome");
 
                         // Display in User Timezone
-                        displayTime = dayjs.utc(istTime).tz(userTimezone).format('HH:mm');
+                        displayTime = businessTime.tz(userTimezone).format('HH:mm');
 
                         // Prepare UTC for proper submission
-                        utcIso = dayjs(istTime).utc().format();
+                        utcIso = businessTime.utc().format();
                       }
 
                       const slotValue = utcIso;

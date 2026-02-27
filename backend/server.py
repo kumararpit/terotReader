@@ -12,7 +12,7 @@ load_dotenv()
 
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -22,7 +22,18 @@ except ImportError:
     from backports.zoneinfo import ZoneInfo
 
 # Define Business Timezone
-BUSINESS_TZ = ZoneInfo('Asia/Kolkata')
+DEFAULT_TZ = 'Europe/Rome'
+BUSINESS_TZ_STR = os.environ.get('BUSINESS_TZ', DEFAULT_TZ)
+BUSINESS_TZ = ZoneInfo(BUSINESS_TZ_STR)
+
+def get_business_offset():
+    """Helper to get current offset string for BUSINESS_TZ (e.g. +05:30)"""
+    now = datetime.now(BUSINESS_TZ)
+    offset = now.strftime('%z')
+    # Convert +0530 to +05:30
+    if len(offset) == 5:
+        return f"{offset[:3]}:{offset[3:]}"
+    return offset
 from payment_service import payment_service
 from email_service import send_password_reset_otp, send_booking_confirmation_to_client, send_booking_notification_to_tejashvini
 import zoom_service
@@ -61,12 +72,44 @@ async def lifespan(app: FastAPI):
     try:
         await db.slots.create_index([("date", 1), ("time", 1)], unique=True)
         print("Ensured unique index on slots (date, time)")
+        
+        # Seed Service Prices if empty
+        if await db.services.count_documents({}) == 0:
+            print("Seeding Service Prices...")
+            for key, val in PRICING_MAP.items():
+                # Determine category
+                cat = "Live Readings"
+                if "delivered" in key:
+                    cat = "Email Readings"
+                elif "aura" in key:
+                    cat = "Other"
+                
+                await db.services.insert_one({
+                    "id": str(uuid.uuid4()),
+                    "key": key,
+                    "name": val['name'],
+                    "amount": val['amount'],
+                    "currency": val['currency'],
+                    "category": cat,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+            print("Service Prices seeded.")
+            
     except Exception as e:
-        print(f"Error creating index: {e}")
+        print(f"Error creating index or seeding: {e}")
     yield
 
 # Create the main app without a prefix
 app = FastAPI(lifespan=lifespan)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.environ.get('FRONTEND_URL', 'http://localhost:3000')],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
@@ -108,6 +151,7 @@ class BookingCreate(BaseModel):
     payment_method: str  # 'stripe', 'razorpay', 'paypal'
     is_emergency: bool = False
     aura_image: Optional[str] = None
+    promo_code: Optional[str] = None
 
 class Booking(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -116,6 +160,30 @@ class Booking(BaseModel):
     booking_id: str
     full_name: str
     email: EmailStr
+    phone: Optional[str] = None
+    gender: str
+    date_of_birth: str
+    service_type: str
+    preferred_date: str
+    preferred_time: Optional[str] = None
+    alternative_time: Optional[str] = None
+    partner_info: Optional[str] = None
+    questions: Optional[str] = None
+    situation_description: Optional[str] = None
+    reading_focus: Optional[str] = None
+    payment_method: str
+    is_emergency: bool = False
+    payment_status: str = "pending"
+    transaction_id: Optional[str] = None
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+    status: str = "confirmed"  # 'confirmed', 'canceled'
+    gcal_event_id: Optional[str] = None
+    aura_image: Optional[str] = None
+    promo_code: Optional[str] = None
+    discount_amount: float = 0.0
+    original_amount: float = 0.0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     phone: Optional[str] = None
     gender: str
     date_of_birth: str
@@ -194,6 +262,75 @@ class ResetPasswordRequest(BaseModel):
     email: EmailStr
     otp: str
     new_password: str
+
+# --- New Models for Promotions ---
+
+class ServicePrice(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    key: str # unique identifier e.g. 'live-20'
+    name: str
+    amount: float
+    currency: str
+    category: str # 'Email Readings', 'Live Readings', 'Other'
+
+class ServicePriceUpdate(BaseModel):
+    amount: float
+    currency: Optional[str] = None
+    name: Optional[str] = None
+
+class GlobalCampaign(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    message: str
+    discount_percentage: int
+    expiry_date: datetime
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class GlobalCampaignCreate(BaseModel):
+    message: str
+    discount_percentage: int
+    expiry_date: str # ISO string
+
+    @field_validator('discount_percentage')
+    @classmethod
+    def validate_discount(cls, v: int) -> int:
+        if v > 100:
+            raise ValueError("Discount percentage cannot exceed 100%")
+        if v < 0:
+            raise ValueError("Discount percentage cannot be negative")
+        return v
+
+class Promotion(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    code: str
+    discount_type: str = "percentage" # 'percentage' or 'fixed'
+    discount_value: float
+    usage_limit: int = 100
+    used_count: int = 0
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PromotionCreate(BaseModel):
+    code: str
+    discount_type: str
+    discount_value: float
+    usage_limit: int
+
+    @model_validator(mode='after')
+    def validate_discount(self) -> 'PromotionCreate':
+        if self.discount_type == 'percentage':
+            if self.discount_value > 100:
+                raise ValueError("Percentage discount cannot exceed 100%")
+        if self.discount_value < 0:
+            raise ValueError("Discount value cannot be negative")
+        return self
+    
+class VerifyCodeRequest(BaseModel):
+    code: str
+    service_type: str
 
 
 # --- Auth Dependency ---
@@ -327,6 +464,153 @@ PRICING_MAP = {
     'aura': {'amount': 15.00, 'currency': 'EUR', 'name': 'Aura Scanning'}
 }
 
+# --- Offer Management System ---
+
+class Offer(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    code: str  # Unique code, e.g., "SUMMER20"
+    type: str  # 'website' or 'promo'
+    text: str  # Display text
+    discount_percent: float
+    start_date: datetime
+    end_date: datetime
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class OfferCreate(BaseModel):
+    code: str
+    type: str = "promo" # 'website' or 'promo'
+    text: str
+    discount_percent: float
+    start_date: str # ISO 8601
+    end_date: str   # ISO 8601
+    is_active: bool = True
+
+class OfferValidate(BaseModel):
+    code: str
+
+
+# Helper: Get current ACTIVE WEBSITE offer (using GlobalCampaign)
+async def get_current_offer() -> dict:
+    # 1. Look for active campaigns within date range
+    now = datetime.now(timezone.utc)
+    
+    # Sort by discount_percentage descending to give best offer if multiple exist
+    cursor = db.campaigns.find({
+        "is_active": True
+    }).sort("discount_percentage", -1).limit(1)
+    
+    campaigns = await cursor.to_list(length=1)
+    
+    if campaigns:
+        campaign = campaigns[0]
+        
+        # Check expiry
+        expiry = campaign.get('expiry_date')
+        if isinstance(expiry, str):
+            expiry = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
+        
+        if isinstance(expiry, datetime) and expiry.replace(tzinfo=timezone.utc) > now:
+            # Return strict format expected by frontend Offer components
+            return {
+                "is_active": True,
+                "text": "Special Campaign", # Default text if no code is present
+                "offer_text": campaign.get("message", "Special Campaign"), 
+                "discount_percent": campaign.get("discount_percentage", 0),
+                "code": "CAMPAIGN", # Dummy code
+                "type": "website"
+            }
+        else:
+             # Deactivate expired campaign automatically
+             await db.campaigns.update_one({"id": campaign['id']}, {"$set": {"is_active": False}})
+
+    # Default Inactive
+    return {"is_active": False, "text": "", "discount_percent": 0.0}
+
+@api_router.get("/settings/offer", response_model=dict)
+async def get_offer_endpoint():
+    # Legacy endpoint wrapper
+    return await get_current_offer()
+
+# Admin: List Offers
+@api_router.get("/admin/offers", response_model=List[Offer])
+async def list_offers(admin=Depends(get_current_admin)):
+    offers = await db.offers.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return offers
+
+# Admin: Create Offer
+@api_router.post("/admin/offers", response_model=Offer)
+async def create_offer(offer_data: OfferCreate, admin=Depends(get_current_admin)):
+    # Check if code already exists
+    existing = await db.offers.find_one({"code": offer_data.code})
+    if existing:
+        raise HTTPException(status_code=400, detail="Offer with this code already exists")
+    
+    try:
+        # Parse Dates
+        dt_start = datetime.fromisoformat(offer_data.start_date.replace("Z", "+00:00"))
+        dt_end = datetime.fromisoformat(offer_data.end_date.replace("Z", "+00:00"))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format")
+
+    new_offer = Offer(
+        code=offer_data.code,
+        type=offer_data.type,
+        text=offer_data.text,
+        discount_percent=offer_data.discount_percent,
+        start_date=dt_start,
+        end_date=dt_end,
+        is_active=offer_data.is_active
+    )
+    
+    await db.offers.insert_one(new_offer.model_dump())
+    return new_offer
+
+# Admin: Delete Offer
+@api_router.delete("/admin/offers/{offer_id}")
+async def delete_offer(offer_id: str, admin=Depends(get_current_admin)):
+    result = await db.offers.delete_one({"id": offer_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    return {"success": True}
+
+# Admin: Toggle Offer
+@api_router.put("/admin/offers/{offer_id}/toggle")
+async def toggle_offer(offer_id: str, admin=Depends(get_current_admin)):
+    offer = await db.offers.find_one({"id": offer_id})
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    
+    new_status = not offer.get("is_active", False)
+    await db.offers.update_one({"id": offer_id}, {"$set": {"is_active": new_status}})
+    return {"success": True, "is_active": new_status}
+
+# Public: Validate Promo Code
+@api_router.post("/offers/validate")
+async def validate_promo_code_endpoint(data: OfferValidate):
+    now = datetime.now(timezone.utc)
+    
+    # Case insensitive search might be better, but strict for now
+    offer = await db.offers.find_one({
+        "code": data.code,
+        "is_active": True,
+        "start_date": {"$lte": now},
+        "end_date": {"$gte": now}
+    })
+    
+    if not offer:
+        # Check if it exists but expired? No, simply Invalid for user.
+        return {"valid": False, "message": "Invalid or expired code"}
+    
+    return {
+        "valid": True,
+        "discount_percent": offer["discount_percent"],
+        "text": offer["text"],
+        "code": offer["code"],
+        "type": offer["type"]
+    }
+
 # --- Availability Models & Routes ---
 class Availability(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -457,9 +741,9 @@ async def get_availability(date: Optional[str] = None):
     if not date: 
         return []
         
-    TZ_OFFSET = "+05:30"
-    day_start_iso = f"{date}T00:00:00{TZ_OFFSET}"
-    day_end_iso = f"{date}T23:59:59{TZ_OFFSET}"
+    current_offset = get_business_offset()
+    day_start_iso = f"{date}T00:00:00{current_offset}"
+    day_end_iso = f"{date}T23:59:59{current_offset}"
     
     events = calendar_service.list_events(day_start_iso, day_end_iso)
     avail_list = []
@@ -573,9 +857,9 @@ async def update_availability(event_id: str, avail: AvailabilityUpdate):
     # 1. Check for Duplicate/Overlap (excluding self ideally, but simplified logic first)
     # Ideally we fetch the old event to know its ID, but here we just check overlap against others.
     
-    TZ_OFFSET = "+05:30"
-    day_start_iso = f"{avail.date}T00:00:00{TZ_OFFSET}"
-    day_end_iso = f"{avail.date}T23:59:59{TZ_OFFSET}"
+    current_offset = get_business_offset()
+    day_start_iso = f"{avail.date}T00:00:00{current_offset}"
+    day_end_iso = f"{avail.date}T23:59:59{current_offset}"
     existing_events = calendar_service.list_events(day_start_iso, day_end_iso)
     
     new_start_min = int(avail.start_time.split(':')[0]) * 60 + int(avail.start_time.split(':')[1])
@@ -603,8 +887,9 @@ async def update_availability(event_id: str, avail: AvailabilityUpdate):
     if avail.type.lower() == 'emergency':
         summary = "EMERGENCY_TIMING"
         
-    start_dt_iso = f"{avail.date}T{avail.start_time}:00+05:30"
-    end_dt_iso = f"{avail.date}T{avail.end_time}:00+05:30"
+    current_offset = get_business_offset()
+    start_dt_iso = f"{avail.date}T{avail.start_time}:00{current_offset}"
+    end_dt_iso = f"{avail.date}T{avail.end_time}:00{current_offset}"
     
     updated = calendar_service.update_event(
         event_id,
@@ -702,9 +987,9 @@ async def get_slots(date: Optional[str] = None, available_only: bool = False, ty
     logger.info(f"GET_SLOTS: date={date} type={type} duration={duration} avail_only={available_only}")
 
     # 1. Fetch ALL events
-    TZ_OFFSET = "+05:30"
-    day_start_iso = f"{date}T00:00:00{TZ_OFFSET}"
-    day_end_iso = f"{date}T23:59:59{TZ_OFFSET}"
+    current_offset = get_business_offset()
+    day_start_iso = f"{date}T00:00:00{current_offset}"
+    day_end_iso = f"{date}T23:59:59{current_offset}"
     
     events = calendar_service.list_events(day_start_iso, day_end_iso)
     
@@ -955,7 +1240,23 @@ async def get_status_checks():
     
     return status_checks
 
-@api_router.post("/bookings/create")
+@api_router.post("/bookings/verify-code")
+async def verify_promo_code(data: VerifyCodeRequest):
+    """Verify a promo code before booking"""
+    promo = await db.promotions.find_one({"code": data.code.upper(), "is_active": True})
+    if not promo:
+        raise HTTPException(status_code=404, detail="Invalid or expired promo code")
+    
+    if promo['used_count'] >= promo['usage_limit']:
+        raise HTTPException(status_code=400, detail="Promo code usage limit reached")
+    
+    return {
+        "valid": True,
+        "code": promo['code'],
+        "discount_type": promo['discount_type'],
+        "discount_value": promo['discount_value']
+    }
+
 @api_router.post("/bookings/create")
 async def create_booking(booking_data: BookingCreate, background_tasks: BackgroundTasks):
     """Create a new booking and initiate payment"""
@@ -963,11 +1264,57 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
         # Generate booking ID
         booking_id = f"TRT-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
         
-        # Get pricing info
-        pricing = PRICING_MAP.get(booking_data.service_type)
-        if not pricing:
-            raise HTTPException(status_code=400, detail="Invalid service type")
+        # 1. Get Base Pricing
+        service_price = await db.services.find_one({"key": booking_data.service_type})
+        if service_price:
+            base_amount = float(service_price['amount'])
+            currency = service_price['currency']
+        else:
+            # Fallback
+            pricing = PRICING_MAP.get(booking_data.service_type)
+            if not pricing:
+                raise HTTPException(status_code=400, detail="Invalid service type")
+            base_amount = float(pricing['amount'])
+            currency = pricing['currency']
+
+        final_amount = base_amount
+        discount_total = 0.0
+        applied_promo_code = None
         
+        # 2. Apply Discounts (Mutually Exclusive: Promo Code takes priority)
+        if booking_data.promo_code:
+            promo = await db.promotions.find_one({"code": booking_data.promo_code, "is_active": True})
+            if promo and promo['used_count'] < promo['usage_limit']:
+                # Apply Promo Code
+                if promo['discount_type'] == 'percentage':
+                    p_discount = (float(promo['discount_value']) / 100.0) * final_amount
+                else:
+                    p_discount = float(promo['discount_value'])
+                
+                final_amount -= p_discount
+                discount_total += p_discount
+                applied_promo_code = promo['code']
+                logger.info(f"Applied Promo Code: {applied_promo_code}. Discount: {p_discount}")
+            else:
+                logger.warning(f"Invalid or limited promo code: {booking_data.promo_code}")
+
+        # 3. Apply Global Campaign (Only if no promo applied)
+        if not applied_promo_code:
+            campaign = await db.campaigns.find_one({"is_active": True})
+            if campaign:
+                expiry = campaign.get('expiry_date')
+                if isinstance(expiry, str): expiry = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
+                if isinstance(expiry, datetime) and expiry.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc):
+                    pct = campaign.get('discount_percentage', 0)
+                    discount = (float(pct) / 100.0) * final_amount
+                    final_amount -= discount
+                    discount_total += discount
+                    logger.info(f"Applied Global Campaign: {pct}% off. New amount: {final_amount}")
+
+        # Ensure non-negative
+        if final_amount < 0: final_amount = 0.0
+        final_amount = round(final_amount, 2)
+
         # Create booking record
         booking = Booking(
             booking_id=booking_id,
@@ -986,8 +1333,11 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
             reading_focus=booking_data.reading_focus,
             payment_method=booking_data.payment_method,
             is_emergency=booking_data.is_emergency,
-            amount=pricing['amount'],
-            currency=pricing['currency'],
+            amount=final_amount,
+            original_amount=base_amount,
+            discount_amount=round(discount_total, 2),
+            promo_code=applied_promo_code,
+            currency=currency,
             status="confirmed",
             aura_image=booking_data.aura_image
         )
@@ -1015,8 +1365,9 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
              if 'Z' in p_time or '+' in p_time:
                  start_dt_iso = f"{booking_data.preferred_date}T{p_time}"
              else:
-                 # Fallback to IST if no timezone info
-                 start_dt_iso = f"{booking_data.preferred_date}T{p_time}:00+05:30"
+                 # Fallback to Business Offset if no timezone info
+                 current_offset = get_business_offset()
+                 start_dt_iso = f"{booking_data.preferred_date}T{p_time}:00{current_offset}"
              
              try:
                  dt = datetime.fromisoformat(start_dt_iso)
@@ -1047,8 +1398,8 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
 
         if booking_data.payment_method == 'paypal':
             payment_result = payment_service.create_paypal_payment(
-                pricing['amount'],
-                pricing['currency'],
+                booking.amount,
+                booking.currency,
                 booking.model_dump()
             )
         else:
@@ -1176,6 +1527,13 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
         # Refresh booking data
         booking = await db.bookings.find_one({'booking_id': verification.booking_id}, {"_id": 0})
         
+        # Increment Promo Usage
+        if booking.get('promo_code'):
+             await db.promotions.update_one(
+                 {"code": booking['promo_code']},
+                 {"$inc": {"used_count": 1}}
+             )
+        
         # Send confirmation emails in background
         import email_service
         # import zoom_service # Unused?
@@ -1238,6 +1596,115 @@ async def get_booking(booking_id: str):
     
     return booking
 
+@api_router.post("/services/init")
+async def init_services(current_user: str = Depends(get_current_admin)):
+    """Manually re-seed services if empty or user requests reset."""
+    try:
+        # Check if we should overwrite or just add missing?
+        # User wants "default pricing". Let's upsert defaults.
+        count = 0
+        for key, data in PRICING_MAP.items():
+            res = await db.services.update_one(
+                {"key": key},
+                {"$setOnInsert": {
+                    "id": str(uuid.uuid4()),
+                    "key": key,
+                    "name": data['name'],
+                    "amount": data['amount'],
+                    "currency": data['currency'],
+                    "category": "delivered" if "delivered" in key else ("live" if "live" in key else "aura"),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }},
+                upsert=True
+            )
+            if res.upserted_id: count += 1
+        return {"message": f"Initialized {count} new services. Defaults ensured."}
+    except Exception as e:
+        logger.error(f"Init services error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/services", response_model=List[ServicePrice])
+async def get_services():
+    return await db.services.find({}, {"_id": 0}).to_list(100)
+
+@api_router.put("/services/{service_id}", response_model=ServicePrice)
+async def update_service(service_id: str, data: ServicePriceUpdate):
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.services.find_one_and_update(
+        {"id": service_id},
+        {"$set": update_data},
+        return_document=True,
+        projection={"_id": 0}
+    )
+    if not result:
+        raise HTTPException(status_code=404, detail="Service not found")
+    return result
+
+# --- Promotions Routes ---
+
+@api_router.get("/promotions", response_model=List[Promotion])
+async def get_promotions():
+    return await db.promotions.find({}, {"_id": 0}).to_list(100)
+
+@api_router.post("/promotions", response_model=Promotion)
+async def create_promotion(promo: PromotionCreate):
+    # Check if code exists
+    existing = await db.promotions.find_one({"code": promo.code.upper()})
+    if existing:
+        raise HTTPException(status_code=400, detail="Promo code already exists")
+    
+    new_promo = Promotion(**promo.model_dump())
+    new_promo.code = new_promo.code.upper()
+    await db.promotions.insert_one(new_promo.model_dump())
+    return new_promo
+
+@api_router.delete("/promotions/{promo_id}")
+async def delete_promotion(promo_id: str):
+    result = await db.promotions.update_one({"id": promo_id}, {"$set": {"is_active": False}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Promotion not found")
+    return {"success": True}
+
+# --- Campaign Routes ---
+
+@api_router.get("/campaign", response_model=Optional[GlobalCampaign])
+async def get_active_campaign():
+    # Get the latest active campaign
+    campaign = await db.campaigns.find_one({"is_active": True}, sort=[("created_at", -1)], projection={"_id": 0})
+    if campaign:
+        # Check expiry
+        expiry = campaign.get('expiry_date')
+        if isinstance(expiry, str):
+            expiry = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
+        
+        if expiry.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+            await db.campaigns.update_one({"id": campaign['id']}, {"$set": {"is_active": False}})
+            return None
+            
+    return campaign
+
+@api_router.post("/campaign", response_model=GlobalCampaign)
+async def set_campaign(campaign: GlobalCampaignCreate):
+    # Deactivate all old campaigns
+    await db.campaigns.update_many({"is_active": True}, {"$set": {"is_active": False}})
+    
+    new_campaign = GlobalCampaign(
+        message=campaign.message,
+        discount_percentage=campaign.discount_percentage,
+        expiry_date=datetime.fromisoformat(campaign.expiry_date.replace("Z", "+00:00")),
+        is_active=True
+    )
+    await db.campaigns.insert_one(new_campaign.model_dump())
+    return new_campaign
+
+@api_router.delete("/campaign/{campaign_id}")
+async def deactivate_campaign(campaign_id: str):
+    result = await db.campaigns.update_one({"id": campaign_id}, {"$set": {"is_active": False}})
+    if result.matched_count == 0:
+        # Try to find any active one if ID mismatch? No, stick to ID.
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    return {"success": True}
+
 @api_router.get("/bookings/gcal/{event_id}")
 async def get_booking_by_gcal(event_id: str):
     """Get booking details by Google Calendar Event ID"""
@@ -1260,20 +1727,10 @@ async def get_booking_by_gcal(event_id: str):
 # Include the router in the main app
 app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Middleware already configured above
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Configure logging - already configured above
+# logger = logging.getLogger(__name__) - already configured above
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
