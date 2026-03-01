@@ -24,16 +24,13 @@ const PromotionsTab = () => {
     const [loading, setLoading] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [editValue, setEditValue] = useState('');
+    const [confirmDelete, setConfirmDelete] = useState({ id: null, type: null });
 
     // Forms
     const [newPromo, setNewPromo] = useState({ code: '', discount_type: 'percentage', discount_value: '', usage_limit: 100 });
     const [newCampaign, setNewCampaign] = useState({ message: '', discount_percentage: '', expiry_date: '' });
 
     const baseUrl = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '') || 'http://localhost:8000';
-
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -53,6 +50,10 @@ const PromotionsTab = () => {
             setLoading(false);
         }
     }, [baseUrl]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleUpdateService = async (id, field, value) => {
         try {
@@ -95,13 +96,13 @@ const PromotionsTab = () => {
     };
 
     const handleDeletePromo = async (id) => {
-        if (!window.confirm("Delete this promotion?")) return;
         try {
             await axios.delete(`${baseUrl}/api/promotions/${id}`);
-            toast.success("Promotion deleted");
+            toast.success("Promotion deactivated");
+            setConfirmDelete({ id: null, type: null });
             fetchData();
         } catch (error) {
-            toast.error("Delete failed");
+            toast.error("Deactivation failed");
         }
     };
 
@@ -131,10 +132,10 @@ const PromotionsTab = () => {
     };
 
     const handleDeleteCampaign = async (id) => {
-        if (!window.confirm("End this global campaign?")) return;
         try {
             await axios.delete(`${baseUrl}/api/campaign/${id}`);
             toast.success("Campaign deactivated");
+            setConfirmDelete({ id: null, type: null });
             fetchData();
         } catch (error) {
             toast.error("Failed to deactivate campaign");
@@ -161,7 +162,7 @@ const PromotionsTab = () => {
                                 <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Site-wide announcement & rewards</p>
                             </div>
                         </div>
-                        <div className="p-8">
+                        <div className="p-4 sm:p-8">
                             {activeCampaign ? (
                                 <div className="mb-10 relative group">
                                     <div className="absolute inset-0 bg-secondary/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -184,13 +185,34 @@ const PromotionsTab = () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button
-                                                className="text-primary/20 hover:text-destructive transition-all p-3 hover:bg-destructive/5 rounded-full"
-                                                onClick={() => handleDeleteCampaign(activeCampaign.id)}
-                                                title="Terminate Campaign"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
+                                            {confirmDelete.id === activeCampaign.id && confirmDelete.type === 'campaign' ? (
+                                                <div className="flex gap-2 animate-in slide-in-from-right-2 fade-in">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        className="h-9 px-4 font-bold rounded-xl"
+                                                        onClick={() => handleDeleteCampaign(activeCampaign.id)}
+                                                    >
+                                                        End Now
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="h-9 px-4 font-bold rounded-xl"
+                                                        onClick={() => setConfirmDelete({ id: null, type: null })}
+                                                    >
+                                                        Keep
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    className="text-primary/30 hover:text-destructive transition-all p-3 hover:bg-destructive/5 rounded-full group/del"
+                                                    onClick={() => setConfirmDelete({ id: activeCampaign.id, type: 'campaign' })}
+                                                    title="Terminate Campaign"
+                                                >
+                                                    <Trash2 className="w-5 h-5 group-hover/del:scale-110 transition-transform" />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -218,7 +240,7 @@ const PromotionsTab = () => {
                                             required
                                         />
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <Label className="text-[11px] font-bold text-primary/60 uppercase ml-1">Discount Percentage</Label>
                                             <div className="relative">
@@ -263,8 +285,8 @@ const PromotionsTab = () => {
                             <h2 className="text-lg font-heading font-bold text-primary">Service Pricing</h2>
                             <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Global baseline rates</p>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
+                        <div className="overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin">
+                            <table className="w-full min-w-[500px] text-left">
                                 <thead className="bg-primary/5">
                                     <tr>
                                         <th className="px-6 py-4 text-[10px] font-bold text-primary/40 uppercase tracking-widest">Offering</th>
@@ -371,7 +393,7 @@ const PromotionsTab = () => {
                                                 required
                                             />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
                                                 <Label className="text-[10px] font-bold text-primary/50 uppercase ml-1">Type</Label>
                                                 <select
@@ -427,12 +449,34 @@ const PromotionsTab = () => {
                                                             Up to {promo.discount_type === 'percentage' ? `${promo.discount_value}%` : `€${promo.discount_value}`} OFF
                                                         </span>
                                                     </div>
-                                                    <button
-                                                        className="text-primary/10 hover:text-destructive transition-all p-2 rounded-full hover:bg-destructive/5"
-                                                        onClick={() => handleDeletePromo(promo.id)}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
+                                                    {confirmDelete.id === promo.id && confirmDelete.type === 'promo' ? (
+                                                        <div className="flex gap-2 animate-in slide-in-from-right-2 fade-in">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="destructive"
+                                                                className="h-8 px-3 text-[10px] font-bold rounded-lg"
+                                                                onClick={() => handleDeletePromo(promo.id)}
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-8 px-3 text-[10px] font-bold rounded-lg"
+                                                                onClick={() => setConfirmDelete({ id: null, type: null })}
+                                                            >
+                                                                No
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            className="text-primary/40 hover:text-destructive transition-all p-2 rounded-full hover:bg-destructive/5 group/del"
+                                                            onClick={() => setConfirmDelete({ id: promo.id, type: 'promo' })}
+                                                            title="Delete Promo"
+                                                        >
+                                                            <Trash2 className="w-4 h-4 group-hover/del:scale-110 transition-transform" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-center text-[10px] font-bold text-primary/30 uppercase tracking-tighter">

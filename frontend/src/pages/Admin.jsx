@@ -26,13 +26,16 @@ import {
     Sheet,
     SheetContent,
     SheetTrigger,
+    SheetHeader,
+    SheetTitle,
 } from "../components/ui/sheet";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '');
 const API = `${BACKEND_URL}/api`;
 
 const Admin = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('admin_token'));
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAppLoaded, setIsAppLoaded] = useState(false);
     const [activeTab, setActiveTab] = useState('slots');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -48,10 +51,27 @@ const Admin = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        const initAuth = async () => {
+            try {
+                const res = await axios.get(`${API}/auth/me`);
+                if (res.data.username) {
+                    setIsAuthenticated(true);
+                }
+            } catch (err) {
+                // Not authenticated
+                checkSetupStatus();
+            } finally {
+                setIsAppLoaded(true);
+            }
+        };
+        initAuth();
+    }, []);
+
+    useEffect(() => {
+        if (isAppLoaded && !isAuthenticated) {
             checkSetupStatus();
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, isAppLoaded]);
 
     const checkSetupStatus = async () => {
         try {
@@ -79,8 +99,7 @@ const Admin = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const res = await axios.post(`${API}/login`, credentials);
-            localStorage.setItem('admin_token', res.data.access_token);
+            await axios.post(`${API}/login`, credentials);
             setIsAuthenticated(true);
             toast.success('Welcome back');
         } catch (error) {
@@ -139,8 +158,12 @@ const Admin = () => {
 
 
 
-    const handleLogout = () => {
-        localStorage.removeItem('admin_token');
+    const handleLogout = async () => {
+        try {
+            await axios.post(`${API}/auth/logout`);
+        } catch (e) {
+            console.error("Logout failed", e);
+        }
         setIsAuthenticated(false);
         toast.info('Logged out');
     };
@@ -409,9 +432,18 @@ const Admin = () => {
 
 
 
+    if (!isAppLoaded) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-primary/60 font-medium animate-pulse">Initializing Command Center...</p>
+            </div>
+        );
+    }
+
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+            <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden px-4 py-8">
                 {/* Subtle Background Elements */}
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(184,134,11,0.05)_0%,transparent_70%)]" />
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary opacity-5 blur-[100px] rounded-full" />
@@ -570,51 +602,56 @@ const Admin = () => {
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="right" className="bg-background text-foreground border-l border-primary/5 w-[280px] p-0">
-                                    <div className="p-6 space-y-8 mt-12">
-                                        <div className="space-y-4">
-                                            <p className="text-[10px] uppercase font-bold text-primary/40 tracking-widest pl-2">Navigation</p>
-                                            {[
-                                                { id: 'slots', label: 'Manage Slots', icon: CalendarIcon },
-                                                { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
-                                                { id: 'promotions', label: 'Promotions', icon: Sparkles }
-                                            ].map((tab) => (
-                                                <button
-                                                    key={tab.id}
+                                    <SheetHeader className="sr-only">
+                                        <SheetTitle>Navigation Menu</SheetTitle>
+                                    </SheetHeader>
+                                    <div className="flex flex-col h-full">
+                                        <div className="p-6 space-y-8 mt-12">
+                                            <div className="space-y-4">
+                                                <p className="text-[10px] uppercase font-bold text-primary/40 tracking-widest pl-2">Navigation</p>
+                                                {[
+                                                    { id: 'slots', label: 'Manage Slots', icon: CalendarIcon },
+                                                    { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+                                                    { id: 'promotions', label: 'Promotions', icon: Sparkles }
+                                                ].map((tab) => (
+                                                    <button
+                                                        key={tab.id}
+                                                        onClick={() => {
+                                                            setActiveTab(tab.id);
+                                                            setIsMobileMenuOpen(false);
+                                                        }}
+                                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === tab.id
+                                                            ? 'bg-primary text-primary-foreground shadow-md font-bold scale-[1.02]'
+                                                            : 'text-primary/60 hover:bg-primary/5 hover:text-primary'
+                                                            }`}
+                                                    >
+                                                        <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-secondary' : ''}`} />
+                                                        <span className="text-sm">{tab.label}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            <div className="space-y-4 pt-4 border-t border-primary/5">
+                                                <p className="text-[10px] uppercase font-bold text-primary/40 tracking-widest pl-2">Settings</p>
+                                                <div className="px-4 py-3 bg-primary/5 rounded-xl space-y-1">
+                                                    <div className="flex items-center gap-2 text-xs text-primary/60">
+                                                        <CalendarIcon className="w-3 h-3" />
+                                                        <span>Timezone</span>
+                                                    </div>
+                                                    <p className="text-xs font-bold text-primary">{activeTZ}</p>
+                                                </div>
+                                                <Button
                                                     onClick={() => {
-                                                        setActiveTab(tab.id);
+                                                        handleLogout();
                                                         setIsMobileMenuOpen(false);
                                                     }}
-                                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === tab.id
-                                                        ? 'bg-primary text-primary-foreground shadow-md font-bold scale-[1.02]'
-                                                        : 'text-primary/60 hover:bg-primary/5 hover:text-primary'
-                                                        }`}
+                                                    variant="outline"
+                                                    className="w-full justify-start gap-3 px-4 py-3 rounded-xl border-primary/10 text-destructive hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20"
                                                 >
-                                                    <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-secondary' : ''}`} />
-                                                    <span className="text-sm">{tab.label}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        <div className="space-y-4 pt-4 border-t border-primary/5">
-                                            <p className="text-[10px] uppercase font-bold text-primary/40 tracking-widest pl-2">Settings</p>
-                                            <div className="px-4 py-3 bg-primary/5 rounded-xl space-y-1">
-                                                <div className="flex items-center gap-2 text-xs text-primary/60">
-                                                    <CalendarIcon className="w-3 h-3" />
-                                                    <span>Timezone</span>
-                                                </div>
-                                                <p className="text-xs font-bold text-primary">{activeTZ}</p>
+                                                    <LogOut className="w-4 h-4" />
+                                                    <span className="text-sm font-medium">Logout</span>
+                                                </Button>
                                             </div>
-                                            <Button
-                                                onClick={() => {
-                                                    handleLogout();
-                                                    setIsMobileMenuOpen(false);
-                                                }}
-                                                variant="outline"
-                                                className="w-full justify-start gap-3 px-4 py-3 rounded-xl border-primary/10 text-destructive hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20"
-                                            >
-                                                <LogOut className="w-4 h-4" />
-                                                <span className="text-sm font-medium">Logout</span>
-                                            </Button>
                                         </div>
                                     </div>
                                 </SheetContent>
@@ -655,7 +692,7 @@ const Admin = () => {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-2">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <Label className="text-xs">Start Time (24h)</Label>
                                                 <select id="genStart" className="w-full p-2 mt-1 rounded-md border text-sm bg-background" defaultValue="10:00">
@@ -797,7 +834,7 @@ const Admin = () => {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="flex-1 overflow-y-auto p-3 md:p-6">
-                                        <div className="relative border-l-2 border-gray-200 ml-6 md:ml-4 space-y-0 pb-12">
+                                        <div className="relative border-l-2 border-gray-200 ml-4 space-y-0 pb-12">
                                             {Array.from({ length: 24 }).map((_, hour) => {
                                                 const hourStr = hour.toString().padStart(2, '0') + ":00";
 
@@ -817,7 +854,7 @@ const Admin = () => {
                                                 });
 
                                                 return (
-                                                    <div key={hour} className={`relative pl-8 py-4 group hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${getWindowForHour(hour) ? (
+                                                    <div key={hour} className={`relative pl-8 pr-4 py-4 group hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${getWindowForHour(hour) ? (
                                                         getWindowForHour(hour).type === 'emergency' ? 'bg-amber-50/50' : 'bg-green-50/50'
                                                     ) : ''
                                                         }`}>

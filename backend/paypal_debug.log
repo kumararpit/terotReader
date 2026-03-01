@@ -27,3 +27,8 @@
 2026-02-06 14:49:39,221 - PAYPAL DEBUG: Return URL: http://localhost:3000/payment-success
 2026-02-06 14:49:39,221 - PAYPAL DEBUG: Cancel URL: http://localhost:3000/payment-cancel
 2026-02-06 14:49:49,207 - PAYPAL DEBUG: Verifying payment_id=PAYID-NGC3ELA4RX469008E6395057
+2026-03-01 18:22:05,052 - PAYPAL DEBUG: AppEnv=development
+2026-03-01 18:22:05,052 - PAYPAL DEBUG: OverrideMode=sandox (Calculated Default=sandbox)
+2026-03-01 18:22:05,052 - PAYPAL DEBUG: ClientID (partial)=AQ_19...30B6S
+2026-03-01 18:22:05,052 - PAYPAL DEBUG: Return URL: http://localhost:3000,https://tejashvinibdivinedecode.com/payment-success
+2026-03-01 18:22:05,053 - PAYPAL DEBUG: Cancel URL: http://localhost:3000,https://tejashvinibdivinedecode.com/payment-cancel

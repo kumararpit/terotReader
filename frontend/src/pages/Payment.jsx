@@ -215,10 +215,10 @@ const Payment = () => {
                 if (payment.payment_method === 'paypal') {
                     // PayPal
                     if (payment.approval_url) {
-                        localStorage.setItem('payment_method', 'paypal');
+                        sessionStorage.setItem('payment_method', 'paypal');
                         // Also save booking_id if available to cover all bases, but URL param should suffice
                         if (response.data.booking_id) {
-                            localStorage.setItem('booking_id', response.data.booking_id);
+                            sessionStorage.setItem('booking_id', response.data.booking_id);
                         }
 
                         // Check cancel one last time before redirect

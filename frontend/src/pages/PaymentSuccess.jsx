@@ -48,8 +48,8 @@ const PaymentSuccess = () => {
       // PayPal parses as paymentId and PayerID usually
       const paymentId = searchParams.get('payment_id') || searchParams.get('paymentId');
       const payerId = searchParams.get('PayerID') || searchParams.get('payer_id');
-      const bookingId = searchParams.get('booking_id') || localStorage.getItem('booking_id');
-      const paymentMethod = localStorage.getItem('payment_method') || 'stripe';
+      const bookingId = searchParams.get('booking_id') || sessionStorage.getItem('booking_id');
+      const paymentMethod = sessionStorage.getItem('payment_method') || 'stripe';
 
       if (!bookingId) {
         // Only error if we actually expected a booking ID (i.e., not just visiting the page manually)
@@ -91,8 +91,8 @@ const PaymentSuccess = () => {
     } finally {
       setIsVerifying(false);
       // Clear localStorage
-      localStorage.removeItem('booking_id');
-      localStorage.removeItem('payment_method');
+      sessionStorage.removeItem('booking_id');
+      sessionStorage.removeItem('payment_method');
     }
   };
 

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Depends, status, Response, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 import email_service
@@ -335,9 +335,23 @@ class VerifyCodeRequest(BaseModel):
 
 
 # --- Auth Dependency ---
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False)
 
-async def get_current_admin(token: str = Depends(oauth2_scheme)):
+async def get_current_admin(request: Request):
+    token = request.cookies.get("admin_token")
+    if not token:
+        # Fallback to Header for flexibility during transition or if explicitly needed
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -382,8 +396,8 @@ async def setup_admin(data: SetupAdminRequest):
     await db.users.insert_one(user_doc)
     return {"message": "Admin user created successfully"}
 
-@api_router.post("/login", response_model=Token)
-async def login_for_access_token(form_data: LoginRequest):
+@api_router.post("/login")
+async def login_for_access_token(form_data: LoginRequest, response: Response):
     # Find user
     user = await db.users.find_one({"username": form_data.username})
     
@@ -394,7 +408,31 @@ async def login_for_access_token(form_data: LoginRequest):
     access_token = create_access_token(
         data={"sub": user["username"]}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    # Set HttpOnly Cookie
+    response.set_cookie(
+        key="admin_token",
+        value=access_token,
+        httponly=True,
+        max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        expires=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite="lax",
+        secure=os.environ.get("ENV") == "production"
+    )
+    
+    return {"message": "Login successful", "access_token": access_token, "token_type": "bearer"}
+
+@api_router.get("/auth/me")
+async def get_me(admin=Depends(get_current_admin)):
+    return {
+        "username": admin["username"],
+        "email": admin["email"]
+    }
+
+@api_router.post("/auth/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="admin_token", samesite="lax", secure=os.environ.get("ENV") == "production")
+    return {"message": "Logged out"}
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(data: ForgotPasswordRequest, background_tasks: BackgroundTasks):
