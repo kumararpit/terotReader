@@ -103,10 +103,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Add CORS middleware
-frontend_urls = os.environ.get('FRONTEND_URL', 'http://localhost:3000').split(',')
+frontend_url = os.environ.get('FRONTEND_URL', '')
+cors_origins = os.environ.get('CORS_ORIGINS', '')
+combined = f"{frontend_url},{cors_origins}"
+allowed_origins = [url.strip() for url in combined.split(',') if url.strip()]
+if not allowed_origins:
+    allowed_origins = ["http://localhost:3000"]
+
+logger.info(f"Allowed CORS Origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[url.strip() for url in frontend_urls if url.strip()],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -417,7 +425,7 @@ async def login_for_access_token(form_data: LoginRequest, response: Response):
         max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         expires=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         samesite="lax",
-        secure=os.environ.get("ENV") == "production"
+        secure=os.environ.get("APP_ENV") == "production"
     )
     
     return {"message": "Login successful", "access_token": access_token, "token_type": "bearer"}
@@ -431,7 +439,7 @@ async def get_me(admin=Depends(get_current_admin)):
 
 @api_router.post("/auth/logout")
 async def logout(response: Response):
-    response.delete_cookie(key="admin_token", samesite="lax", secure=os.environ.get("ENV") == "production")
+    response.delete_cookie(key="admin_token", samesite="lax", secure=os.environ.get("APP_ENV") == "production")
     return {"message": "Logged out"}
 
 @api_router.post("/auth/forgot-password")

@@ -19,6 +19,17 @@ A premium, modern web application for tarot card reading services. This platform
 
 ---
 
+## 🌐 Global Timezone Sync
+
+The application is built to handle global consultations with precision:
+- **Automatic Detection**: The system detects the user's (client or admin) local timezone automatically.
+- **Intelligent Translation**:
+    - **Admin Dashboard**: Shows all slots and availability in the **Admin's local time**.
+    - **Booking Interface**: Shows availability converted to the **Client's local time**.
+- **UTC Preservation**: All data is stored and processed in UTC to ensure no session is ever missed due to daylight savings or travel.
+
+---
+
 ## 🛠 Tech Stack
 
 ### Frontend
