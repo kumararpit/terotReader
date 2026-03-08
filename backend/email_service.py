@@ -1,15 +1,7 @@
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
 import os
 import logging
 from dotenv import load_dotenv
-import io
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+import resend
 import base64
 from pdf_service import generate_invoice_pdf, generate_booking_details_pdf
 
@@ -18,56 +10,58 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+# Resend Configuration
+RESEND_API = os.getenv("RESEND_API")
+if RESEND_API:
+    resend.api_key = RESEND_API
+else:
+    logger.warning("RESEND_API not set in .env")
+
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+SENDER_EMAIL = "noreply@tejashvinibdivinedecode.com"
 
 def send_email(to_email: str, subject: str, body_html: str, attachments: list = None):
     """
-    Sends an email using SMTP with multiple attachments.
+    Sends an email using Resend API with multiple attachments.
     attachments: list of dicts {'name': str, 'data': bytes, 'mime': str (optional)}
     """
-    if not SMTP_USER or not SMTP_PASSWORD:
-        logger.warning("SMTP credentials not set. Email not sent.")
+    if not RESEND_API:
+        logger.warning("Resend API key not set. Email not sent.")
         return
 
     try:
-        msg = MIMEMultipart()
-        msg['From'] = SMTP_USER
-        msg['To'] = to_email
-        msg['Subject'] = subject
-
-        msg.attach(MIMEText(body_html, 'html'))
-
-        if attachments and len(attachments) > 0:
+        resend_attachments = []
+        if attachments:
             for attachment in attachments:
                 name = attachment.get('name', 'attachment')
                 data = attachment.get('data')
                 
                 if not data:
                     continue
-                    
-                # Basic MIME type detection or default
-                part = MIMEApplication(data, Name=name)
-                part['Content-Disposition'] = f'attachment; filename="{name}"'
-                msg.attach(part)
+                
+                # Resend requires base64 encoded content for attachments
+                encoded_content = base64.b64encode(data).decode('utf-8')
+                resend_attachments.append({
+                    "filename": name,
+                    "content": encoded_content
+                })
 
-        if SMTP_PORT == 465:
-            server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
-            server.login(SMTP_USER, SMTP_PASSWORD)
-        else:
-            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT) # Establish connection
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            
-        text = msg.as_string()
-        server.sendmail(SMTP_USER, to_email, text)
-        server.quit()
-        logger.info(f"Email sent to {to_email}")
+        params = {
+            "from": f"Tarot with Tejashvini <{SENDER_EMAIL}>",
+            "to": to_email,
+            "subject": subject,
+            "html": body_html,
+        }
+
+        if resend_attachments:
+            params["attachments"] = resend_attachments
+
+        r = resend.Emails.send(params)
+        logger.info(f"Email sent successfully to {to_email}. ID: {r.get('id')}")
+        return r
     except Exception as e:
-        logger.error(f"Failed to send email to {to_email}: {e}")
+        logger.error(f"Failed to send email to {to_email} via Resend: {e}")
+        return None
 
 def send_booking_confirmation_to_client(booking: dict, payment_info: dict = None, meeting_link: str = None):
     """

@@ -1472,53 +1472,6 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
         # Insert into MongoDB
         new_booking = await db.bookings.insert_one(doc)
         
-        # Schedule Zoom Meeting if Live Reading
-        meeting_link = None
-        if str(doc.get('service_type', '')).startswith('live-'):
-            try:
-                # Format: "{Service Name} with {User Name}"
-                
-                # Get Readable Service Name
-                raw_service = doc.get('service_type', '')
-                service_name = "Live Reading"
-                if '20' in raw_service:
-                    service_name = "Live Reading (20 Mins)"
-                elif '40' in raw_service:
-                    service_name = "Live Reading (40 Mins)"
-                
-                topic = f"{service_name} with {doc.get('full_name')}"
-                
-                # Calculate start time (assuming preferred_date is YYYY-MM-DD and time is HH:mm)
-                start_time_iso = f"{doc.get('preferred_date')}T{doc.get('preferred_time')}:00"
-                
-                # Default duration 40, or 20/40 based on type
-                duration = 40
-                if '20' in raw_service:
-                    duration = 20
-                
-                logger.info(f"Scheduling Zoom meeting: {topic} at {start_time_iso}")
-                
-                # Pass Situation/Context as Agenda
-                agenda = doc.get('situation_description', '')
-                meeting_link = await zoom_service.create_meeting(topic, start_time_iso, duration, agenda=agenda)
-                
-                if meeting_link:
-                    # Update booking with meeting link
-                    await db.bookings.update_one(
-                        {"_id": new_booking.inserted_id},
-                        {"$set": {"meeting_link": meeting_link}}
-                    )
-                    logger.info(f"Zoom meeting created: {meeting_link}")
-            except Exception as e:
-                logger.error(f"Failed to create Zoom meeting: {e}")
-
-        # Send Confirmation Email (Background Task)
-        # Pass meeting_link to email service
-        background_tasks.add_task(send_booking_confirmation_to_client, doc, None, meeting_link)
-        
-        # Notify Admin
-        background_tasks.add_task(send_booking_notification_to_tejashvini, doc)
-
         return {
             'success': True,
             'booking_id': booking_id,
@@ -1581,15 +1534,36 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
                  {"$inc": {"used_count": 1}}
              )
         
+        # 4. Schedule Zoom Meeting if Live Reading (Only on Payment Success)
+        meeting_link = booking.get('meeting_link')
+        if not meeting_link and str(booking.get('service_type', '')).startswith('live-'):
+            try:
+                raw_service = booking.get('service_type', '')
+                service_name = "Live Reading (20 Mins)" if '20' in raw_service else "Live Reading (40 Mins)"
+                topic = f"{service_name} with {booking.get('full_name')}"
+                start_time_iso = f"{booking.get('preferred_date')}T{booking.get('preferred_time')}:00"
+                duration = 20 if '20' in raw_service else 40
+                
+                logger.info(f"Scheduling Zoom meeting: {topic} at {start_time_iso}")
+                meeting_link = await zoom_service.create_meeting(topic, start_time_iso, duration, agenda=booking.get('situation_description', ''))
+                
+                if meeting_link:
+                    await db.bookings.update_one(
+                        {'booking_id': verification.booking_id},
+                        {"$set": {"meeting_link": meeting_link}}
+                    )
+                    logger.info(f"Zoom meeting created: {meeting_link}")
+            except Exception as e:
+                logger.error(f"Failed to create Zoom meeting in verification: {e}")
+
         # Send confirmation emails in background
         import email_service
-        # import zoom_service # Unused?
         
         background_tasks.add_task(
             email_service.send_booking_confirmation_to_client,
             booking,
             payment_verified,
-            booking.get('meeting_link')
+            meeting_link
         )
         background_tasks.add_task(
             email_service.send_booking_notification_to_tejashvini,
