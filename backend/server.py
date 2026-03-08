@@ -396,6 +396,8 @@ async def login_for_access_token(form_data: LoginRequest, response: Response):
         data={"sub": user["username"]}, expires_delta=access_token_expires
     )
     
+    is_production = os.environ.get("APP_ENV") == "production"
+    
     # Set HttpOnly Cookie
     response.set_cookie(
         key="admin_token",
@@ -403,8 +405,8 @@ async def login_for_access_token(form_data: LoginRequest, response: Response):
         httponly=True,
         max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         expires=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite="lax",
-        secure=os.environ.get("APP_ENV") == "production"
+        samesite="none" if is_production else "lax",
+        secure=is_production
     )
     
     return {"message": "Login successful", "access_token": access_token, "token_type": "bearer"}
@@ -418,7 +420,12 @@ async def get_me(admin=Depends(get_current_admin)):
 
 @api_router.post("/auth/logout")
 async def logout(response: Response):
-    response.delete_cookie(key="admin_token", samesite="lax", secure=os.environ.get("APP_ENV") == "production")
+    is_production = os.environ.get("APP_ENV") == "production"
+    response.delete_cookie(
+        key="admin_token", 
+        samesite="none" if is_production else "lax", 
+        secure=is_production
+    )
     return {"message": "Logged out"}
 
 @api_router.post("/auth/forgot-password")
@@ -1599,9 +1606,9 @@ async def get_all_bookings(
         # 1. Payment Status Filtering (Frontend labels: Confirmed/Not Completed)
         if payment_status == 'paid':
             query["status"] = "confirmed"
-            query["payment_status"] = "paid"
+            query["transaction_id"] = {"$ne": None}
         elif payment_status == 'pending':
-            query["payment_status"] = {"$ne": "paid"}
+            query["transaction_id"] = None
         # 'all' means we don't apply an initial status filter
         
         # 2. Service Type Filtering
@@ -1651,30 +1658,35 @@ async def get_all_bookings(
 async def get_admin_stats(days: int = 30, current_user: str = Depends(get_current_admin)):
     """Get aggregated statistics for admin dashboard"""
     try:
-        # 1. Basic KPI metrics
-        total_attempts = await db.bookings.count_documents({})
-        confirmed_bookings = await db.bookings.count_documents({"status": "confirmed"})
-        pending_bookings = total_attempts - confirmed_bookings
+        # 1. Basic KPI metrics - Simplified and strict based on new definitions
+        # Confirmed: transaction_id is not null AND status is confirmed
+        confirmed_criteria = {"transaction_id": {"$ne": None}, "status": "confirmed"}
+        # Not Completed: transaction_id is null
+        pending_criteria = {"transaction_id": None}
         
-        # Total Revenue (Only from confirmed bookings)
+        confirmed_bookings = await db.bookings.count_documents(confirmed_criteria)
+        pending_bookings = await db.bookings.count_documents(pending_criteria)
+        total_attempts = confirmed_bookings + pending_bookings
+        
+        # Total Revenue (Only from confirmed bookings using strict criteria)
         rev_pipeline = [
-            {"$match": {"status": "confirmed"}},
+            {"$match": confirmed_criteria},
             {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
         ]
         rev_res = await db.bookings.aggregate(rev_pipeline).to_list(1)
         total_revenue = rev_res[0]["total"] if rev_res else 0.0
 
-        # 2. Service Distribution (Confirmed only)
+        # 2. Service Distribution (Confirmed only using strict criteria)
         service_pipeline = [
-            {"$match": {"status": "confirmed"}},
+            {"$match": confirmed_criteria},
             {"$group": {"_id": "$service_type", "count": {"$sum": 1}}}
         ]
         service_stats = await db.bookings.aggregate(service_pipeline).to_list(100)
         services = [{"name": s["_id"], "value": s["count"]} for s in service_stats]
 
-        # 3. Daily Trends (Confirmed only)
+        # 3. Daily Trends (Confirmed only using strict criteria)
         trend_pipeline = [
-            {"$match": {"status": "confirmed"}},
+            {"$match": confirmed_criteria},
             {"$group": {
                 "_id": {"$substr": ["$created_at", 0, 10]},
                 "revenue": {"$sum": "$amount"},
