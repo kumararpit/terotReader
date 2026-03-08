@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Trash2, Plus, Calendar as CalendarIcon, MessageSquare, LogOut, Sparkles, Globe, Menu, X } from 'lucide-react';
+import { Trash2, Plus, Calendar as CalendarIcon, MessageSquare, LogOut, Sparkles, Globe, Menu, X, ArrowUpDown, ChevronUp, ChevronDown, TrendingUp, Users, DollarSign, Activity, PieChart as PieChartIcon } from 'lucide-react';
+import {
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+    BarChart, Bar, PieChart, Pie, Cell, Legend
+} from 'recharts';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -33,11 +37,25 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '');
 const API = `${BACKEND_URL}/api`;
 
+const COLORS = ['#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#EF4444'];
+
 const Admin = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isAppLoaded, setIsAppLoaded] = useState(false);
     const [activeTab, setActiveTab] = useState('slots');
+    const [allBookings, setAllBookings] = useState([]);
+    const [isBookingsLoading, setIsBookingsLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('paid');
+    const [serviceTypeFilter, setServiceTypeFilter] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalBookings, setTotalBookings] = useState(0);
+    const [pageSize] = useState(10);
+    const [sortField, setSortField] = useState('created_at');
+    const [sortOrder, setSortOrder] = useState(-1);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [stats, setStats] = useState(null);
+    const [isStatsLoading, setIsStatsLoading] = useState(false);
 
     // Auth Flow State
     const [needsSetup, setNeedsSetup] = useState(null);
@@ -368,12 +386,94 @@ const Admin = () => {
         }
     }, []);
 
+    const handleSort = (field) => {
+        if (sortField === field) {
+            setSortOrder(sortOrder === 1 ? -1 : 1);
+        } else {
+            setSortField(field);
+            setSortOrder(-1); // Default to Descending for new field
+        }
+        setCurrentPage(1);
+    };
+
+    const SortIcon = ({ field }) => {
+        if (sortField !== field) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />;
+        return sortOrder === 1 ? <ChevronUp className="ml-1 h-3 w-3 text-secondary" /> : <ChevronDown className="ml-1 h-3 w-3 text-secondary" />;
+    };
+
+    const formatLocalDateTime = (dateStr, timeStr) => {
+        if (!dateStr) return { date: 'N/A', time: '' };
+        try {
+            // If timeStr starts with a digit or T, it's likely a time or ISO
+            // If it's a full ISO string (from slots)
+            let dt;
+            if (timeStr && (timeStr.includes('T') || timeStr.includes('Z') || timeStr.includes('+'))) {
+                dt = new Date(timeStr.includes('T') ? timeStr : `${dateStr}T${timeStr}`);
+            } else if (timeStr) {
+                // Legacy or simple HH:mm
+                // If we don't have TZ info, we assume UTC or Business TZ? 
+                // But BookingForm sends UTC ISO now.
+                dt = new Date(`${dateStr}T${timeStr}`);
+            } else {
+                dt = new Date(dateStr);
+            }
+
+            if (isNaN(dt.getTime())) return { date: dateStr, time: timeStr || '' };
+
+            return {
+                date: format(dt, 'yyyy-MM-dd'),
+                time: format(dt, 'HH:mm')
+            };
+        } catch (e) {
+            return { date: dateStr, time: timeStr || '' };
+        }
+    };
+
+    const fetchAllBookings = React.useCallback(async () => {
+        setIsBookingsLoading(true);
+        try {
+            const skip = (currentPage - 1) * pageSize;
+            const res = await axios.get(`${API}/bookings`, {
+                params: {
+                    skip,
+                    limit: pageSize,
+                    service_type: serviceTypeFilter,
+                    payment_status: statusFilter,
+                    sort_by: sortField,
+                    sort_order: sortOrder
+                }
+            });
+            setAllBookings(res.data.bookings);
+            setTotalBookings(res.data.total);
+        } catch (error) {
+            console.error('Error fetching all bookings:', error);
+            toast.error('Failed to load bookings list');
+        } finally {
+            setIsBookingsLoading(false);
+        }
+    }, [currentPage, pageSize, serviceTypeFilter, statusFilter, sortField, sortOrder]);
+
+    const fetchStats = async () => {
+        setIsStatsLoading(true);
+        try {
+            const res = await axios.get(`${API}/admin/stats`);
+            setStats(res.data);
+        } catch (error) {
+            console.error('Error fetching admin stats:', error);
+            // Non-critical toast? Dashboard usually has its own error state
+        } finally {
+            setIsStatsLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (isAuthenticated) {
             fetchSlots();
             fetchTestimonials();
+            fetchAllBookings();
+            fetchStats();
         }
-    }, [isAuthenticated, fetchSlots, fetchTestimonials]);
+    }, [isAuthenticated, fetchSlots, fetchTestimonials, fetchAllBookings]);
 
     const createTestimonial = async (e) => {
         e.preventDefault();
@@ -562,7 +662,9 @@ const Admin = () => {
 
                         <nav className="hidden md:flex items-center space-x-8">
                             {[
+                                { id: 'analytics', label: 'Analytics' },
                                 { id: 'slots', label: 'Manage Slots' },
+                                { id: 'bookings', label: 'Bookings' },
                                 { id: 'testimonials', label: 'Testimonials' },
                                 { id: 'promotions', label: 'Promotions' }
                             ].map((tab) => (
@@ -610,7 +712,9 @@ const Admin = () => {
                                             <div className="space-y-4">
                                                 <p className="text-[10px] uppercase font-bold text-primary/40 tracking-widest pl-2">Navigation</p>
                                                 {[
+                                                    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
                                                     { id: 'slots', label: 'Manage Slots', icon: CalendarIcon },
+                                                    { id: 'bookings', label: 'Bookings', icon: CalendarIcon },
                                                     { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
                                                     { id: 'promotions', label: 'Promotions', icon: Sparkles }
                                                 ].map((tab) => (
@@ -663,6 +767,143 @@ const Admin = () => {
 
             <main className="container mx-auto px-4 pt-28 pb-8">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+
+                    <TabsContent value="analytics" className="space-y-8 outline-none">
+                        {isStatsLoading ? (
+                            <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                <p className="text-primary/60 font-medium">Crunching your data...</p>
+                            </div>
+                        ) : stats ? (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                {/* KPI Section */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {[
+                                        { label: 'Total Revenue', value: `${stats.kpis.total_revenue || 0}€`, icon: DollarSign, color: 'text-green-500', bg: 'bg-green-500/10' },
+                                        { label: 'Confirmed Bookings', value: stats.kpis.confirmed_bookings, icon: Activity, color: 'text-primary', bg: 'bg-primary/10' },
+                                        { label: 'Incomplete Attempts', value: stats.kpis.pending_bookings, icon: Users, color: 'text-orange-400', bg: 'bg-orange-400/10' },
+                                        { label: 'Conversion Rate', value: `${stats.kpis.conversion_rate}%`, icon: TrendingUp, color: 'text-secondary', bg: 'bg-secondary/10' },
+                                    ].map((kpi, i) => (
+                                        <Card key={i} className="border-none shadow-sm hover:shadow-md transition-all">
+                                            <CardContent className="p-6">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-xs font-bold text-primary/40 uppercase tracking-wider mb-1">{kpi.label}</p>
+                                                        <h3 className="text-2xl font-heading font-bold text-primary">{kpi.value}</h3>
+                                                    </div>
+                                                    <div className={`p-3 rounded-2xl ${kpi.bg}`}>
+                                                        <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                    {/* Revenue Trend Line Chart */}
+                                    <Card className="lg:col-span-2 shadow-sm border-none">
+                                        <CardHeader>
+                                            <CardTitle className="text-lg flex items-center gap-2">
+                                                <Activity className="w-4 h-4 text-secondary" />
+                                                Revenue Trend (Last 30 Days)
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="h-[350px] w-full">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <LineChart data={stats.daily_trends}>
+                                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                                        <XAxis
+                                                            dataKey="date"
+                                                            fontSize={10}
+                                                            tickFormatter={(val) => val.split('-').slice(1).join('/')}
+                                                            stroke="#94A3B8"
+                                                        />
+                                                        <YAxis fontSize={10} stroke="#94A3B8" tickFormatter={(val) => `${val}€`} />
+                                                        <RechartsTooltip
+                                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                                        />
+                                                        <Line
+                                                            type="monotone"
+                                                            dataKey="revenue"
+                                                            stroke="#8B5CF6"
+                                                            strokeWidth={3}
+                                                            dot={{ r: 4, fill: '#8B5CF6', strokeWidth: 2, stroke: '#FFF' }}
+                                                            activeDot={{ r: 6, strokeWidth: 0 }}
+                                                        />
+                                                    </LineChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Service Mix Pie Chart */}
+                                    <Card className="shadow-sm border-none">
+                                        <CardHeader>
+                                            <CardTitle className="text-lg flex items-center gap-2">
+                                                <PieChartIcon className="w-4 h-4 text-secondary" />
+                                                Service Distribution
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="h-[350px] w-full">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <PieChart>
+                                                        <Pie
+                                                            data={stats.services}
+                                                            innerRadius={60}
+                                                            outerRadius={100}
+                                                            paddingAngle={5}
+                                                            dataKey="value"
+                                                        >
+                                                            {stats.services.map((entry, index) => (
+                                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                            ))}
+                                                        </Pie>
+                                                        <RechartsTooltip />
+                                                        <Legend verticalAlign="bottom" height={36} />
+                                                    </PieChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+
+                                {/* Booking Volume Bar Chart */}
+                                <Card className="shadow-sm border-none">
+                                    <CardHeader>
+                                        <CardTitle className="text-lg flex items-center gap-2">
+                                            <Sparkles className="w-4 h-4 text-secondary" />
+                                            Daily Booking Volume
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="h-[250px] w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={stats.daily_trends}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                                    <XAxis
+                                                        dataKey="date"
+                                                        fontSize={10}
+                                                        tickFormatter={(val) => val.split('-').slice(1).join('/')}
+                                                        stroke="#94A3B8"
+                                                    />
+                                                    <YAxis fontSize={10} stroke="#94A3B8" />
+                                                    <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                                    <Bar dataKey="count" fill="#EC4899" radius={[4, 4, 0, 0]} />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        ) : (
+                            <div className="py-20 text-center text-primary/40 font-medium">
+                                No analytics data available yet.
+                            </div>
+                        )}
+                    </TabsContent>
 
                     <TabsContent value="slots">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1056,6 +1297,190 @@ const Admin = () => {
                                 </Card>
                             </div>
                         </div>
+                    </TabsContent>
+
+                    <TabsContent value="bookings">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <CardTitle className="text-2xl font-heading text-primary">User Bookings</CardTitle>
+                                        <CardDescription>View and manage all customer appointments</CardDescription>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <div className="relative">
+                                            <Input
+                                                placeholder="Search by name or email..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="pl-8 bg-background/50 border-primary/10 focus:border-secondary transition-all w-full sm:w-[250px]"
+                                            />
+                                            <Sparkles className="absolute left-2.5 top-2.5 h-4 w-4 text-primary/40" />
+                                        </div>
+                                        <select
+                                            value={serviceTypeFilter}
+                                            onChange={(e) => {
+                                                setServiceTypeFilter(e.target.value);
+                                                setCurrentPage(1);
+                                            }}
+                                            className="p-2 rounded-md border border-primary/10 text-sm bg-background/50 focus:border-secondary outline-none"
+                                        >
+                                            <option value="all">All Services</option>
+                                            <option value="live">Live Readings</option>
+                                            <option value="delivered">Delivered Readings</option>
+                                            <option value="aura">Aura Reading</option>
+                                        </select>
+                                        <select
+                                            value={statusFilter}
+                                            onChange={(e) => {
+                                                setStatusFilter(e.target.value);
+                                                setCurrentPage(1);
+                                            }}
+                                            className="p-2 rounded-md border border-primary/10 text-sm bg-background/50 focus:border-secondary outline-none"
+                                        >
+                                            <option value="all">All Status</option>
+                                            <option value="paid">Confirmed</option>
+                                            <option value="pending">Not Completed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {isBookingsLoading ? (
+                                    <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                                        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="text-primary/60 font-medium">Loading user data...</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className="overflow-x-auto max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead className="sticky top-0 bg-background/95 backdrop-blur-md z-10 shadow-sm">
+                                                    <tr className="border-b border-primary/5 text-xs uppercase tracking-wider text-primary/40 font-bold">
+                                                        <th className="px-4 py-4 pb-2">Ref ID</th>
+                                                        {statusFilter !== 'pending' && <th className="px-4 py-4 pb-2">Transaction ID</th>}
+                                                        <th className="px-4 py-4 pb-2">Status & Type</th>
+                                                        <th className="px-4 py-4 pb-2">Client</th>
+                                                        <th className="px-4 py-4 pb-2 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('preferred_date')}>
+                                                            <div className="flex items-center">Date & Time <SortIcon field="preferred_date" /></div>
+                                                        </th>
+                                                        <th className="px-4 py-4 pb-2 text-right cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('amount')}>
+                                                            <div className="flex items-center justify-end">Amount <SortIcon field="amount" /></div>
+                                                        </th>
+                                                        <th className="px-4 py-4 pb-2 text-right">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-primary/5">
+                                                    {allBookings
+                                                        .filter(b => {
+                                                            const matchesSearch = b.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                                                b.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                                                b.booking_id?.toLowerCase().includes(searchQuery.toLowerCase());
+                                                            return matchesSearch;
+                                                        })
+                                                        .map((booking) => (
+                                                            <tr key={booking.booking_id} className="hover:bg-primary/[0.02] transition-colors group">
+                                                                <td className="px-4 py-4">
+                                                                    <span className="text-xs font-mono font-bold text-primary/70">{booking.booking_id}</span>
+                                                                </td>
+                                                                {statusFilter !== 'pending' && (
+                                                                    <td className="px-4 py-4">
+                                                                        <span className="text-xs font-mono text-primary/60">
+                                                                            {booking.transaction_id ? booking.transaction_id.replace('PAYID-', '') : '-'}
+                                                                        </span>
+                                                                    </td>
+                                                                )}
+                                                                <td className="px-4 py-4">
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className={`text-[10px] w-fit font-bold px-2 py-0.5 rounded-full ${booking.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                                                                            }`}>
+                                                                            {booking.payment_status?.toUpperCase() || 'PENDING'}
+                                                                        </span>
+                                                                        <span className="text-xs text-primary/60 capitalize">
+                                                                            {booking.service_type?.replace('-', ' ')}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-4">
+                                                                    <div className="flex flex-col leading-tight">
+                                                                        <span className="text-sm font-bold text-primary">{booking.full_name}</span>
+                                                                        <span className="text-xs text-primary/50">{booking.email}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-4">
+                                                                    <div className="flex flex-col leading-tight">
+                                                                        {(() => {
+                                                                            const { date, time } = formatLocalDateTime(booking.preferred_date, booking.preferred_time);
+                                                                            return (
+                                                                                <>
+                                                                                    <span className="text-sm font-medium text-primary">{date}</span>
+                                                                                    <span className="text-xs text-primary/40">{time}</span>
+                                                                                </>
+                                                                            );
+                                                                        })()}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-4 text-right">
+                                                                    <span className="text-sm font-bold text-primary">
+                                                                        {booking.currency} {booking.amount}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-4 text-right">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => fetchBookingDetails(booking.booking_id)}
+                                                                        className="text-secondary hover:text-secondary/80 hover:bg-secondary/10 font-bold text-xs rounded-lg"
+                                                                    >
+                                                                        View Details
+                                                                    </Button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    {allBookings.length === 0 && (
+                                                        <tr>
+                                                            <td colSpan="6" className="px-4 py-20 text-center text-primary/40 italic">
+                                                                No bookings found matching your criteria.
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        {/* Pagination Controls */}
+                                        <div className="flex items-center justify-between pt-4 border-t border-primary/5">
+                                            <p className="text-xs text-primary/40">
+                                                Showing <span className="font-bold">{(currentPage - 1) * pageSize + 1}</span> to <span className="font-bold">{Math.min(currentPage * pageSize, totalBookings)}</span> of <span className="font-bold">{totalBookings}</span> bookings
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={currentPage === 1}
+                                                    onClick={() => setCurrentPage(prev => prev - 1)}
+                                                    className="text-xs font-bold border-primary/10 hover:bg-primary/5"
+                                                >
+                                                    Previous
+                                                </Button>
+                                                <div className="flex items-center px-4 bg-primary/5 rounded-md">
+                                                    <span className="text-xs font-bold text-primary">Page {currentPage} of {Math.ceil(totalBookings / pageSize) || 1}</span>
+                                                </div>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={currentPage >= Math.ceil(totalBookings / pageSize)}
+                                                    onClick={() => setCurrentPage(prev => prev + 1)}
+                                                    className="text-xs font-bold border-primary/10 hover:bg-primary/5"
+                                                >
+                                                    Next
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
                     <TabsContent value="promotions">

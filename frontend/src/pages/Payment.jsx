@@ -175,9 +175,9 @@ const Payment = () => {
                 // User's task is "configure payment details". 
                 // If email is missing, the backend validation will fail.
 
-                phone: bookingData.phone || '0000000000', // Missing in form
-                gender: bookingData.gender || 'Not specified',
-                date_of_birth: bookingData.dob || '1970-01-01',
+                phone: bookingData.phone || null,
+                gender: bookingData.gender || null,
+                date_of_birth: bookingData.dob || null,
                 service_type: serviceType,
                 preferred_date: preferred_date,
                 preferred_time: preferred_time,

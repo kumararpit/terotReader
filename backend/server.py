@@ -147,8 +147,8 @@ class BookingCreate(BaseModel):
     full_name: str
     email: EmailStr
     phone: Optional[str] = None
-    gender: str
-    date_of_birth: str
+    gender: Optional[str] = None
+    date_of_birth: Optional[str] = None
     service_type: str
     preferred_date: str
     preferred_time: Optional[str] = None
@@ -170,8 +170,8 @@ class Booking(BaseModel):
     full_name: str
     email: EmailStr
     phone: Optional[str] = None
-    gender: str
-    date_of_birth: str
+    gender: Optional[str] = None
+    date_of_birth: Optional[str] = None
     service_type: str
     preferred_date: str
     preferred_time: Optional[str] = None
@@ -186,33 +186,12 @@ class Booking(BaseModel):
     transaction_id: Optional[str] = None
     amount: Optional[float] = None
     currency: Optional[str] = None
-    status: str = "confirmed"  # 'confirmed', 'canceled'
+    status: str = "pending"  # 'pending', 'confirmed', 'canceled'
     gcal_event_id: Optional[str] = None
     aura_image: Optional[str] = None
     promo_code: Optional[str] = None
     discount_amount: float = 0.0
     original_amount: float = 0.0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    phone: Optional[str] = None
-    gender: str
-    date_of_birth: str
-    service_type: str
-    preferred_date: str
-    preferred_time: Optional[str] = None
-    alternative_time: Optional[str] = None
-    partner_info: Optional[str] = None
-    questions: Optional[str] = None
-    situation_description: Optional[str] = None
-    reading_focus: Optional[str] = None
-    payment_method: str
-    is_emergency: bool = False
-    payment_status: str = "pending"
-    transaction_id: Optional[str] = None
-    amount: Optional[float] = None
-    currency: Optional[str] = None
-    status: str = "confirmed"  # 'confirmed', 'canceled'
-    gcal_event_id: Optional[str] = None
-    aura_image: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -1385,7 +1364,7 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
             discount_amount=round(discount_total, 2),
             promo_code=applied_promo_code,
             currency=currency,
-            status="confirmed",
+            status="pending",
             aura_image=booking_data.aura_image
         )
 
@@ -1519,6 +1498,7 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
             {'booking_id': verification.booking_id},
             {'$set': {
                 'payment_status': 'paid',
+                'status': 'confirmed',
                 'transaction_id': payment_verified.get('transaction_id'),
                 'updated_at': datetime.now(timezone.utc).isoformat()
             }}
@@ -1601,6 +1581,125 @@ async def resend_email(
     )
     
     return {"status": "queued", "message": f"Email queued for {booking.get('email')}"}
+
+@api_router.get("/bookings")
+async def get_all_bookings(
+    skip: int = 0, 
+    limit: int = 20, 
+    service_type: Optional[str] = None,
+    payment_status: Optional[str] = None,
+    sort_by: str = "created_at",
+    sort_order: int = -1,  # -1 for DESC, 1 for ASC
+    current_user: str = Depends(get_current_admin)
+):
+    """Fetch all bookings for admin view with pagination and filtering"""
+    try:
+        query = {}
+        
+        # 1. Payment Status Filtering (Frontend labels: Confirmed/Not Completed)
+        if payment_status == 'paid':
+            query["status"] = "confirmed"
+            query["payment_status"] = "paid"
+        elif payment_status == 'pending':
+            query["payment_status"] = {"$ne": "paid"}
+        # 'all' means we don't apply an initial status filter
+        
+        # 2. Service Type Filtering
+        if service_type and service_type != 'all':
+            if service_type == 'delivered':
+                query["service_type"] = {"$regex": "^delivered-"}
+            elif service_type == 'live':
+                query["service_type"] = {"$regex": "^live-"}
+            elif service_type == 'aura':
+                query["service_type"] = "aura"
+            else:
+                query["service_type"] = service_type
+
+        # Validate sort_by
+        allowed_sort_fields = ["created_at", "preferred_date", "amount"]
+        if sort_by not in allowed_sort_fields:
+            sort_by = "created_at"
+
+        # Count total for pagination
+        total = await db.bookings.count_documents(query)
+        
+        # Fetch subset with sorting
+        bookings_cursor = db.bookings.find(query, {"_id": 0}).sort(sort_by, sort_order).skip(skip).limit(limit)
+        bookings = await bookings_cursor.to_list(length=limit)
+        
+        # Consistent timestamp formatting
+        for booking in bookings:
+            for field in ['created_at', 'updated_at']:
+                val = booking.get(field)
+                if val and isinstance(val, str):
+                    try:
+                        booking[field] = datetime.fromisoformat(val.replace("Z", "+00:00"))
+                    except ValueError:
+                        pass
+                    
+        return {
+            "bookings": bookings,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
+    except Exception as e:
+        logger.error(f"Error fetching filtered bookings: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error while fetching bookings")
+
+@api_router.get("/admin/stats")
+async def get_admin_stats(days: int = 30, current_user: str = Depends(get_current_admin)):
+    """Get aggregated statistics for admin dashboard"""
+    try:
+        # 1. Basic KPI metrics
+        total_attempts = await db.bookings.count_documents({})
+        confirmed_bookings = await db.bookings.count_documents({"status": "confirmed"})
+        pending_bookings = total_attempts - confirmed_bookings
+        
+        # Total Revenue (Only from confirmed bookings)
+        rev_pipeline = [
+            {"$match": {"status": "confirmed"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]
+        rev_res = await db.bookings.aggregate(rev_pipeline).to_list(1)
+        total_revenue = rev_res[0]["total"] if rev_res else 0.0
+
+        # 2. Service Distribution (Confirmed only)
+        service_pipeline = [
+            {"$match": {"status": "confirmed"}},
+            {"$group": {"_id": "$service_type", "count": {"$sum": 1}}}
+        ]
+        service_stats = await db.bookings.aggregate(service_pipeline).to_list(100)
+        services = [{"name": s["_id"], "value": s["count"]} for s in service_stats]
+
+        # 3. Daily Trends (Confirmed only)
+        trend_pipeline = [
+            {"$match": {"status": "confirmed"}},
+            {"$group": {
+                "_id": {"$substr": ["$created_at", 0, 10]},
+                "revenue": {"$sum": "$amount"},
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"_id": 1}},
+            {"$limit": days}
+        ]
+        trend_res = await db.bookings.aggregate(trend_pipeline).to_list(days)
+        daily_trends = [{"date": t["_id"], "revenue": round(t["revenue"], 2), "count": t["count"]} for t in trend_res]
+
+        return {
+            "kpis": {
+                "total_bookings": total_attempts,
+                "confirmed_bookings": confirmed_bookings,
+                "pending_bookings": pending_bookings,
+                "total_revenue": round(total_revenue, 2),
+                "conversion_rate": round((confirmed_bookings / total_attempts * 100), 1) if total_attempts > 0 else 0
+            },
+            "services": services,
+            "daily_trends": daily_trends
+        }
+    except Exception as e:
+        logger.error(f"Error fetching admin stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch statistics")
 
 @api_router.get("/bookings/{booking_id}")
 async def get_booking(booking_id: str):
