@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Trash2, Plus, Calendar as CalendarIcon, MessageSquare, LogOut, Sparkles, Globe, Menu, X, ArrowUpDown, ChevronUp, ChevronDown, TrendingUp, Users, DollarSign, Activity, PieChart as PieChartIcon } from 'lucide-react';
+import { Trash2, Plus, Calendar as CalendarIcon, MessageSquare, LogOut, Sparkles, Globe, Menu, X, ArrowUpDown, ChevronUp, ChevronDown, TrendingUp, Users, DollarSign, Activity, PieChart as PieChartIcon, Download } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
     BarChart, Bar, PieChart, Pie, Cell, Legend
@@ -502,6 +502,16 @@ const Admin = () => {
     const [isDetailsLoading, setIsDetailsLoading] = useState(false);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
+    const handleDownloadAura = (imageUrl, clientName) => {
+        if (!imageUrl) return;
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = `Aura_${clientName.replace(/\s+/g, '_')}_${new Date().getTime()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const fetchBookingDetails = async (gcalEventId) => {
         setSelectedBooking(null); // Reset immediately
         setIsDetailsLoading(true);
@@ -890,8 +900,12 @@ const Admin = () => {
                                                         stroke="#94A3B8"
                                                     />
                                                     <YAxis fontSize={10} stroke="#94A3B8" />
-                                                    <RechartsTooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                                                    <Bar dataKey="count" fill="#EC4899" radius={[4, 4, 0, 0]} />
+                                                    <RechartsTooltip
+                                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                                    />
+                                                    <Legend verticalAlign="top" height={36} />
+                                                    <Bar name="Confirmed" dataKey="confirmed" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                                                    <Bar name="Not Completed" dataKey="pending" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                                                 </BarChart>
                                             </ResponsiveContainer>
                                         </div>
@@ -1568,14 +1582,30 @@ const Admin = () => {
                                         <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
                                         <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.situation_description || 'No description provided.'}</p>
                                     </div>
+                                    {selectedBooking.questions && (
+                                        <div>
+                                            <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Specific Questions</h4>
+                                            <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.questions}</p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Aura Image if available */}
                                 {selectedBooking.aura_image && (
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2 text-sm uppercase tracking-wide flex items-center gap-2">
-                                            <Sparkles className="w-4 h-4 text-purple-500" /> Aura Photo
-                                        </h4>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-semibold text-gray-700 text-sm uppercase tracking-wide flex items-center gap-2">
+                                                <Sparkles className="w-4 h-4 text-purple-500" /> Aura Photo
+                                            </h4>
+                                            <button
+                                                onClick={() => handleDownloadAura(selectedBooking.aura_image, selectedBooking.full_name)}
+                                                className="p-1.5 bg-purple-50 text-purple-600 rounded-md hover:bg-purple-100 transition-colors flex items-center gap-1.5 text-xs font-medium"
+                                                title="Download Photo"
+                                            >
+                                                <Download className="w-3.5 h-3.5" />
+                                                Download
+                                            </button>
+                                        </div>
                                         <div className="border rounded-lg overflow-hidden bg-black/5 p-2 flex justify-center">
                                             <img
                                                 src={selectedBooking.aura_image}

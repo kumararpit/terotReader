@@ -1684,19 +1684,35 @@ async def get_admin_stats(days: int = 30, current_user: str = Depends(get_curren
         service_stats = await db.bookings.aggregate(service_pipeline).to_list(100)
         services = [{"name": s["_id"], "value": s["count"]} for s in service_stats]
 
-        # 3. Daily Trends (Confirmed only using strict criteria)
+        # 3. Daily Trends (Revenue from Confirmed, Counts for both)
         trend_pipeline = [
-            {"$match": confirmed_criteria},
+            # Potential match for date range here if needed, e.g. last 'days' days
             {"$group": {
                 "_id": {"$substr": ["$created_at", 0, 10]},
-                "revenue": {"$sum": "$amount"},
-                "count": {"$sum": 1}
+                "revenue": {
+                    "$sum": { "$cond": [{"$and": [{"$ne": ["$transaction_id", None]}, {"$eq": ["$status", "confirmed"]}]}, "$amount", 0] }
+                },
+                "confirmed": {
+                    "$sum": { "$cond": [{"$and": [{"$ne": ["$transaction_id", None]}, {"$eq": ["$status", "confirmed"]}]}, 1, 0] }
+                },
+                "pending": {
+                    "$sum": { "$cond": [{"$eq": ["$transaction_id", None]}, 1, 0] }
+                }
             }},
-            {"$sort": {"_id": 1}},
-            {"$limit": days}
+            {"$sort": {"_id": -1}}, # Sort descending to get latest
+            {"$limit": days},
+            {"$sort": {"_id": 1}} # Re-sort ascending for chart display
         ]
         trend_res = await db.bookings.aggregate(trend_pipeline).to_list(days)
-        daily_trends = [{"date": t["_id"], "revenue": round(t["revenue"], 2), "count": t["count"]} for t in trend_res]
+        daily_trends = [
+            {
+                "date": t["_id"], 
+                "revenue": round(t["revenue"], 2), 
+                "confirmed": t["confirmed"],
+                "pending": t["pending"]
+            } 
+            for t in trend_res
+        ]
 
         return {
             "kpis": {
