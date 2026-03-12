@@ -8,7 +8,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("DB_INIT")
 
 # Load Env
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), 'env', '.env')
+load_dotenv(dotenv_path=env_path)
 MONGO_URL = os.getenv("MONGO_URL")
 
 def init_db():

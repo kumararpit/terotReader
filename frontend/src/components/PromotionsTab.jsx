@@ -21,28 +21,33 @@ const PromotionsTab = () => {
     const [services, setServices] = useState([]);
     const [promotions, setPromotions] = useState([]);
     const [activeCampaign, setActiveCampaign] = useState(null);
+    const [activeTax, setActiveTax] = useState(null);
     const [loading, setLoading] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [editValue, setEditValue] = useState('');
     const [confirmDelete, setConfirmDelete] = useState({ id: null, type: null });
+    const [confirmDeleteTax, setConfirmDeleteTax] = useState(false);
 
     // Forms
     const [newPromo, setNewPromo] = useState({ code: '', discount_type: 'percentage', discount_value: '', usage_limit: 100 });
     const [newCampaign, setNewCampaign] = useState({ message: '', discount_percentage: '', expiry_date: '' });
+    const [newTax, setNewTax] = useState({ name: '', percentage: '' });
 
     const baseUrl = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '') || 'http://localhost:8000';
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [sRes, pRes, cRes] = await Promise.all([
+            const [sRes, pRes, cRes, tRes] = await Promise.all([
                 axios.get(`${baseUrl}/api/services`),
                 axios.get(`${baseUrl}/api/promotions`),
-                axios.get(`${baseUrl}/api/campaign`)
+                axios.get(`${baseUrl}/api/campaign`),
+                axios.get(`${baseUrl}/api/taxes/active`)
             ]);
             setServices(sRes.data);
             setPromotions(pRes.data);
             setActiveCampaign(cRes.data);
+            setActiveTax(tRes.data);
         } catch (error) {
             console.error("Error fetching data:", error);
             toast.error("Failed to load data");
@@ -139,6 +144,36 @@ const PromotionsTab = () => {
             fetchData();
         } catch (error) {
             toast.error("Failed to deactivate campaign");
+        }
+    };
+
+    const handleSetTax = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await axios.post(`${baseUrl}/api/taxes`, {
+                name: newTax.name,
+                percentage: parseFloat(newTax.percentage),
+                is_active: true
+            });
+            toast.success("Tax Configuration Updated!");
+            setNewTax({ name: '', percentage: '' });
+            fetchData();
+        } catch (error) {
+            toast.error("Failed to update tax");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteTax = async (id) => {
+        try {
+            await axios.delete(`${baseUrl}/api/taxes/${id}`);
+            toast.success("Tax configuration deleted");
+            setConfirmDeleteTax(false);
+            fetchData();
+        } catch (error) {
+            toast.error("Failed to delete tax configuration");
         }
     };
 
@@ -273,6 +308,117 @@ const PromotionsTab = () => {
                                     >
                                         <Rocket className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                                         Activate Site-Wide Campaign
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Tax Configuration */}
+                    <section className="bg-background/50 backdrop-blur-sm rounded-3xl border border-primary/5 shadow-lg overflow-hidden">
+                        <div className="p-6 border-b border-primary/5 flex items-center gap-4 bg-primary/5">
+                            <div className="h-10 w-10 bg-primary text-secondary rounded-xl flex items-center justify-center shadow-md">
+                                <Percent className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-heading font-bold text-primary">Tax Configuration</h2>
+                                <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Global tax settings</p>
+                            </div>
+                        </div>
+                        <div className="p-4 sm:p-8">
+                            {activeTax ? (
+                                <div className="mb-8 p-6 bg-primary/5 border border-primary/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <p className="text-[10px] font-black text-primary/30 uppercase tracking-[0.2em] mb-1">Active configuration</p>
+                                        <h4 className="text-2xl font-heading font-bold text-primary">{activeTax.name} <span className="text-secondary ml-1">{activeTax.percentage}%</span></h4>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="px-4 py-2 bg-background border border-primary/10 rounded-xl text-[10px] font-bold text-primary/40 uppercase tracking-wider">
+                                            System Timestamp: {new Date(activeTax.created_at).toLocaleDateString()}
+                                        </div>
+                                        {confirmDeleteTax ? (
+                                            <div className="flex gap-2 animate-in slide-in-from-right-2 fade-in">
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    className="h-9 px-4 font-bold rounded-xl"
+                                                    onClick={() => handleDeleteTax(activeTax.id)}
+                                                >
+                                                    Confirm
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-9 px-4 font-bold rounded-xl"
+                                                    onClick={() => setConfirmDeleteTax(false)}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                className="text-primary/30 hover:text-destructive transition-all p-3 hover:bg-destructive/5 rounded-full group/del"
+                                                onClick={() => setConfirmDeleteTax(true)}
+                                                title="Delete Tax Protocol"
+                                            >
+                                                <Trash2 className="w-5 h-5 group-hover/del:scale-110 transition-transform" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mb-8 p-6 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-amber-700 font-medium flex items-center gap-4 animate-pulse">
+                                    <div className="h-10 w-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                                        <Percent className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold">Protocol Alert: No Active Tax</p>
+                                        <p className="text-xs opacity-80">Global transactions will not include tax parameters until defined below.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div>
+                                <h3 className="text-[10px] font-black text-primary/30 uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                                    <div className="h-px flex-1 bg-primary/5" />
+                                    Update Tax Protocol
+                                    <div className="h-px flex-1 bg-primary/5" />
+                                </h3>
+                                <form onSubmit={handleSetTax} className="space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-[11px] font-bold text-primary/60 uppercase ml-1">Tax Name</Label>
+                                            <Input
+                                                className="w-full bg-background border-primary/10 rounded-xl focus:border-secondary h-12 px-5 transition-all"
+                                                placeholder="e.g. VAT, GST, Sales Tax"
+                                                value={newTax.name}
+                                                onChange={e => setNewTax({ ...newTax, name: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[11px] font-bold text-primary/60 uppercase ml-1">Tax Percentage</Label>
+                                            <div className="relative">
+                                                <Percent className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/20 w-4 h-4" />
+                                                <Input
+                                                    className="w-full bg-background border-primary/10 rounded-xl focus:border-secondary h-12 transition-all"
+                                                    placeholder="15"
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={newTax.percentage}
+                                                    onChange={e => setNewTax({ ...newTax, percentage: e.target.value })}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full bg-primary hover:bg-primary/95 text-secondary font-bold h-14 rounded-2xl shadow-xl shadow-primary/10 transition-all flex items-center justify-center gap-3 group disabled:opacity-50"
+                                    >
+                                        <RefreshCcw className={`w-5 h-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                                        Commit Tax Configuration
                                     </button>
                                 </form>
                             </div>

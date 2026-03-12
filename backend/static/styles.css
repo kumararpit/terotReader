@@ -1,0 +1,58 @@
+body {
+    font-family: "Georgia", serif;
+    color: #333;
+    padding: 40px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand h1 {
+    color: #C9A227;
+    margin: 0;
+}
+
+.brand p {
+    font-size: 12px;
+    color: #777;
+}
+
+.divider {
+    border: 1px solid #C9A227;
+    margin: 20px 0;
+}
+
+.section-title {
+    color: #C9A227;
+    margin-bottom: 15px;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.invoice-table th,
+.invoice-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.total {
+    font-weight: bold;
+    color: #000;
+}
+
+.footer {
+    margin-top: 40px;
+    font-size: 12px;
+    text-align: center;
+    color: #777;
+}

@@ -39,12 +39,16 @@ class CalendarService:
                 except json.JSONDecodeError as e:
                    logger.error(f"Failed to parse GOOGLE_CREDENTIALS env var: {e}")
 
-            elif os.path.exists('credentials.json') or os.path.exists(os.path.join(os.path.dirname(__file__), 'credentials.json')):
+            elif os.path.exists('credentials.json') or \
+                 os.path.exists(os.path.join(os.path.dirname(__file__), '..', 'credentials.json')) or \
+                 os.path.exists(os.path.join(os.path.dirname(__file__), '..', 'env', 'credentials.json')):
                 # Fallback to local file
-                # Check current dir first, then same dir as script
+                # Check current dir first, then parent dir (backend root), then env dir
                 fpath = 'credentials.json'
                 if not os.path.exists(fpath):
-                    fpath = os.path.join(os.path.dirname(__file__), 'credentials.json')
+                    fpath = os.path.join(os.path.dirname(__file__), '..', 'credentials.json')
+                if not os.path.exists(fpath):
+                    fpath = os.path.join(os.path.dirname(__file__), '..', 'env', 'credentials.json')
                     
                 with open(fpath) as f:
                     import json

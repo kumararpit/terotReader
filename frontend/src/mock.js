@@ -17,10 +17,23 @@ export const siteInfo = {
 
 export const services = [
   {
+    id: 4,
+    title: "TikTok Live",
+    type: "Live Interaction",
+    description: "Join a live session on TikTok for real-time guidance and interactive reading experience.",
+    icon: "Video",
+    features: [
+      "Real-time reading on TikTok Live",
+      "Interactive Q&A Session",
+      "Connect with the community",
+      "Personalized insights",
+      "Flexible timing"
+    ]
+  },
+  {
     id: 1,
     title: "Delivered Readings",
     type: "Written Guidance",
-    price: "22",
     description: "Get your questions answered through detailed written tarot readings delivered via email. Ideal for those who prefer to reflect on guidance at their own pace.",
     icon: "Mail",
     features: [
@@ -35,7 +48,6 @@ export const services = [
     id: 2,
     title: "Live Readings",
     type: "Interactive Session",
-    price: "66",
     description: "Real-time tarot reading sessions via Zoom audio call, offering interactive and personalized guidance for your questions and concerns.",
     icon: "Phone",
     features: [
@@ -50,7 +62,6 @@ export const services = [
     id: 3,
     title: "Aura Scanning",
     type: "Energy Report",
-    price: "15",
     description: "A personalized energy assessment that provides a comprehensive report on your overall energy field.",
     icon: "Sparkles",
     features: [
@@ -70,8 +81,8 @@ export const pricingPackages = [
     bgColor: "#D987FF",
     textColor: "#000000",
     packages: [
-      { questions: "3 Questions", price: "€22.00", popular: false },
-      { questions: "5 Questions", price: "€33.00", popular: true }
+      { questions: "3 Questions", popular: false },
+      { questions: "5 Questions", popular: true }
     ]
   },
   {
@@ -80,8 +91,8 @@ export const pricingPackages = [
     bgColor: "#88A2FF",
     textColor: "#000000",
     packages: [
-      { duration: "20 Minutes", price: "€66.00", popular: false },
-      { duration: "40 Minutes", price: "€129.00", popular: true }
+      { duration: "20 Minutes", popular: false },
+      { duration: "40 Minutes", popular: true }
     ]
   },
   {
@@ -90,7 +101,16 @@ export const pricingPackages = [
     bgColor: "#FFD1E7",
     textColor: "#000000",
     packages: [
-      { service: "Complete Aura Reading", price: "€15.00", popular: true }
+      { service: "Complete Aura Reading", popular: true }
+    ]
+  },
+  {
+    id: 4,
+    type: "TikTok Live",
+    bgColor: "#FF8A65",
+    textColor: "#000000",
+    packages: [
+      { service: "TikTok Live Reading", popular: true }
     ]
   }
 ];
@@ -154,14 +174,6 @@ export const faqs = [
 ];
 
 export const images = {
-  hero: "https://customer-assets.emergentagent.com/job_mystic-cards-47/artifacts/37rhwmgz_WhatsApp%20Image%202026-01-29%20at%2012.01.41%20AM.jpeg",
-  heroAlt: "https://customer-assets.emergentagent.com/job_mystic-cards-47/artifacts/25r88kwt_WhatsApp%20Image%202026-01-29%20at%2012.01.42%20AM%20%281%29.jpeg",
-  about: "https://customer-assets.emergentagent.com/job_mystic-cards-47/artifacts/gmqh7mlc_WhatsApp%20Image%202026-01-29%20at%2012.01.42%20AM.jpeg",
-  services: [
-    "https://customer-assets.emergentagent.com/job_mystic-cards-47/artifacts/a7hwvvhy_WhatsApp%20Image%202026-01-29%20at%2012.01.43%20AM.jpeg",
-    "https://customer-assets.emergentagent.com/job_mystic-cards-47/artifacts/g857l2k3_WhatsApp%20Image%202026-01-29%20at%2012.01.44%20AM.jpeg",
-    "https://customer-assets.emergentagent.com/job_mystic-cards-47/artifacts/37rhwmgz_WhatsApp%20Image%202026-01-29%20at%2012.01.41%20AM.jpeg"
-  ],
   backgrounds: {
     cosmic: "https://images.pexels.com/photos/3262249/pexels-photo-3262249.jpeg",
     eclipse: "https://images.unsplash.com/photo-1509978778156-518eea30166b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwyfHxjb3NtaWMlMjBzcGlyaXR1YWwlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc2OTU5NjA0NHww&ixlib=rb-4.1.0&q=85",

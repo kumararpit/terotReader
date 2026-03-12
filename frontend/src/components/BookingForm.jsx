@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import dayjs, { getUserTimezone, formatInTimeZone } from '../lib/dateUtils';
 import { Calendar, Clock, Upload, User, Mail, Heart, HelpCircle, FileText, Smartphone, ShieldCheck, Globe } from 'lucide-react';
 import { Button } from './ui/button';
+import { EMAIL_REGEX } from '../lib/constants';
 
 export const BookingForm = ({ service, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -21,8 +22,11 @@ export const BookingForm = ({ service, onSubmit }) => {
     picture: null,
     isEmergency: false,
     isEmergency: false,
-    bookingDate: ''
+    bookingDate: '',
+    tiktokUsername: ''
   });
+
+  const [emailError, setEmailError] = useState('');
 
   const [pricingMap, setPricingMap] = useState({});
   const [globalCampaign, setGlobalCampaign] = useState(null);
@@ -54,7 +58,8 @@ export const BookingForm = ({ service, onSubmit }) => {
     let amount = service.amount;
     let original = null;
 
-    if (globalCampaign && globalCampaign.is_active) {
+    const isTikTok = key === 'tiktok-live';
+    if (globalCampaign && globalCampaign.is_active && !isTikTok) {
       const expiry = new Date(globalCampaign.expiry_date);
       if (expiry > new Date()) {
         original = amount;
@@ -80,17 +85,32 @@ export const BookingForm = ({ service, onSubmit }) => {
       setFormData({ ...formData, [name]: checked });
     } else {
       setFormData({ ...formData, [name]: value });
+      if (name === 'email') setEmailError('');
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    // Trim and Validate Email
+    const trimmedEmail = formData.email.trim();
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      setEmailError('Please enter a valid email address (e.g., name@domain.com)');
+      return;
+    }
+
+    const submissionData = {
+      ...formData,
+      email: trimmedEmail
+    };
+
+    onSubmit(submissionData);
   };
 
-  const isDelivered = service.title.includes('Delivered');
-  const isLive = service.title.includes('Live');
+  const isLive = service.title.includes('Live') && !service.title.includes('TikTok');
   const isAura = service.title.includes('Aura');
+  const isTikTokLive = service.title.includes('TikTok Live');
+  const isDelivered = service.title.includes('Delivered');
 
   // Slot Logic
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -189,13 +209,31 @@ export const BookingForm = ({ service, onSubmit }) => {
             type="email"
             name="email"
             required
-            className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+            className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-primary/20 outline-none transition-all ${emailError ? 'border-red-500 focus:border-red-500' : 'border-primary/10 focus:border-primary'
+              }`}
             placeholder="your@email.com"
             onChange={handleChange}
           />
+          {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
         </div>
 
-        {!isAura && (
+        {isTikTokLive && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-primary flex items-center gap-2">
+              <User className="w-4 h-4 text-[var(--color-primary)]" /> TikTok Username *
+            </label>
+            <input
+              type="text"
+              name="tiktokUsername"
+              required
+              className="w-full p-3 rounded-lg border border-primary/10 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              placeholder="@username"
+              onChange={handleChange}
+            />
+          </div>
+        )}
+
+        {!isAura && !isTikTokLive && (
           <>
             <div className="space-y-2">
               <label className="text-sm font-medium text-primary flex items-center gap-2">
@@ -293,6 +331,8 @@ export const BookingForm = ({ service, onSubmit }) => {
                 onChange={handleChange}
               />
             </div>
+
+
           </>
         )}
 
@@ -511,7 +551,7 @@ export const BookingForm = ({ service, onSubmit }) => {
         )}
 
         {/* Text Areas */}
-        {!isAura && (
+        {!isAura && !isTikTokLive && (
           <>
             {!isLive && (
               <div className="md:col-span-2 space-y-2">
@@ -546,7 +586,6 @@ export const BookingForm = ({ service, onSubmit }) => {
             </div>
           </>
         )}
-
       </div>
 
       <div className="pt-6">

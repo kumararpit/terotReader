@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Section 1: Delivery Details & Focus -->
+<section>
+    <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">
+        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-wider">Delivered Reading Details
+        </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 mb-8">
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Delivery Method</span>
+            <span class="text-lg text-slate-800 dark:text-slate-200">Email Reading</span>
+        </div>
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Expected
+                Delivery</span>
+            <span class="text-lg font-medium text-primary">24-48 Hours</span>
+        </div>
+        <div class="flex flex-col md:col-span-2">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Reading Focus</span>
+            <span class="text-lg text-slate-800 dark:text-slate-200">{{ reading_focus }}</span>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Partner Details (Conditional) -->
+{% if partner_info %}
+<section
+    class="bg-slate-50 dark:bg-white/5 p-6 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 mb-8">
+    <div class="flex items-center gap-3 mb-4">
+        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <h2 class="text-lg font-bold text-slate-800 dark:text-white uppercase tracking-wider">Partner Details</h2>
+    </div>
+    <div class="text-slate-800 dark:text-slate-200 leading-relaxed">{{ partner_info }}</div>
+</section>
+{% endif %}
+
+<!-- Section 3: Reading Request Content -->
+<section>
+    <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">
+        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-wider">Reading Request</h2>
+    </div>
+
+    <div class="space-y-8">
+        <div>
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold block mb-3">Questions</span>
+            <p class="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">{{ questions }}</p>
+        </div>
+        <div>
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold block mb-3">Situation
+                Description</span>
+            <p
+                class="text-slate-700 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-800/50 p-5 rounded-lg border border-slate-200 dark:border-slate-700">
+                {{ situation_description }}
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

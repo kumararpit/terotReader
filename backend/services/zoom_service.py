@@ -4,7 +4,8 @@ import os
 import logging
 from dotenv import load_dotenv
 
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), '..', 'env', '.env')
+load_dotenv(dotenv_path=env_path)
 
 logger = logging.getLogger(__name__)
 

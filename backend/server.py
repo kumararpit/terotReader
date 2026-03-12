@@ -1,14 +1,15 @@
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Depends, status, Response, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-import email_service
+from services import email_service
 from dotenv import load_dotenv
 from pathlib import Path
 import os
 import logging
 
 # Load environment variables as early as possible
-load_dotenv()
+env_path = Path(__file__).parent / "env" / ".env"
+load_dotenv(dotenv_path=env_path)
 
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -34,13 +35,20 @@ def get_business_offset():
     if len(offset) == 5:
         return f"{offset[:3]}:{offset[3:]}"
     return offset
-from payment_service import payment_service
-from email_service import send_password_reset_otp, send_booking_confirmation_to_client, send_booking_notification_to_tejashvini
-import zoom_service
-import auth
-from auth import Token, TokenData, create_access_token, verify_password, get_password_hash, SECRET_KEY, ALGORITHM
+from services.payment_service import payment_service
+from services.email_service import send_password_reset_otp, send_booking_confirmation_to_client, send_booking_notification_to_tejashvini
+from services import zoom_service
+from services import auth
+from services.auth import Token, TokenData, create_access_token, verify_password, get_password_hash, SECRET_KEY, ALGORITHM
 import random
 import string
+import re
+from fastapi.responses import FileResponse
+from services.pdf_service import generate_invoice_pdf_v2, generate_booking_details_pdf_v2
+from services.template_selector import get_template_for_service
+
+# Email Regex
+EMAIL_REGEX = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
 
 # Logger Setup
 logging.basicConfig(
@@ -143,9 +151,21 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+class Tax(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str  # e.g. VAT, GST
+    percentage: float
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class TaxCreate(BaseModel):
+    name: str
+    percentage: float
+    is_active: bool = True
+
 class BookingCreate(BaseModel):
     full_name: str
-    email: EmailStr
+    email: str # Switched from EmailStr to custom regex
     phone: Optional[str] = None
     gender: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -155,12 +175,22 @@ class BookingCreate(BaseModel):
     alternative_time: Optional[str] = None
     partner_info: Optional[str] = None
     questions: Optional[str] = None
-    situation_description: str
+    situation_description: Optional[str] = None
     reading_focus: Optional[str] = None
     payment_method: str  # 'stripe', 'razorpay', 'paypal'
     is_emergency: bool = False
     aura_image: Optional[str] = None
     promo_code: Optional[str] = None
+    tiktok_username: Optional[str] = None
+    existing_booking_id: Optional[str] = None
+
+    @field_validator('email')
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not re.match(EMAIL_REGEX, v):
+            raise ValueError("Invalid email format")
+        return v
 
 class Booking(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -168,7 +198,7 @@ class Booking(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     booking_id: str
     full_name: str
-    email: EmailStr
+    email: str # Switched from EmailStr to custom regex
     phone: Optional[str] = None
     gender: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -190,6 +220,18 @@ class Booking(BaseModel):
     gcal_event_id: Optional[str] = None
     aura_image: Optional[str] = None
     promo_code: Optional[str] = None
+    tiktok_username: Optional[str] = None
+    tax_amount: float = 0.0
+    tax_percentage: float = 0.0
+    tax_name: str = ""
+
+    @field_validator('email')
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not re.match(EMAIL_REGEX, v):
+            raise ValueError("Invalid email format")
+        return v
     discount_amount: float = 0.0
     original_amount: float = 0.0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -200,6 +242,7 @@ class PaymentVerification(BaseModel):
     payment_method: str
     session_id: Optional[str] = None  # Stripe
     payment_id: Optional[str] = None  # Razorpay/PayPal
+    payer_id: Optional[str] = None    # PayPal
     order_id: Optional[str] = None  # Razorpay
     signature: Optional[str] = None  # Razorpay
 
@@ -240,11 +283,27 @@ class LoginRequest(BaseModel):
 
 class SetupAdminRequest(BaseModel):
     username: str
-    email: EmailStr
+    email: str # Switched from EmailStr to custom regex
     password: str
 
+    @field_validator('email')
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not re.match(EMAIL_REGEX, v):
+            raise ValueError("Invalid email format")
+        return v
+
 class ForgotPasswordRequest(BaseModel):
-    email: EmailStr
+    email: str # Switched from EmailStr to custom regex
+
+    @field_validator('email')
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not re.match(EMAIL_REGEX, v):
+            raise ValueError("Invalid email format")
+        return v
 
 class ResetPasswordRequest(BaseModel):
     email: EmailStr
@@ -494,6 +553,7 @@ PRICING_MAP = {
     'delivered-5': {'amount': 33.00, 'currency': 'EUR', 'name': '5 Questions'},
     'live-20': {'amount': 66.00, 'currency': 'EUR', 'name': '20 Minutes'},
     'live-40': {'amount': 129.00, 'currency': 'EUR', 'name': '40 Minutes'},
+    'tiktok-live': {'amount': 15.00, 'currency': 'EUR', 'name': 'TikTok Live'},
     'aura': {'amount': 15.00, 'currency': 'EUR', 'name': 'Aura Scanning'}
 }
 
@@ -1002,7 +1062,7 @@ async def delete_booking(booking_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 # --- Slot Routes ---
-from calendar_service import calendar_service
+from services.calendar_service import calendar_service
 
 # Define Windows
 REGULAR_WINDOW_START = "10:30"
@@ -1314,39 +1374,54 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
         discount_total = 0.0
         applied_promo_code = None
         
-        # 2. Apply Discounts (Mutually Exclusive: Promo Code takes priority)
-        if booking_data.promo_code:
-            promo = await db.promotions.find_one({"code": booking_data.promo_code, "is_active": True})
-            if promo and promo['used_count'] < promo['usage_limit']:
-                # Apply Promo Code
-                if promo['discount_type'] == 'percentage':
-                    p_discount = (float(promo['discount_value']) / 100.0) * final_amount
+        # 2 & 3. Apply Discounts (Only if service is not tiktok-live)
+        if booking_data.service_type != 'tiktok-live':
+            # 2. Apply Promo Code (Takes priority)
+            if booking_data.promo_code:
+                promo = await db.promotions.find_one({"code": booking_data.promo_code, "is_active": True})
+                if promo and promo['used_count'] < promo['usage_limit']:
+                    if promo['discount_type'] == 'percentage':
+                        p_discount = (float(promo['discount_value']) / 100.0) * final_amount
+                    else:
+                        p_discount = float(promo['discount_value'])
+                    
+                    final_amount -= p_discount
+                    discount_total += p_discount
+                    applied_promo_code = promo['code']
+                    logger.info(f"Applied Promo Code: {applied_promo_code}. Discount: {p_discount}")
                 else:
-                    p_discount = float(promo['discount_value'])
-                
-                final_amount -= p_discount
-                discount_total += p_discount
-                applied_promo_code = promo['code']
-                logger.info(f"Applied Promo Code: {applied_promo_code}. Discount: {p_discount}")
-            else:
-                logger.warning(f"Invalid or limited promo code: {booking_data.promo_code}")
+                    logger.warning(f"Invalid or limited promo code: {booking_data.promo_code}")
 
-        # 3. Apply Global Campaign (Only if no promo applied)
-        if not applied_promo_code:
-            campaign = await db.campaigns.find_one({"is_active": True})
-            if campaign:
-                expiry = campaign.get('expiry_date')
-                if isinstance(expiry, str): expiry = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
-                if isinstance(expiry, datetime) and expiry.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc):
-                    pct = campaign.get('discount_percentage', 0)
-                    discount = (float(pct) / 100.0) * final_amount
-                    final_amount -= discount
-                    discount_total += discount
-                    logger.info(f"Applied Global Campaign: {pct}% off. New amount: {final_amount}")
+            # 3. Apply Global Campaign (Only if no promo applied)
+            if not applied_promo_code:
+                campaign = await db.campaigns.find_one({"is_active": True})
+                if campaign:
+                    expiry = campaign.get('expiry_date')
+                    if isinstance(expiry, str): expiry = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
+                    if isinstance(expiry, datetime) and expiry.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc):
+                        pct = campaign.get('discount_percentage', 0)
+                        discount = (float(pct) / 100.0) * final_amount
+                        final_amount -= discount
+                        discount_total += discount
+                        logger.info(f"Applied Global Campaign: {pct}% off. New amount: {final_amount}")
+        else:
+            logger.info("TikTok Live service selected. Discounts are not applicable.")
 
         # Ensure non-negative
         if final_amount < 0: final_amount = 0.0
         final_amount = round(final_amount, 2)
+
+        # 4. Calculate Tax
+        tax_pct = 0.0
+        tax_name = ""
+        tax_amount = 0.0
+        
+        active_tax = await db.taxes.find_one({"is_active": True}, sort=[("created_at", -1)])
+        if active_tax:
+            tax_pct = active_tax.get('percentage', 0.0)
+            tax_name = active_tax.get('name', 'Tax')
+            tax_amount = round(final_amount * (tax_pct / 100), 2)
+            final_amount = round(final_amount + tax_amount, 2)
 
         # Create booking record
         booking = Booking(
@@ -1372,7 +1447,11 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
             promo_code=applied_promo_code,
             currency=currency,
             status="pending",
-            aura_image=booking_data.aura_image
+            aura_image=booking_data.aura_image,
+            tiktok_username=booking_data.tiktok_username,
+            tax_amount=tax_amount,
+            tax_percentage=tax_pct,
+            tax_name=tax_name
         )
 
         # Apply Emergency Charge (+30%)
@@ -1386,7 +1465,7 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
         # Robustness: re-check availability? 
         # For MVP, just insert. GCal allows overlaps unless we check.
         
-        if 'live' in booking_data.service_type and booking_data.preferred_date and booking_data.preferred_time:
+        if 'live' in booking_data.service_type and 'tiktok' not in booking_data.service_type and booking_data.preferred_date and booking_data.preferred_time:
              # Calculate Duration
              duration_b = 20
              if '40' in booking_data.service_type:
@@ -1483,17 +1562,26 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
             raise HTTPException(status_code=404, detail="Booking not found")
         
         # Convert ISO string timestamps back to datetime objects
-        if isinstance(booking['created_at'], str):
+        if isinstance(booking.get('created_at'), str):
             booking['created_at'] = datetime.fromisoformat(booking['created_at'])
-        if isinstance(booking['updated_at'], str):
+        if isinstance(booking.get('updated_at'), str):
             booking['updated_at'] = datetime.fromisoformat(booking['updated_at'])
+
+        # If already confirmed, return success idempotently
+        if booking.get('status') == 'confirmed' and booking.get('payment_status') == 'paid':
+            logger.info(f"VERIFY DEBUG: Booking {verification.booking_id} already confirmed. Returning success idempotently.")
+            return {
+                'success': True,
+                'message': 'Payment already verified',
+                'booking_id': verification.booking_id
+            }
         
         # Verify payment based on method
         payment_verified = None
         logger.info(f"VERIFY DEBUG: Receiving verification request: {verification}")
         
         if verification.payment_method == 'paypal':
-            payment_verified = payment_service.verify_paypal_payment(verification.payment_id)
+            payment_verified = payment_service.verify_paypal_payment(verification.payment_id, verification.payer_id)
         else:
              raise HTTPException(status_code=400, detail=f"Verification for {verification.payment_method} is not supported.")
 
@@ -1544,7 +1632,7 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
                 logger.error(f"Failed to create Zoom meeting in verification: {e}")
 
         # Send confirmation emails in background
-        import email_service
+        from services import email_service
         
         background_tasks.add_task(
             email_service.send_booking_confirmation_to_client,
@@ -1580,6 +1668,7 @@ async def resend_email(
         raise HTTPException(status_code=404, detail="Booking not found")
 
     # Send
+    from services import email_service
     background_tasks.add_task(
         email_service.send_booking_confirmation_to_client,
         booking,
@@ -1588,6 +1677,23 @@ async def resend_email(
     )
     
     return {"status": "queued", "message": f"Email queued for {booking.get('email')}"}
+
+@api_router.post("/bookings/{booking_id}/send-reminder")
+async def send_booking_reminder(
+    booking_id: str,
+    background_tasks: BackgroundTasks,
+    current_user: str = Depends(get_current_admin)
+):
+    """Send a reminder email to a user with an incomplete booking (no payment)"""
+    booking = await db.bookings.find_one({"booking_id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if booking.get("transaction_id"):
+        raise HTTPException(status_code=400, detail="This booking is already completed with a payment.")
+
+    from services import email_service
+    background_tasks.add_task(email_service.send_reminder_email, booking)
+    return {"status": "queued", "message": f"Reminder email queued for {booking.get('email')}"}
 
 @api_router.get("/bookings")
 async def get_all_bookings(
@@ -1760,7 +1866,7 @@ async def init_services(current_user: str = Depends(get_current_admin)):
                     "name": data['name'],
                     "amount": data['amount'],
                     "currency": data['currency'],
-                    "category": "delivered" if "delivered" in key else ("live" if "live" in key else "aura"),
+                    "category": "delivered" if "delivered" in key else ("live" if "live" in key or "tiktok" in key else "aura"),
                     "created_at": datetime.now(timezone.utc).isoformat()
                 }},
                 upsert=True
@@ -1853,6 +1959,42 @@ async def deactivate_campaign(campaign_id: str):
         raise HTTPException(status_code=404, detail="Campaign not found")
     return {"success": True}
 
+# --- Tax Configuration Endpoints ---
+
+@api_router.get("/taxes", response_model=List[Tax])
+async def get_taxes(current_admin: str = Depends(get_current_admin)):
+    """Fetch all tax configurations (Admin only)"""
+    taxes = await db.taxes.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return taxes
+
+@api_router.get("/taxes/active", response_model=Optional[Tax])
+async def get_active_tax():
+    """Fetch the currently active tax (Public)"""
+    tax = await db.taxes.find_one({"is_active": True}, sort=[("created_at", -1)], projection={"_id": 0})
+    return tax
+
+@api_router.post("/taxes", response_model=Tax)
+async def create_tax(tax: TaxCreate, current_admin: str = Depends(get_current_admin)):
+    """Create a new tax and set it as active, deactivating others (Admin only)"""
+    # Deactivate others
+    await db.taxes.update_many({"is_active": True}, {"$set": {"is_active": False}})
+    
+    new_tax = Tax(
+        name=tax.name,
+        percentage=tax.percentage,
+        is_active=tax.is_active
+    )
+    await db.taxes.insert_one(new_tax.model_dump())
+    return new_tax
+
+@api_router.delete("/taxes/{tax_id}")
+async def delete_tax(tax_id: str, current_admin: str = Depends(get_current_admin)):
+    """Delete a tax configuration (Admin only)"""
+    result = await db.taxes.delete_one({"id": tax_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tax configuration not found")
+    return {"message": "Tax configuration deleted successfully"}
+
 @api_router.get("/bookings/gcal/{event_id}")
 async def get_booking_by_gcal(event_id: str):
     """Get booking details by Google Calendar Event ID"""
@@ -1871,6 +2013,52 @@ async def get_booking_by_gcal(event_id: str):
         booking['updated_at'] = datetime.fromisoformat(booking['updated_at'])
     
     return booking
+
+@api_router.post("/generate-booking-pdf")
+async def api_generate_booking_pdf(booking_data: dict, background_tasks: BackgroundTasks):
+    """
+    Manual endpoint to generate PDFs for a booking.
+    Workflow:
+    1. Receive booking data
+    2. Determine service_type
+    3. Select template
+    4. Render template
+    5. Generate PDF
+    6. Return file path
+    """
+    try:
+        service_type = booking_data.get('service_type', 'delivered-3')
+        template = get_template_for_service(service_type)
+        
+        # Generate Invoice
+        invoice_path = generate_invoice_pdf_v2(booking_data)
+        
+        # Generate Details
+        details_path = generate_booking_details_pdf_v2(template, booking_data)
+        
+        return {
+            "success": True,
+            "invoice_path": invoice_path,
+            "details_path": details_path
+        }
+    except Exception as e:
+        logger.error(f"Manual PDF generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/download-pdf")
+async def download_pdf(path: str):
+    """Securely download a generated PDF if it exists in the output folder"""
+    # Security check: ensure path is within generated_pdfs
+    abs_path = os.path.abspath(path)
+    base_gen_path = os.path.abspath(os.path.join(os.getcwd(), "generated_pdfs"))
+    
+    if not abs_path.startswith(base_gen_path):
+        raise HTTPException(status_code=403, detail="Forbidden: Path outside generated directory")
+        
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="File not found")
+        
+    return FileResponse(abs_path, filename=os.path.basename(abs_path), media_type='application/pdf')
 
 # Include the router in the main app
 app.include_router(api_router)

@@ -1,12 +1,14 @@
 import os
 import logging
+import base64
 from dotenv import load_dotenv
 import resend
-import base64
-from pdf_service import generate_invoice_pdf, generate_booking_details_pdf
+from .pdf_service import generate_invoice_pdf_v2, generate_booking_details_pdf_v2
+from .template_selector import get_template_for_service
 
 # Load env vars
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), '..', 'env', '.env')
+load_dotenv(dotenv_path=env_path)
 
 logger = logging.getLogger(__name__)
 
@@ -132,19 +134,26 @@ def send_booking_confirmation_to_client(booking: dict, payment_info: dict = None
     # Prepare Attachments
     attachments = []
     
-    # 1. Invoice PDF
+    # 1. Invoice PDF (New System)
     try:
-        invoice_bytes = generate_invoice_pdf(booking, payment_info)
-        attachments.append({'name': 'invoice.pdf', 'data': invoice_bytes})
+        invoice_path = generate_invoice_pdf_v2(booking, payment_info)
+        if invoice_path and os.path.exists(invoice_path):
+            with open(invoice_path, "rb") as f:
+                attachments.append({'name': 'invoice.pdf', 'data': f.read()})
+            os.remove(invoice_path)
     except Exception as e:
-        logger.error(f"Failed to generate invoice: {e}")
+        logger.error(f"Failed to generate invoice v2: {e}")
 
-    # 2. Booking Details PDF
+    # 2. Booking Details PDF (New System)
     try:
-        details_bytes = generate_booking_details_pdf(booking)
-        attachments.append({'name': 'booking_details.pdf', 'data': details_bytes})
+        template = get_template_for_service(booking.get('service_type'))
+        details_path = generate_booking_details_pdf_v2(template, booking)
+        if details_path and os.path.exists(details_path):
+            with open(details_path, "rb") as f:
+                attachments.append({'name': 'booking_details.pdf', 'data': f.read()})
+            os.remove(details_path)
     except Exception as e:
-        logger.error(f"Failed to generate booking details: {e}")
+        logger.error(f"Failed to generate booking details v2: {e}")
 
     # 3. Aura Image (Separate Attachment)
     aura_data = booking.get('aura_image')
@@ -195,14 +204,23 @@ def send_booking_notification_to_tejashvini(booking: dict, payment_info: dict = 
     # Re-generate attachments (or pass them if we wanted to optimize, but regeneration is safer/stateless here)
     attachments = []
     
-    # 1. Invoice
+    # 1. Invoice (New System)
     try:
-        attachments.append({'name': 'invoice.pdf', 'data': generate_invoice_pdf(booking, payment_info)})
+        invoice_path = generate_invoice_pdf_v2(booking, payment_info)
+        if invoice_path and os.path.exists(invoice_path):
+            with open(invoice_path, "rb") as f:
+                attachments.append({'name': 'invoice.pdf', 'data': f.read()})
+            os.remove(invoice_path)
     except Exception: pass
     
-    # 2. Details
+    # 2. Details (New System)
     try:
-         attachments.append({'name': 'booking_details.pdf', 'data': generate_booking_details_pdf(booking)})
+         template = get_template_for_service(booking.get('service_type'))
+         details_path = generate_booking_details_pdf_v2(template, booking)
+         if details_path and os.path.exists(details_path):
+             with open(details_path, "rb") as f:
+                 attachments.append({'name': 'booking_details.pdf', 'data': f.read()})
+             os.remove(details_path)
     except Exception: pass
     
     # 3. Aura
@@ -277,3 +295,59 @@ def send_booking_cancellation_email(booking: dict):
         send_email(recipient_email, subject, body)
     else:
         logger.warning(f"No email found for booking {booking.get('booking_id')}, cancellation email not sent.")
+
+
+def send_reminder_email(booking: dict):
+    """
+    Sends a booking completion reminder email to a user who started but didn't pay.
+    """
+    import jinja2
+    import os
+
+    templates_dir = os.path.join(os.path.dirname(__file__), '..', 'templates')
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_dir))
+
+    try:
+        template = env.get_template('reminder_email.html')
+    except jinja2.TemplateNotFound:
+        logger.error("reminder_email.html template not found")
+        return None
+
+    service_type = booking.get('service_type', 'Tarot Reading')
+    service_map = {
+        'live-standard': 'Live Standard Reading',
+        'live-emergency': 'Live Emergency Reading',
+        'delivered-standard': 'Delivered Standard Reading',
+        'delivered-emergency': 'Delivered Emergency Reading',
+        'aura': 'Aura Reading',
+        'tiktok-live': 'TikTok Live Session',
+    }
+    service_name = service_map.get(service_type, service_type.replace('-', ' ').title())
+
+    # Strip out any comma-separated values (e.g. "http://localhost:3000,https://prod.com")
+    # Always use the LAST entry which is typically the production URL, or override with PROD_URL
+    _raw_url = os.getenv('FRONTEND_URL', 'https://tejashvinibdivinedecode.com')
+    _urls = [u.strip() for u in _raw_url.split(',') if u.strip()]
+    # Prefer production URL (https) if multiple; fall back to last entry
+    frontend_url = next((u for u in reversed(_urls) if u.startswith('https://')), _urls[-1] if _urls else 'https://tejashvinibdivinedecode.com')
+    booking_url = f"{frontend_url}/services"
+
+    body = template.render(
+        name=booking.get('full_name', 'Valued Customer'),
+        service_name=service_name,
+        booking_id=booking.get('booking_id', ''),
+        amount=booking.get('amount', ''),
+        currency=booking.get('currency', 'EUR'),
+        booking_url=booking_url,
+    )
+
+    recipient_email = booking.get('email')
+    if not recipient_email:
+        logger.warning(f"No email for booking {booking.get('booking_id')}, reminder not sent.")
+        return None
+
+    subject = "✨ Complete Your Tarot Booking - Your Reading Awaits"
+    result = send_email(recipient_email, subject, body)
+    if result:
+        logger.info(f"Reminder email sent to {recipient_email} for booking {booking.get('booking_id')}")
+    return result

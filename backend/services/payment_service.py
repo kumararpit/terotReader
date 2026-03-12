@@ -8,13 +8,16 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Load environment variables
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), '..', 'env', '.env')
+load_dotenv(dotenv_path=env_path)
 
 logger = logging.getLogger(__name__)
 
 # Add File Handler for debugging
 try:
-    f_handler = logging.FileHandler('paypal_debug.log')
+    log_dir = Path(__file__).parent.parent / "logs"
+    log_dir.mkdir(exist_ok=True)
+    f_handler = logging.FileHandler(log_dir / 'paypal_debug.log')
     f_handler.setLevel(logging.INFO)
     fmt = logging.Formatter('%(asctime)s - %(message)s')
     f_handler.setFormatter(fmt)
@@ -73,6 +76,10 @@ class PaymentService:
                 logger.error("PayPal Client ID not configured")
                 return {'success': False, 'error': "PayPal configuration missing"}
             
+            # PayPal Tax Breakdown
+            tax_amount = booking_data.get('tax_amount', 0.0)
+            subtotal = amount - tax_amount
+
             # PayPal implementation
             payment = paypalrestsdk.Payment({
                 "intent": "sale",
@@ -84,9 +91,22 @@ class PaymentService:
                 "transactions": [{
                     "amount": {
                         "total": f"{amount:.2f}",
-                        "currency": currency
+                        "currency": currency,
+                        "details": {
+                            "subtotal": f"{subtotal:.2f}",
+                            "tax": f"{tax_amount:.2f}"
+                        }
                     },
-                    "description": f"Tarot Reading - {booking_data.get('service_type')}"
+                    "description": f"Tarot Reading - {booking_data.get('service_type')}",
+                    "item_list": {
+                        "items": [{
+                            "name": f"Tarot Reading ({booking_data.get('service_type')})",
+                            "sku": booking_data.get('booking_id'),
+                            "price": f"{subtotal:.2f}",
+                            "currency": currency,
+                            "quantity": 1
+                        }]
+                    }
                 }]
             })
             
@@ -110,10 +130,10 @@ class PaymentService:
             return {'success': False, 'error': "Technical Error: Unable to initiate payment. Please try again later."}
     
     @staticmethod
-    def verify_paypal_payment(payment_id: str):
+    def verify_paypal_payment(payment_id: str, payer_id: str = None):
         """Verify PayPal payment"""
         try:
-            logger.info(f"PAYPAL DEBUG: Verifying payment_id={payment_id}")
+            logger.info(f"PAYPAL DEBUG: Verifying payment_id={payment_id}, payer_id={payer_id}")
             # For testing with dummy ID if needed, but usually we want real verification
             if 'demo' in payment_id:
                  return {
@@ -125,7 +145,19 @@ class PaymentService:
                 }
 
             payment = paypalrestsdk.Payment.find(payment_id)
-            if payment.execute({"payer_id": payment.payer.payer_info.payer_id}):
+            
+            exec_payer_id = payer_id
+            if not exec_payer_id:
+                try:
+                    exec_payer_id = payment.payer.payer_info.payer_id
+                except AttributeError:
+                    pass
+            
+            if not exec_payer_id:
+                logger.error("No payer_id provided or found in payment object.")
+                return {'success': False, 'error': "Missing payer_id"}
+
+            if payment.execute({"payer_id": exec_payer_id}):
                 if payment.state != 'approved':
                     logger.error(f"PayPal payment executed but state is {payment.state}")
                     return {'success': False, 'error': f"Payment state is {payment.state}"}

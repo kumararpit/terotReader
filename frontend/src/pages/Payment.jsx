@@ -20,19 +20,22 @@ const Payment = () => {
     const [promoCode, setPromoCode] = React.useState('');
     const [appliedPromo, setAppliedPromo] = React.useState(null);
     const [promoLoading, setPromoLoading] = React.useState(false);
+    const [activeTax, setActiveTax] = React.useState(null);
 
     useEffect(() => {
         const fetchPricing = async () => {
             const baseUrl = process.env.REACT_APP_BACKEND_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '') || 'http://localhost:8000';
             try {
-                const [sRes, cRes] = await Promise.all([
+                const [sRes, cRes, tRes] = await Promise.all([
                     axios.get(`${baseUrl}/api/services`),
-                    axios.get(`${baseUrl}/api/campaign`)
+                    axios.get(`${baseUrl}/api/campaign`),
+                    axios.get(`${baseUrl}/api/taxes/active`)
                 ]);
                 const pMap = {};
                 sRes.data.forEach(s => pMap[s.key] = s);
                 setPricingMap(pMap);
                 setGlobalCampaign(cRes.data);
+                setActiveTax(tRes.data);
             } catch (e) {
                 console.error("Pricing fetch error", e);
             }
@@ -65,7 +68,9 @@ const Payment = () => {
 
         // Determine Service Key
         let serviceKey = '';
-        if (service?.title?.includes('Delivered')) {
+        if (service?.title?.includes('TikTok')) {
+            serviceKey = 'tiktok-live';
+        } else if (service?.title?.includes('Delivered')) {
             if (bookingData?.sessionType === '3_questions') serviceKey = 'delivered-3';
             if (bookingData?.sessionType === '5_questions') serviceKey = 'delivered-5';
         } else if (service?.title?.includes('Live')) {
@@ -79,13 +84,6 @@ const Payment = () => {
         if (pricingMap[serviceKey]) {
             basePrice = pricingMap[serviceKey].amount;
             currency = pricingMap[serviceKey].currency;
-        } else {
-            // Fallback Logic (Mock)
-            if (serviceKey === 'delivered-3') basePrice = 22;
-            if (serviceKey === 'delivered-5') basePrice = 33;
-            if (serviceKey === 'live-20') basePrice = 66;
-            if (serviceKey === 'live-40') basePrice = 129;
-            if (serviceKey === 'aura') basePrice = 15;
         }
 
         let final = basePrice;
@@ -93,7 +91,7 @@ const Payment = () => {
         let promoDiscountAmount = 0;
 
         // 1. Promo Code (Priority)
-        if (appliedPromo) {
+        if (appliedPromo && serviceKey !== 'tiktok-live') {
             if (appliedPromo.discount_type === 'percentage') {
                 promoDiscountAmount = basePrice * (appliedPromo.discount_value / 100);
             } else {
@@ -102,7 +100,7 @@ const Payment = () => {
             final = basePrice - promoDiscountAmount;
         }
         // 2. Global Campaign (Only if no promo applied)
-        else if (globalCampaign && globalCampaign.is_active) {
+        else if (globalCampaign && globalCampaign.is_active && serviceKey !== 'tiktok-live') {
             const expiry = new Date(globalCampaign.expiry_date);
             if (expiry > new Date()) {
                 globalDiscountAmount = basePrice * (globalCampaign.discount_percentage / 100);
@@ -127,12 +125,27 @@ const Payment = () => {
             final += emergencyFee;
         }
 
+        let taxAmount = 0;
+        if (activeTax) {
+            taxAmount = (final * activeTax.percentage) / 100;
+            final += taxAmount;
+        }
+
         if (final < 0) final = 0;
 
-        return { basePrice, globalDiscountAmount, promoDiscountAmount, emergencyFee, total: final, currency };
+        return { 
+            basePrice, 
+            globalDiscountAmount, 
+            promoDiscountAmount, 
+            emergencyFee, 
+            taxAmount,
+            taxInfo: activeTax,
+            total: final, 
+            currency 
+        };
     };
 
-    const { basePrice, globalDiscountAmount, promoDiscountAmount, emergencyFee, total, currency } = calculateTotal();
+    const { basePrice, globalDiscountAmount, promoDiscountAmount, emergencyFee, taxAmount, taxInfo, total, currency } = calculateTotal();
 
     const isCancelled = React.useRef(false);
 
@@ -144,7 +157,9 @@ const Payment = () => {
 
             // Map service type for backend
             let serviceType = 'unknown';
-            if (service?.title?.includes('Delivered')) {
+            if (service?.title?.includes('TikTok')) {
+                serviceType = 'tiktok-live';
+            } else if (service?.title?.includes('Delivered')) {
                 serviceType = `delivered-${bookingData.sessionType === '3_questions' ? 3 : 5}`;
             } else if (service?.title?.includes('Live')) {
                 serviceType = `live-${bookingData.sessionType === '20_min' ? 20 : 40}`;
@@ -183,9 +198,10 @@ const Payment = () => {
                 preferred_time: preferred_time,
                 alternative_time: null,
                 partner_info: bookingData.partnerName ? `${bookingData.partnerName} (${bookingData.partnerDob})` : null,
-                questions: bookingData.questions || 'Aura Reading', // Aura might not have questions
-                situation_description: bookingData.situation || 'Aura Reading',
+                questions: bookingData.questions || (serviceType === 'tiktok-live' ? 'TikTok Live Session' : 'Aura Reading'),
+                situation_description: bookingData.situation || (serviceType === 'tiktok-live' ? 'TikTok Live Session' : 'Aura Reading'),
                 reading_focus: bookingData.readingFocus || null,
+                tiktok_username: bookingData.tiktokUsername || null,
                 payment_method: selectedPayment,
                 is_emergency: bookingData.isEmergency || false,
                 aura_image: bookingData.auraImage || null,
@@ -293,6 +309,13 @@ const Payment = () => {
                                         <span className="text-muted-foreground">Client Name</span>
                                         <span className="font-medium text-primary">{bookingData?.name}</span>
                                     </div>
+
+                                    {bookingData?.tiktokUsername && (
+                                        <div className="flex justify-between py-3 border-b border-primary/5">
+                                            <span className="text-muted-foreground">TikTok Username</span>
+                                            <span className="font-medium text-primary">{bookingData.tiktokUsername}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -325,6 +348,14 @@ const Payment = () => {
                                             <span>+{currency === 'EUR' ? '€' : currency}{emergencyFee.toFixed(2)}</span>
                                         </div>
                                     )}
+
+                                    {taxAmount > 0 && (
+                                        <div className="flex justify-between text-primary/60 italic">
+                                            <span>{taxInfo?.name || 'Tax'} ({taxInfo?.percentage}%)</span>
+                                            <span>+{currency === 'EUR' ? '€' : currency}{taxAmount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+
                                     <div className="border-t border-dashed border-primary/20 my-4"></div>
                                     <div className="flex justify-between text-xl font-bold text-primary">
                                         <span>Total to Pay</span>
@@ -332,28 +363,30 @@ const Payment = () => {
                                     </div>
 
                                     {/* Promo Input */}
-                                    <div className="pt-4 border-t mt-4">
-                                        <label className="text-xs font-medium text-primary mb-1 block">Have a Promo Code?</label>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                className="flex-1 p-2 rounded-lg border border-primary/20 text-sm uppercase"
-                                                placeholder="ENTER CODE"
-                                                value={promoCode}
-                                                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                                                disabled={!!appliedPromo}
-                                            />
-                                            {appliedPromo ? (
-                                                <Button size="sm" variant="outline" onClick={() => { setAppliedPromo(null); setPromoCode(''); }}>
-                                                    Remove
-                                                </Button>
-                                            ) : (
-                                                <Button size="sm" onClick={handleVerifyPromo} disabled={promoLoading || !promoCode}>
-                                                    {promoLoading ? '...' : 'Apply'}
-                                                </Button>
-                                            )}
+                                    {(!service?.title?.includes('TikTok')) && (
+                                        <div className="pt-4 border-t mt-4">
+                                            <label className="text-xs font-medium text-primary mb-1 block">Have a Promo Code?</label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    className="flex-1 p-2 rounded-lg border border-primary/20 text-sm uppercase"
+                                                    placeholder="ENTER CODE"
+                                                    value={promoCode}
+                                                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                                                    disabled={!!appliedPromo}
+                                                />
+                                                {appliedPromo ? (
+                                                    <Button size="sm" variant="outline" onClick={() => { setAppliedPromo(null); setPromoCode(''); }}>
+                                                        Remove
+                                                    </Button>
+                                                ) : (
+                                                    <Button size="sm" onClick={handleVerifyPromo} disabled={promoLoading || !promoCode}>
+                                                        {promoLoading ? '...' : 'Apply'}
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

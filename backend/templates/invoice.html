@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Section 1: Client Profile (Bill To) -->
+<section>
+    <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">
+        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-wider">Client Profile</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Full Name</span>
+            <span class="text-lg text-slate-800 dark:text-slate-200">{{ full_name }}</span>
+        </div>
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Date Created</span>
+            <span class="text-lg text-slate-800 dark:text-slate-200">{{ created_at }}</span>
+        </div>
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Email Address</span>
+            <span class="text-lg text-slate-800 dark:text-slate-200">{{ email }}</span>
+        </div>
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Phone Number</span>
+            <span class="text-lg text-slate-800 dark:text-slate-200">{{ phone }}</span>
+        </div>
+    </div>
+    
+    <div class="mt-6 border-t border-slate-200 dark:border-slate-700 pt-6"></div>
+    <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">
+        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+        <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-wider">Payment Details</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-y-6 gap-x-12">
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Status</span>
+            <span class="text-lg text-emerald-600 dark:text-emerald-400 font-bold uppercase">{{ payment_info.status | default('Completed') }}</span>
+        </div>
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Payment Method</span>
+            <span class="text-lg text-slate-800 dark:text-slate-200 uppercase">{{ payment_info.payment_method | default('PayPal') }}</span>
+        </div>
+        <div class="flex flex-col">
+            <span class="text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold mb-1">Transaction ID</span>
+            <span class="text-lg text-slate-800 dark:text-slate-200 font-mono text-sm">{{ payment_info.transaction_id | default('N/A') }}</span>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Invoice Details -->
+<section>
+    <div class="flex items-center gap-3 mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">
+        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <h2 class="text-xl font-bold text-slate-800 dark:text-white uppercase tracking-wider">Invoice Details</h2>
+    </div>
+
+    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 dark:bg-slate-800/50">
+                    <th
+                        class="p-4 text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700">
+                        Service</th>
+                    <th
+                        class="p-4 text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700 text-right">
+                        Amount</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tr>
+                    <td class="p-4 text-slate-800 dark:text-slate-200 font-medium">{{ service_name }}</td>
+                    <td class="p-4 text-slate-800 dark:text-slate-200 text-right">{{ currency }} {{ original_amount | default(amount, true) }}</td>
+                </tr>
+                {% if is_emergency %}
+                <tr>
+                    <td class="p-4 text-primary font-medium">Priority Booking (+30%)</td>
+                    <td class="p-4 text-slate-800 dark:text-slate-200 text-right">Included</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-8 flex justify-end">
+        <div class="w-full max-w-sm space-y-3 text-right">
+            <div class="flex justify-between text-slate-600 dark:text-slate-400">
+                <span>Subtotal (Excl. Tax):</span>
+                <span>{{ currency }} {{ (amount - tax_amount) | round(2) }}</span>
+            </div>
+            <div class="flex justify-between text-slate-600 dark:text-slate-400">
+                <span>{{ tax_name | default('Tax') }} ({{ tax_percentage | default(0) }}%):</span>
+                <span>{{ currency }} {{ tax_amount | default(0) }}</span>
+            </div>
+            
+            {% if discount_amount and discount_amount > 0 %}
+            <div class="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium pt-1">
+                <span>
+                    Discount Applied
+                    {% if promo_code %}
+                    <span class="text-xs ml-1 px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">{{ promo_code }}</span>
+                    {% endif %}
+                </span>
+                <span>-{{ currency }} {{ discount_amount }}</span>
+            </div>
+            {% endif %}
+            
+            <div
+                class="flex justify-between text-xl font-bold text-slate-800 dark:text-white border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+                <span class="text-primary">Total Paid:</span>
+                <span>{{ currency }} {{ amount }}</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import PromotionsTab from '../components/PromotionsTab';
 import dayjs, { getUserTimezone, formatInTimeZone } from '../lib/dateUtils';
+import { EMAIL_REGEX } from '../lib/constants';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -46,7 +47,7 @@ const Admin = () => {
     const [allBookings, setAllBookings] = useState([]);
     const [isBookingsLoading, setIsBookingsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('paid');
+    const [statusFilter, setStatusFilter] = useState('paid'); // default: confirmed only
     const [serviceTypeFilter, setServiceTypeFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalBookings, setTotalBookings] = useState(0);
@@ -56,6 +57,13 @@ const Admin = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [stats, setStats] = useState(null);
     const [isStatsLoading, setIsStatsLoading] = useState(false);
+    // Incomplete bookings (no payment)
+    const [incompleteBookings, setIncompleteBookings] = useState([]);
+    const [isIncompleteLoading, setIsIncompleteLoading] = useState(false);
+    const [reminderSending, setReminderSending] = useState({});
+    const [incompletePage, setIncompletePage] = useState(1);
+    const [totalIncompleteBookings, setTotalIncompleteBookings] = useState(0);
+    const incompletePageSize = 5;
 
     // Auth Flow State
     const [needsSetup, setNeedsSetup] = useState(null);
@@ -65,6 +73,9 @@ const Admin = () => {
     const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [setupData, setSetupData] = useState({ username: '', email: '', password: '' });
     const [resetData, setResetData] = useState({ email: '', otp: '', newPassword: '' });
+
+    const [setupEmailError, setSetupEmailError] = useState('');
+    const [forgotEmailError, setForgotEmailError] = useState('');
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -129,9 +140,19 @@ const Admin = () => {
 
     const handleSetup = async (e) => {
         e.preventDefault();
+        
+        const trimmedEmail = setupData.email.trim();
+        if (!EMAIL_REGEX.test(trimmedEmail)) {
+            setSetupEmailError('Please enter a valid email address');
+            return;
+        }
+
         setIsLoading(true);
         try {
-            await axios.post(`${API}/auth/setup`, setupData);
+            await axios.post(`${API}/auth/setup`, {
+                ...setupData,
+                email: trimmedEmail
+            });
             toast.success('Admin account created! Please login.');
             setNeedsSetup(false);
             setCredentials({ username: setupData.username, password: '' });
@@ -144,9 +165,16 @@ const Admin = () => {
 
     const handleForgotPassword = async (e) => {
         e.preventDefault();
+        
+        const trimmedEmail = resetData.email.trim();
+        if (!EMAIL_REGEX.test(trimmedEmail)) {
+            setForgotEmailError('Please enter a valid email address');
+            return;
+        }
+
         setIsLoading(true);
         try {
-            await axios.post(`${API}/auth/forgot-password`, { email: resetData.email });
+            await axios.post(`${API}/auth/forgot-password`, { email: trimmedEmail });
             toast.success('If registered, an OTP has been sent.');
             setAuthView('reset');
         } catch (error) {
@@ -453,6 +481,40 @@ const Admin = () => {
         }
     }, [currentPage, pageSize, serviceTypeFilter, statusFilter, sortField, sortOrder]);
 
+    const fetchIncompleteBookings = React.useCallback(async () => {
+        setIsIncompleteLoading(true);
+        try {
+            const skip = (incompletePage - 1) * incompletePageSize;
+            const res = await axios.get(`${API}/bookings`, {
+                params: {
+                    skip,
+                    limit: incompletePageSize,
+                    payment_status: 'pending',
+                    sort_by: 'created_at',
+                    sort_order: -1
+                }
+            });
+            setIncompleteBookings(res.data.bookings);
+            setTotalIncompleteBookings(res.data.total);
+        } catch (error) {
+            console.error('Error fetching incomplete bookings:', error);
+        } finally {
+            setIsIncompleteLoading(false);
+        }
+    }, [incompletePage]);
+
+    const handleSendReminder = async (bookingId, email) => {
+        setReminderSending(prev => ({ ...prev, [bookingId]: true }));
+        try {
+            await axios.post(`${API}/bookings/${bookingId}/send-reminder`);
+            toast.success(`Reminder sent to ${email}`);
+        } catch (error) {
+            toast.error(error.response?.data?.detail || 'Failed to send reminder');
+        } finally {
+            setReminderSending(prev => ({ ...prev, [bookingId]: false }));
+        }
+    };
+
     const fetchStats = async () => {
         setIsStatsLoading(true);
         try {
@@ -460,7 +522,6 @@ const Admin = () => {
             setStats(res.data);
         } catch (error) {
             console.error('Error fetching admin stats:', error);
-            // Non-critical toast? Dashboard usually has its own error state
         } finally {
             setIsStatsLoading(false);
         }
@@ -472,8 +533,9 @@ const Admin = () => {
             fetchTestimonials();
             fetchAllBookings();
             fetchStats();
+            fetchIncompleteBookings();
         }
-    }, [isAuthenticated, fetchSlots, fetchTestimonials, fetchAllBookings]);
+    }, [isAuthenticated, fetchSlots, fetchTestimonials, fetchAllBookings, fetchIncompleteBookings]);
 
     const createTestimonial = async (e) => {
         e.preventDefault();
@@ -583,7 +645,18 @@ const Admin = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-primary/70">Email Address</Label>
-                                    <Input required type="email" value={setupData.email} onChange={e => setSetupData({ ...setupData, email: e.target.value })} placeholder="admin@example.com" className="bg-background/50 border-primary/10 focus:border-secondary focus:ring-secondary/20 transition-all" />
+                                    <Input 
+                                        required 
+                                        type="email" 
+                                        value={setupData.email} 
+                                        onChange={e => {
+                                            setSetupData({ ...setupData, email: e.target.value });
+                                            setSetupEmailError('');
+                                        }} 
+                                        placeholder="admin@example.com" 
+                                        className={`bg-background/50 border-primary/10 focus:border-secondary focus:ring-secondary/20 transition-all ${setupEmailError ? 'border-red-500' : ''}`} 
+                                    />
+                                    {setupEmailError && <p className="text-xs text-red-500">{setupEmailError}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-primary/70">Access Password</Label>
@@ -595,7 +668,18 @@ const Admin = () => {
                             <form onSubmit={handleForgotPassword} className="space-y-4">
                                 <div className="space-y-2">
                                     <Label className="text-primary/70">Verified Email Address</Label>
-                                    <Input required type="email" value={resetData.email} onChange={e => setResetData({ ...resetData, email: e.target.value })} placeholder="admin@example.com" className="bg-background/50 border-primary/10 focus:border-secondary transition-all" />
+                                    <Input 
+                                        required 
+                                        type="email" 
+                                        value={resetData.email} 
+                                        onChange={e => {
+                                            setResetData({ ...resetData, email: e.target.value });
+                                            setForgotEmailError('');
+                                        }} 
+                                        placeholder="admin@example.com" 
+                                        className={`bg-background/50 border-primary/10 focus:border-secondary transition-all ${forgotEmailError ? 'border-red-500' : ''}`} 
+                                    />
+                                    {forgotEmailError && <p className="text-xs text-red-500">{forgotEmailError}</p>}
                                 </div>
                                 <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-xl shadow-md transition-all" disabled={isLoading}>{isLoading ? 'Processing...' : 'Request Access Code'}</Button>
                                 <Button type="button" variant="ghost" className="w-full text-muted-foreground hover:text-primary" onClick={() => setAuthView('login')}>Return to Login</Button>
@@ -917,6 +1001,119 @@ const Admin = () => {
                                 No analytics data available yet.
                             </div>
                         )}
+
+                        {/* Incomplete Bookings Table */}
+                        <Card className="shadow-sm border-none">
+                            <CardHeader>
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <CardTitle className="text-xl font-heading text-primary flex items-center gap-2">
+                                            <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                            Incomplete Bookings
+                                        </CardTitle>
+                                        <CardDescription>Users who started a booking but did not complete payment</CardDescription>
+                                    </div>
+                                    <Button size="sm" variant="outline" onClick={fetchIncompleteBookings} className="text-xs">
+                                        ↻ Refresh
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {isIncompleteLoading ? (
+                                    <div className="py-12 flex flex-col items-center justify-center space-y-4">
+                                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="text-primary/60 font-medium text-sm">Loading…</p>
+                                    </div>
+                                ) : incompleteBookings.length === 0 ? (
+                                    <div className="py-12 text-center text-primary/40 italic text-sm">No incomplete bookings found.</div>
+                                ) : (
+                                    <>
+                                        <div className="overflow-x-auto max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead className="sticky top-0 bg-background/95 backdrop-blur-md z-10 shadow-sm">
+                                                    <tr className="border-b border-primary/5 text-xs uppercase tracking-wider text-primary/40 font-bold">
+                                                        <th className="px-4 py-3">Ref ID ↓</th>
+                                                        <th className="px-4 py-3">Service</th>
+                                                        <th className="px-4 py-3">Client</th>
+                                                        <th className="px-4 py-3">Date</th>
+                                                        <th className="px-4 py-3 text-right">Amount</th>
+                                                        <th className="px-4 py-3 text-right">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-primary/5">
+                                                    {incompleteBookings.map((booking) => (
+                                                        <tr key={booking.booking_id} className="hover:bg-amber-50/40 transition-colors">
+                                                            <td className="px-4 py-3">
+                                                                <span className="text-xs font-mono font-bold text-primary/70">{booking.booking_id}</span>
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                <span className="text-xs text-primary/60 capitalize">{booking.service_type?.replace(/-/g, ' ')}</span>
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                <div className="flex flex-col leading-tight">
+                                                                    <span className="text-sm font-bold text-primary">{booking.full_name}</span>
+                                                                    <span className="text-xs text-primary/50">{booking.email}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                {(() => {
+                                                                    const { date } = formatLocalDateTime(booking.preferred_date, booking.preferred_time);
+                                                                    return <span className="text-sm text-primary/70">{date}</span>;
+                                                                })()}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right">
+                                                                <span className="text-sm font-bold text-amber-700">{booking.currency} {booking.amount}</span>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    className="text-xs border-amber-300 text-amber-700 hover:bg-amber-50 font-bold"
+                                                                    disabled={!!reminderSending[booking.booking_id]}
+                                                                    onClick={() => handleSendReminder(booking.booking_id, booking.email)}
+                                                                >
+                                                                    {reminderSending[booking.booking_id] ? '...' : '✉ Send Reminder'}
+                                                                </Button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        {/* Incomplete Bookings Pagination */}
+                                        <div className="flex items-center justify-between pt-4 border-t border-primary/5 mt-4">
+                                            <p className="text-xs text-primary/40">
+                                                Showing <span className="font-bold">{(incompletePage - 1) * incompletePageSize + 1}</span> to <span className="font-bold">{Math.min(incompletePage * incompletePageSize, totalIncompleteBookings)}</span> of <span className="font-bold">{totalIncompleteBookings}</span> bookings
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={incompletePage === 1}
+                                                    onClick={() => setIncompletePage(prev => prev - 1)}
+                                                    className="text-xs font-bold border-primary/10 hover:bg-primary/5"
+                                                >
+                                                    Previous
+                                                </Button>
+                                                <div className="flex items-center px-4 bg-primary/5 rounded-md">
+                                                    <span className="text-xs font-bold text-primary">Page {incompletePage} of {Math.ceil(totalIncompleteBookings / incompletePageSize) || 1}</span>
+                                                </div>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={incompletePage >= Math.ceil(totalIncompleteBookings / incompletePageSize)}
+                                                    onClick={() => setIncompletePage(prev => prev + 1)}
+                                                    className="text-xs font-bold border-primary/10 hover:bg-primary/5"
+                                                >
+                                                    Next
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
                     <TabsContent value="slots">
@@ -1576,19 +1773,129 @@ const Admin = () => {
                                     </div>
                                 </div>
 
-                                {/* Context */}
-                                <div className="space-y-4">
-                                    <div>
-                                        <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
-                                        <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.situation_description || 'No description provided.'}</p>
-                                    </div>
-                                    {selectedBooking.questions && (
-                                        <div>
-                                            <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Specific Questions</h4>
-                                            <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">{selectedBooking.questions}</p>
+                                {/* Service-Specific Details */}
+                                {(() => {
+                                    const sType = selectedBooking.service_type || '';
+                                    const isTikTok = sType === 'tiktok-live';
+                                    const isAura = sType === 'aura';
+
+                                    if (isTikTok) {
+                                        return (
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">TikTok Username</h4>
+                                                    <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 font-mono">
+                                                        {selectedBooking.tiktok_username || 'Not provided'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Booking Date</h4>
+                                                    <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700">
+                                                        {selectedBooking.preferred_date || 'N/A'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+
+                                    if (isAura) {
+                                        return null; // Aura has no Situation/Questions — just the photo below
+                                    }
+
+                                    // Delivered / Live Readings
+                                    const isLive = sType.startsWith('live');
+                                    return (
+                                        <div className="space-y-4">
+                                            {/* Live Session Info Card */}
+                                            {isLive && (() => {
+                                                const pt = selectedBooking.preferred_time;
+                                                const pd = selectedBooking.preferred_date;
+                                                let slotDt;
+                                                if (pt && pd) {
+                                                    const fullIso = pt.includes('T') ? pt : `${pd}T${pt}`;
+                                                    const parsed = dayjs(fullIso);
+                                                    if (parsed.isValid()) slotDt = parsed.tz(activeTZ);
+                                                }
+                                                const slotDate = slotDt ? slotDt.format('ddd, D MMM YYYY') : (pd || 'N/A');
+                                                const slotTime = slotDt ? slotDt.format('HH:mm') : (pt ? pt.substring(0, 5) : 'N/A');
+                                                return (
+                                                    <div className="rounded-xl border border-blue-100 bg-blue-50/60 overflow-hidden">
+                                                        <div className="px-4 py-2 bg-blue-100/70 flex items-center gap-2">
+                                                            <span className="text-xs font-bold uppercase tracking-wider text-blue-700">📅 Session Details</span>
+                                                        </div>
+                                                        <div className="divide-y divide-blue-100">
+                                                            <div className="flex items-center justify-between px-4 py-3">
+                                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</span>
+                                                                <span className="text-sm font-semibold text-gray-800">{slotDate}</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between px-4 py-3">
+                                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Time ({activeTZ})</span>
+                                                                <span className="text-sm font-bold font-mono text-gray-800">{slotTime}</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between px-4 py-3">
+                                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Slot Type</span>
+                                                                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${selectedBooking.is_emergency ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                                    {selectedBooking.is_emergency ? '⚡ Emergency' : '✓ Standard'}
+                                                                </span>
+                                                            </div>
+                                                            {selectedBooking.meeting_link && (
+                                                                <div className="flex items-center justify-between px-4 py-3 gap-4">
+                                                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide shrink-0">Zoom Link</span>
+                                                                    <a
+                                                                        href={selectedBooking.meeting_link}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-sm text-blue-600 hover:text-blue-800 underline truncate max-w-[280px]"
+                                                                        title={selectedBooking.meeting_link}
+                                                                    >
+                                                                        {selectedBooking.meeting_link}
+                                                                    </a>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                            {/* Situation / Context — always shown for Live & Delivered */}
+                                            <div>
+                                                <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Situation/Context</h4>
+                                                <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">
+                                                    {selectedBooking.situation_description &&
+                                                     selectedBooking.situation_description !== 'TikTok Live Session' &&
+                                                     selectedBooking.situation_description !== 'Aura Reading'
+                                                        ? selectedBooking.situation_description
+                                                        : 'No description provided.'}
+                                                </p>
+                                            </div>
+                                            {selectedBooking.questions &&
+                                             selectedBooking.questions !== 'TikTok Live Session' &&
+                                             selectedBooking.questions !== 'Aura Reading' && (
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Specific Questions</h4>
+                                                    <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 whitespace-pre-wrap">
+                                                        {selectedBooking.questions}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {selectedBooking.reading_focus && (
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Reading Focus</h4>
+                                                    <p className="bg-gray-50 p-3 rounded-md text-sm text-gray-700 capitalize">
+                                                        {selectedBooking.reading_focus.replace(/_/g, ' ')}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {selectedBooking.partner_info && (
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-700 mb-1 text-sm uppercase tracking-wide">Partner / Other Person</h4>
+                                                    <p className="bg-amber-50 p-3 rounded-md text-sm text-gray-700">
+                                                        {selectedBooking.partner_info}
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
+                                    );
+                                })()}
 
                                 {/* Aura Image if available */}
                                 {selectedBooking.aura_image && (
@@ -1624,12 +1931,21 @@ const Admin = () => {
                                     <div>
                                         <span className="block font-medium">Payment:</span> {selectedBooking.amount} {selectedBooking.currency} ({selectedBooking.payment_method})
                                     </div>
-                                    <div>
-                                        <span className="block font-medium">DOB:</span> {selectedBooking.date_of_birth}
-                                    </div>
-                                    <div>
-                                        <span className="block font-medium">Gender:</span> {selectedBooking.gender}
-                                    </div>
+                                    {selectedBooking.service_type !== 'tiktok-live' && selectedBooking.service_type !== 'aura' && (
+                                        <>
+                                            <div>
+                                                <span className="block font-medium">DOB:</span> {selectedBooking.date_of_birth}
+                                            </div>
+                                            <div>
+                                                <span className="block font-medium">Gender:</span> {selectedBooking.gender}
+                                            </div>
+                                        </>
+                                    )}
+                                    {selectedBooking.tiktok_username && (
+                                        <div className="col-span-2">
+                                            <span className="block font-medium">TikTok:</span> {selectedBooking.tiktok_username}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
