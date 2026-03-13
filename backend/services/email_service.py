@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # Resend Configuration
 RESEND_API = os.getenv("RESEND_API")
 if RESEND_API:
+    RESEND_API = RESEND_API.strip()
     resend.api_key = RESEND_API
 else:
     logger.warning("Action=email_config Status=missing_api_key Message='RESEND_API not set in .env'")
