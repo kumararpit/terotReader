@@ -113,14 +113,16 @@
 
     <div class="tot">
         <table class="tot-t" cellpadding="0" cellspacing="0">
+            {% if tax_amount and tax_amount > 0 %}
             <tr>
                 <td class="lbl">Subtotal (Excl. Tax)</td>
                 <td class="amt">{{ currency }} {{ (amount - tax_amount) | round(2) }}</td>
             </tr>
             <tr>
                 <td class="lbl">{{ tax_name | default('Tax') }} ({{ tax_percentage | default(0) }}%)</td>
-                <td class="amt">{{ currency }} {{ tax_amount | default(0) }}</td>
+                <td class="amt">{{ currency }} {{ tax_amount }}</td>
             </tr>
+            {% endif %}
             {% if discount_amount and discount_amount > 0 %}
             <tr class="disc">
                 <td class="lbl">Discount{% if promo_code %} — {{ promo_code }}{% endif %}</td>

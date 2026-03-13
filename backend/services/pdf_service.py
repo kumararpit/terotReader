@@ -88,6 +88,9 @@ def generate_invoice_pdf_v2(booking: dict, payment_info: dict = None, output_dir
     logger.debug(f"Action=generate_invoice_pdf_v2 Status=started BookingID={booking_id}")
 
     context = {
+        "tax_amount": 0.0,
+        "tax_percentage": 0.0,
+        "tax_name": "Tax",
         **booking,
         "payment_info": payment_info or {},
         "is_emergency": booking.get('is_emergency', False),
