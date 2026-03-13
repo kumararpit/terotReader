@@ -6,7 +6,6 @@ pydantic
 pydantic[email]
 python-jose[cryptography]
 resend
-playwright
 jinja2
 google-api-python-client
 google-auth-oauthlib

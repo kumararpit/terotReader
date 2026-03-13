@@ -1,121 +1,503 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>{{ title | default('Booking Details - Tarot with Tejashvini') }}</title>
-
-    <!-- Tailwind CSS (CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
-
-    <!-- Tailwind Configuration -->
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#ec5b13",
-                        "background-light": "#f8f6f6",
-                        "mystic-navy": "#0f172a",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    }
-                },
-            },
-        }
-    </script>
-
     <style>
-        @media print {
-            body {
-                background-color: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-            .print-shadow-none {
-                box-shadow: none !important;
-            }
+        :root {
+            --primary: #ec5b13;
+            --navy: #0f172a;
+            --s50: #f8fafc;
+            --s100: #f1f5f9;
+            --s200: #e2e8f0;
+            --s400: #94a3b8;
+            --s500: #64748b;
+            --s700: #334155;
+            --s800: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: var(--s800);
+            background: #f0eeee;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* ── Outer card — 100% width, fits inside @page margins ── */
+        .page-wrap {
+            width: 100%;
+            background: #fff;
+            border: 1px solid var(--s200);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        .hdr {
+            position: relative;
+            background-color: var(--navy);
+            overflow: hidden;
+        }
+
+        .hdr-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 38% 55%, rgba(236, 91, 19, 0.30) 0%, transparent 62%);
+        }
+
+        .hdr-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.28;
+        }
+
+        /* Table-based header layout — 2 rows so WeasyPrint can place badge bottom-right */
+        .hdr-table {
+            width: 100%;
+            border-collapse: collapse;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Row 1: brand spans full width, centred */
+        .hdr-brand-cell {
+            text-align: center;
+            vertical-align: middle;
+            padding: 32px 24px 12px;
+        }
+
+        .hdr-title {
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        .hdr-rule {
+            width: 56px;
+            height: 2px;
+            background-color: var(--primary);
+            margin: 8px auto 8px;
+        }
+
+        .hdr-tagline {
+            font-size: 11px;
+            font-weight: 300;
+            font-style: italic;
+            color: #cbd5e1;
+        }
+
+        /* Row 2: gap cell fills left, badge cell hugs right */
+        .hdr-gap-cell {
+            padding: 0;
+        }
+
+        .hdr-badge-cell {
+            text-align: right;
+            vertical-align: bottom;
+            padding: 0 16px 14px 0;
+            white-space: nowrap;
+            width: 1%;
+        }
+
+        .hdr-badge {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid #475569;
+            border-radius: 9px;
+            padding: 9px 13px;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .hdr-badge-lbl {
+            font-size: 7.5px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            margin-bottom: 4px;
+        }
+
+        .hdr-badge-val {
+            font-size: 11.5px;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            word-break: break-all;
+        }
+
+        /* ── Body ── */
+        .body {
+            padding: 32px 36px;
+            background: #fff;
+        }
+
+        /* ── Section ── */
+        .sec {
+            margin-bottom: 28px;
+        }
+
+        .sec:last-child {
+            margin-bottom: 0;
+        }
+
+        .sec-head {
+            padding-bottom: 9px;
+            margin-bottom: 16px;
+            border-bottom: 1.5px solid var(--s200);
+        }
+
+        /* section icon — explicit presentation attrs for WeasyPrint */
+        .ico {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 7px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .sec-title {
+            display: inline-block;
+            vertical-align: middle;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.17em;
+            text-transform: uppercase;
+            color: var(--s800);
+        }
+
+        /* ── Field table — WeasyPrint-safe 2-col layout ── */
+        .ft {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ft td {
+            padding: 0 8px 14px 0;
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .ft td:last-child {
+            padding-right: 0;
+        }
+
+        .ft td.w33 {
+            width: 33.33%;
+        }
+
+        .ft td.full {
+            width: 100%;
+        }
+
+        .ft td.nobpad {
+            padding-bottom: 0;
+        }
+
+        .fl {
+            font-size: 8.5px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--s500);
+            margin-bottom: 4px;
+        }
+
+        .fv {
+            font-size: 13.5px;
+            color: var(--s800);
+            line-height: 1.35;
+        }
+
+        .fv-p {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .fv-m {
+            font-family: 'Courier New', monospace;
+            font-size: 11.5px;
+        }
+
+        .fv-lk {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* ── Pills ── */
+        .pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+
+        .p-green {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .p-yellow {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .p-red {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .p-orange {
+            background: rgba(236, 91, 19, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(236, 91, 19, 0.28);
+        }
+
+        /* ── Invoice table ── */
+        .inv {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid var(--s200);
+            /* WeasyPrint doesn't clip border-radius on tables reliably,
+               so we skip it and let the totals block close it */
+        }
+
+        .inv thead {
+            background: var(--s50);
+        }
+
+        .inv th {
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: var(--s500);
+            padding: 10px 14px;
+            border-bottom: 1.5px solid var(--s200);
+            text-align: left;
+        }
+
+        .inv th.r {
+            text-align: right;
+        }
+
+        .inv td {
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--s800);
+            border-bottom: 1px solid var(--s100);
+        }
+
+        .inv td.r {
+            text-align: right;
+        }
+
+        .inv tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ── Totals ── */
+        .tot {
+            border: 1.5px solid var(--s200);
+            border-top: none;
+            background: var(--s50);
+            padding: 12px 14px;
+        }
+
+        .tot-t {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tot-t td {
+            padding: 3px 0;
+            font-size: 11.5px;
+            color: var(--s500);
+        }
+
+        .tot-t td.lbl {
+            text-align: right;
+            padding-right: 20px;
+        }
+
+        .tot-t td.amt {
+            text-align: right;
+            white-space: nowrap;
+            width: 90px;
+        }
+
+        .tot-t .disc td {
+            color: #15803d;
+            font-weight: 500;
+        }
+
+        .tot-t .grand td {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            border-top: 1.5px solid var(--s200);
+            padding-top: 9px;
+        }
+
+        /* ── Cards ── */
+        .card-d {
+            background: var(--s50);
+            border: 1.5px dashed var(--s200);
+            border-radius: 9px;
+            padding: 16px 20px;
+        }
+
+        .card-s {
+            background: #fff;
+            border: 1.5px solid var(--s200);
+            border-radius: 7px;
+            padding: 13px 16px;
+        }
+
+        .lbl {
+            font-size: 8.5px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--s500);
+            margin-bottom: 6px;
+        }
+
+        .bt {
+            font-size: 13px;
+            color: var(--s700);
+            line-height: 1.7;
+        }
+
+        .divl {
+            border: none;
+            border-top: 1.5px solid var(--s200);
+            margin: 14px 0;
+        }
+
+        /* ── Footer ── */
+        .ftr {
+            background: var(--s50);
+            border-top: 1.5px solid var(--s200);
+            padding: 20px 36px;
+            text-align: center;
+        }
+
+        .ftr-q {
+            font-size: 10.5px;
+            font-style: italic;
+            color: var(--s500);
+            margin-bottom: 12px;
+            line-height: 1.7;
+        }
+
+        .ftr-m {
+            font-size: 8.5px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--s400);
+            padding-top: 10px;
+            border-top: 1px solid var(--s200);
+        }
+
+        .ftr-m .acc {
+            color: var(--primary);
         }
     </style>
 </head>
 
-<body class="bg-background-light font-display text-slate-900">
-    <div class="min-h-screen flex flex-col items-center sm:p-8">
-        <!-- Document Container -->
-        <div
-            class="w-full max-w-4xl bg-white shadow-2xl print-shadow-none rounded-2xl overflow-hidden border border-slate-200">
+<body>
+    <div class="page-wrap">
 
-            <!-- SaaS Celestial Header Section -->
-            <div class="relative h-56 bg-mystic-navy flex flex-col justify-center items-center text-center px-6 overflow-hidden">
-                <!-- Fallback background color in case Playwright misses the image -->
-                <div class="absolute inset-0 bg-slate-900 border-b border-slate-800"></div>
+        <!-- ── Header ── -->
+        <div class="hdr">
+            <div class="hdr-glow"></div>
+            {% if header_image %}
+            <div class="hdr-bg" style="background-image:url('{{ header_image }}');"></div>
+            {% endif %}
 
-                <!-- Glow & Background Image -->
-                <div class="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/40 via-transparent to-transparent"></div>
-                {% if header_image %}
-                <div class="absolute inset-0 bg-cover bg-center opacity-40"
-                    style="background-image: url('{{ header_image }}');">
-                </div>
-                {% endif %}
-
-                <div class="relative z-10 w-full flex flex-col items-center">
-                    <div class="flex items-center justify-center gap-3 mb-3 text-primary">
-                        <!-- SVG Star Icon -->
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                            </path>
-                        </svg>
-                        <h1 class="text-3xl font-bold tracking-widest uppercase text-white">Tarot with Tejashvini</h1>
-                        <!-- SVG Star Icon -->
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                            </path>
-                        </svg>
-                    </div>
-                    <div class="h-px w-24 bg-primary mx-auto mb-3 opacity-80"></div>
-                    <p class="text-slate-300 text-base font-light italic">"Intuitive Readings & Aura Scanning"</p>
-                </div>
-
-                <div
-                    class="absolute z-10 bottom-6 right-8 px-4 py-2 rounded-lg border border-slate-600" style="background-color: rgba(0,0,0,0.6);">
-                    <p class="text-[10px] text-slate-300 uppercase tracking-wider mb-0.5" style="margin-bottom: 2px;">Booking Reference</p>
-                    <p class="text-white font-mono text-sm tracking-wider font-bold">{{ booking_id }}</p>
-                </div>
-            </div>
-
-            <!-- Dynamic Child Content -->
-            <div class="p-10 space-y-12 bg-white">
-                {% block content %}{% endblock %}
-            </div>
-
-            <!-- Professional Mystic Footer -->
-            <footer class="bg-slate-50 border-t border-slate-200 p-8 text-center">
-                <div class="flex justify-center gap-4 mb-4 text-primary opacity-80">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                        </path>
-                    </svg>
-                </div>
-                <p class="text-slate-500 text-xs max-w-md mx-auto mb-4 italic">
-                    "The cards reveal what is hidden, so you may walk with clarity in the light of your own truth."
-                </p>
-                <div
-                    class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold border-t border-slate-200 pt-4 flex justify-center gap-4">
-                    <span>www.tarotwithtejashvini.com</span>
-                    <span>•</span>
-                    <span class="text-primary">Official Record</span>
-                </div>
-            </footer>
+            <table class="hdr-table" cellpadding="0" cellspacing="0">
+                <!-- Row 1: brand centred across full width -->
+                <tr>
+                    <td class="hdr-brand-cell" colspan="2">
+                        <div style="white-space:nowrap; margin-bottom:0;">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="#ec5b13"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="display:inline-block;vertical-align:middle;margin-right:8px;">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span class="hdr-title">Tarot with Tejashvini</span>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="#ec5b13"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="display:inline-block;vertical-align:middle;margin-left:8px;">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                        <div class="hdr-rule"></div>
+                        <div class="hdr-tagline">"Intuitive Readings &amp; Aura Scanning"</div>
+                    </td>
+                </tr>
+                <!-- Row 2: gap left, badge bottom-right -->
+                <tr>
+                    <td class="hdr-gap-cell"></td>
+                    <td class="hdr-badge-cell">
+                        <div class="hdr-badge">
+                            <div class="hdr-badge-lbl">Booking Reference</div>
+                            <div class="hdr-badge-val">{{ booking_id }}</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
+
+        <!-- ── Child content ── -->
+        <div class="body">
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- ── Footer ── -->
+        <div class="ftr">
+            <!-- Star fill as attribute -->
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="#ec5b13" xmlns="http://www.w3.org/2000/svg"
+                style="display:block;margin:0 auto 10px;opacity:0.7;">
+                <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <div class="ftr-q">"The cards reveal what is hidden, so you may walk with clarity in the light of your own
+                truth."</div>
+            <div class="ftr-m">
+                www.tarotwithtejashvini.com &nbsp;•&nbsp; <span class="acc">Official Record</span>
+            </div>
+        </div>
+
     </div>
 </body>
 

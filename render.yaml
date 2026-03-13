@@ -4,7 +4,7 @@ services:
     plan: free
     env: python
     rootDir: .
-    buildCommand: pip install -r backend/requirements.txt && playwright install chromium
+    buildCommand: pip install -r backend/requirements.txt && apt-get update && apt-get install -y libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0 libharfbuzz-subset0 libffi-dev libjpeg-dev libopenjp2-7-dev
     startCommand: cd backend && uvicorn server:app --host 0.0.0.0 --port 10000
     envVars:
       - key: PYTHON_VERSION
