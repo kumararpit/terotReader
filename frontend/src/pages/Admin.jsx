@@ -1037,6 +1037,7 @@ const Admin = () => {
                                                         <th className="px-4 py-3">Client</th>
                                                         <th className="px-4 py-3">Date</th>
                                                         <th className="px-4 py-3 text-right">Amount</th>
+                                                        <th className="px-4 py-3 text-right">Retention</th>
                                                         <th className="px-4 py-3 text-right">Action</th>
                                                     </tr>
                                                 </thead>
@@ -1063,6 +1064,24 @@ const Admin = () => {
                                                             </td>
                                                             <td className="px-4 py-3 text-right">
                                                                 <span className="text-sm font-bold text-amber-700">{booking.currency} {booking.amount}</span>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right">
+                                                                {booking.retained ? (
+                                                                    <div className="flex flex-col items-end gap-0.5">
+                                                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 uppercase leading-none">
+                                                                            Retained
+                                                                        </span>
+                                                                        {booking.retained_by_booking_id && (
+                                                                            <span className="text-[9px] text-primary/30 font-mono scale-90 origin-right">
+                                                                                via {booking.retained_by_booking_id.split('-').pop()}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-400 uppercase leading-none">
+                                                                        Pending
+                                                                    </span>
+                                                                )}
                                                             </td>
                                                             <td className="px-4 py-3 text-right">
                                                                 <Button

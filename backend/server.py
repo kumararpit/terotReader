@@ -1614,6 +1614,30 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
                 'updated_at': datetime.now(timezone.utc).isoformat()
             }}
         )
+
+        # Retention Tracking: Mark previous incomplete bookings for this email as retained
+        try:
+            email = booking.get('email')
+            if email:
+                res = await db.bookings.update_many(
+                    {
+                        "email": email,
+                        "payment_status": "pending",
+                        "booking_id": {"$ne": verification.booking_id},
+                        "retained": {"$ne": True}
+                    },
+                    {
+                        "$set": {
+                            "retained": True,
+                            "retained_by_booking_id": verification.booking_id,
+                            "retained_at": datetime.now(timezone.utc).isoformat()
+                        }
+                    }
+                )
+                if res.modified_count > 0:
+                    logger.info(f"Retention: Marked {res.modified_count} previous bookings for {email} as retained by {verification.booking_id}")
+        except Exception as e:
+            logger.error(f"Retention Tracking Error: {e}")
         
         # Refresh booking data
         booking = await db.bookings.find_one({'booking_id': verification.booking_id}, {"_id": 0})
