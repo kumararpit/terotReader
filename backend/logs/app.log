@@ -1,0 +1,268 @@
+2026-03-13 20:12:53,196 | INFO     | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:12:54,256 | INFO     | app | lifespan:89 | Application starting up...
+2026-03-13 20:12:54,414 | INFO     | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:13:21,502 | INFO     | app | log_requests_middleware:19 | [05a40845] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:13:21,506 | INFO     | app | log_requests_middleware:19 | [7716b708] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:13:21,512 | INFO     | app | log_requests_middleware:19 | [c3602f36] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:13:21,527 | INFO     | app | log_requests_middleware:39 | [7716b708] ✓ GET /api/campaign | Status: 200 | 22.42ms
+2026-03-13 20:13:21,551 | INFO     | app | log_requests_middleware:19 | [b5347d02] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:13:21,577 | INFO     | app | log_requests_middleware:39 | [b5347d02] ✓ GET /api/campaign | Status: 200 | 26.07ms
+2026-03-13 20:13:21,637 | INFO     | app | log_requests_middleware:39 | [05a40845] ✓ GET /api/services | Status: 200 | 135.15ms
+2026-03-13 20:13:21,648 | INFO     | app | log_requests_middleware:39 | [c3602f36] ✓ GET /api/testimonials | Status: 200 | 135.78ms
+2026-03-13 20:13:21,664 | INFO     | app | log_requests_middleware:19 | [e83b1736] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:13:21,667 | INFO     | app | log_requests_middleware:19 | [50f58442] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:13:21,677 | INFO     | app | log_requests_middleware:39 | [e83b1736] ✓ GET /api/services | Status: 200 | 13.04ms
+2026-03-13 20:13:21,686 | INFO     | app | log_requests_middleware:39 | [50f58442] ✓ GET /api/testimonials | Status: 200 | 18.58ms
+2026-03-13 20:13:26,687 | INFO     | app | lifespan:118 | Application shutting down...
+2026-03-13 20:13:29,106 | INFO     | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:13:30,152 | INFO     | app | lifespan:89 | Application starting up...
+2026-03-13 20:13:30,404 | INFO     | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:13:33,903 | INFO     | app | log_requests_middleware:19 | [0dd16853] ➜ GET /api/debug/error | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-13 20:13:33,904 | INFO     | app | trigger_error:161 | Deliberately triggering an error...
+2026-03-13 20:13:33,904 | ERROR    | app | log_requests_middleware:29 | [0dd16853] ✗ GET /api/debug/error | FAILED after 1.23ms | Error: This is a test exception for logging verification
+Traceback (most recent call last):
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 159, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/anyio/streams/memory.py", line 117, in receive
+    return self.receive_nowait()
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/anyio/streams/memory.py", line 110, in receive_nowait
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/middleware.py", line 26, in log_requests_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        dependant=dependant, values=values, is_coroutine=is_coroutine
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/server.py", line 162, in trigger_error
+    raise ValueError("This is a test exception for logging verification")
+ValueError: This is a test exception for logging verification
+2026-03-13 20:13:33,916 | ERROR    | app | global_exception_handler:12 | [0dd16853] Unhandled exception | GET /api/debug/error
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib64/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    |     raise exc
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/middleware.py", line 26, in log_requests_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 756, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 776, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 297, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 72, in app
+    |     response = await func(request)
+    |                ^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 278, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         dependant=dependant, values=values, is_coroutine=is_coroutine
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/server.py", line 162, in trigger_error
+    |     raise ValueError("This is a test exception for logging verification")
+    | ValueError: This is a test exception for logging verification
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib64/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/middleware.py", line 26, in log_requests_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        dependant=dependant, values=values, is_coroutine=is_coroutine
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/server.py", line 162, in trigger_error
+    raise ValueError("This is a test exception for logging verification")
+ValueError: This is a test exception for logging verification
+2026-03-13 20:14:19,605 | INFO     | app | lifespan:118 | Application shutting down...
+2026-03-13 20:14:21,931 | INFO     | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:14:22,896 | INFO     | app | lifespan:89 | Application starting up...
+2026-03-13 20:14:23,138 | INFO     | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:16:58,405 | INFO     | app | log_requests_middleware:19 | [1006ce62] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:16:58,409 | INFO     | app | log_requests_middleware:19 | [6f1b3035] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:16:58,409 | INFO     | app | log_requests_middleware:19 | [f49a0a4a] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:16:58,422 | INFO     | app | log_requests_middleware:39 | [1006ce62] ✓ GET /api/services | Status: 200 | 17.02ms
+2026-03-13 20:16:58,428 | INFO     | app | log_requests_middleware:19 | [0267b88a] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:16:58,438 | INFO     | app | log_requests_middleware:39 | [0267b88a] ✓ GET /api/services | Status: 200 | 10.15ms
+2026-03-13 20:16:58,526 | INFO     | app | log_requests_middleware:39 | [f49a0a4a] ✓ GET /api/testimonials | Status: 200 | 116.27ms
+2026-03-13 20:16:58,530 | INFO     | app | log_requests_middleware:19 | [d804f9cb] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:16:58,539 | INFO     | app | log_requests_middleware:39 | [d804f9cb] ✓ GET /api/testimonials | Status: 200 | 9.0ms
+2026-03-13 20:16:58,541 | INFO     | app | log_requests_middleware:39 | [6f1b3035] ✓ GET /api/campaign | Status: 200 | 132.41ms
+2026-03-13 20:16:58,549 | INFO     | app | log_requests_middleware:19 | [a9f63d22] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-13 20:16:58,558 | INFO     | app | log_requests_middleware:39 | [a9f63d22] ✓ GET /api/campaign | Status: 200 | 9.25ms
+2026-03-13 20:19:31,257 | INFO     | app | lifespan:118 | Application shutting down...
+2026-03-13 20:19:35,235 | INFO     | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:19:36,269 | INFO     | app | lifespan:89 | Application starting up...
+2026-03-13 20:19:36,587 | INFO     | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:19:39,519 | INFO     | app | lifespan:118 | Application shutting down...
+2026-03-13 20:19:41,855 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:19:43,496 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:19:43,710 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:19:46,210 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:19:58,995 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:19:59,879 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:20:00,040 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:20:08,472 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:20:10,515 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:20:11,350 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:20:11,495 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:20:21,300 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:20:26,095 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:20:30,072 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:20:30,235 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:20:55,314 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:21:03,895 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:21:05,261 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:21:05,597 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:21:52,601 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:21:57,653 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:21:59,270 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:21:59,424 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:22:32,134 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:22:36,995 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:22:39,199 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:22:39,449 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:22:57,022 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:23:00,339 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:23:01,710 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:23:01,901 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:23:09,432 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:23:12,507 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:23:13,838 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:23:14,025 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-13 20:23:32,113 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-13 20:23:38,009 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-13 20:23:39,191 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-13 20:23:39,406 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)

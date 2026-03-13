@@ -11,6 +11,18 @@ import logging
 env_path = Path(__file__).parent / "env" / ".env"
 load_dotenv(dotenv_path=env_path)
 
+# Initialize logger before other imports that might use it
+from services.logger import setup_logger
+setup_logger()
+logger = logging.getLogger("app")
+
+from middleware import log_requests_middleware
+from exceptions import global_exception_handler
+
+GENERATED_PDFS_DIR = os.path.join(os.path.dirname(__file__), "generated_pdfs")
+os.makedirs(GENERATED_PDFS_DIR, exist_ok=True)
+
+
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
@@ -50,13 +62,9 @@ from services.template_selector import get_template_for_service
 # Email Regex
 EMAIL_REGEX = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
 
-# Logger Setup
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
-)
-logger = logging.getLogger("server")
+# Logger Setup (Legacy logging removed, using setup_logger instead)
+# logger = logging.getLogger("server") - No longer needed here as it's initialized above
+
 
 # MongoDB connection
 MONGO_URL = os.environ.get('MONGO_URL')
@@ -78,12 +86,13 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
+        logger.info("Application starting up...")
         await db.slots.create_index([("date", 1), ("time", 1)], unique=True)
-        print("Ensured unique index on slots (date, time)")
+        logger.info("Ensured unique index on slots (date, time)")
         
         # Seed Service Prices if empty
         if await db.services.count_documents({}) == 0:
-            print("Seeding Service Prices...")
+            logger.info("Seeding Service Prices...")
             for key, val in PRICING_MAP.items():
                 # Determine category
                 cat = "Live Readings"
@@ -101,14 +110,21 @@ async def lifespan(app: FastAPI):
                     "category": cat,
                     "created_at": datetime.now(timezone.utc).isoformat()
                 })
-            print("Service Prices seeded.")
+            logger.info("Service Prices seeded.")
             
     except Exception as e:
-        print(f"Error creating index or seeding: {e}")
+        logger.error(f"Error creating index or seeding: {e}", exc_info=True)
     yield
+    logger.info("Application shutting down...")
 
 # Create the main app without a prefix
 app = FastAPI(lifespan=lifespan)
+
+# Register logging middleware
+app.middleware("http")(log_requests_middleware)
+
+# Register global exception handler
+app.add_exception_handler(Exception, global_exception_handler)
 
 # Add CORS middleware
 frontend_url = os.environ.get('FRONTEND_URL', '')
@@ -2031,10 +2047,10 @@ async def api_generate_booking_pdf(booking_data: dict, background_tasks: Backgro
         template = get_template_for_service(service_type)
         
         # Generate Invoice
-        invoice_path = generate_invoice_pdf_v2(booking_data)
+        invoice_path = generate_invoice_pdf_v2(booking_data, output_dir=GENERATED_PDFS_DIR)
         
         # Generate Details
-        details_path = generate_booking_details_pdf_v2(template, booking_data)
+        details_path = generate_booking_details_pdf_v2(template, booking_data, output_dir=GENERATED_PDFS_DIR)
         
         return {
             "success": True,
@@ -2046,11 +2062,11 @@ async def api_generate_booking_pdf(booking_data: dict, background_tasks: Backgro
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/download-pdf")
-async def download_pdf(path: str):
+async def download_pdf(path: str, background_tasks: BackgroundTasks):
     """Securely download a generated PDF if it exists in the output folder"""
     # Security check: ensure path is within generated_pdfs
     abs_path = os.path.abspath(path)
-    base_gen_path = os.path.abspath(os.path.join(os.getcwd(), "generated_pdfs"))
+    base_gen_path = os.path.abspath(GENERATED_PDFS_DIR)
     
     if not abs_path.startswith(base_gen_path):
         raise HTTPException(status_code=403, detail="Forbidden: Path outside generated directory")
@@ -2058,6 +2074,7 @@ async def download_pdf(path: str):
     if not os.path.exists(abs_path):
         raise HTTPException(status_code=404, detail="File not found")
         
+    background_tasks.add_task(os.remove, abs_path)
     return FileResponse(abs_path, filename=os.path.basename(abs_path), media_type='application/pdf')
 
 # Include the router in the main app

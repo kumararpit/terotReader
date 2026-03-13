@@ -1,7 +1,13 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 def get_template_for_service(service_type: str) -> str:
     """
     Maps service_type to the corresponding Jinja2 template filename.
     """
+    logger.debug(f"Action=get_template_for_service Status=started ServiceType={service_type}")
+    
     mapping = {
         'delivered-3': 'delivered_reading.html',
         'delivered-5': 'delivered_reading.html',
@@ -12,4 +18,7 @@ def get_template_for_service(service_type: str) -> str:
     }
     
     # Default to a generic reading template if type not found
-    return mapping.get(service_type, 'delivered_reading.html')
+    template = mapping.get(service_type, 'delivered_reading.html')
+    logger.debug(f"Action=get_template_for_service Status=finished Template={template}")
+    return template
+

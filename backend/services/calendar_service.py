@@ -2,12 +2,14 @@ import os
 import datetime
 import pickle
 import os.path
+import time
+import logging
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-import logging
+from services.logger import mask_pii
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +20,14 @@ class CalendarService:
     def __init__(self):
         self.creds = None
         self.service = None
+        self.primary_time_zone = 'Europe/Rome'
+        logger.debug("Action=CalendarService.__init__ Status=started")
         self.initialize_credentials()
 
     def initialize_credentials(self):
-        """Authenticates with Google Calendar API using Service Account or OAuth"""
+        """Authenticates with Google Calendar API using Service Account or OAuth."""
+        logger.info("Action=initialize_credentials Status=started")
+        start_time = time.time()
         try:
             creds_json_str = os.environ.get('GOOGLE_CREDENTIALS')
             
@@ -35,21 +41,21 @@ class CalendarService:
                    self.creds = service_account.Credentials.from_service_account_info(
                        info, scopes=SCOPES
                    )
-                   logger.info("Loaded Google Credentials from Environment Variable")
+                   logger.info("Action=initialize_credentials Method=env_var Status=success")
                 except json.JSONDecodeError as e:
-                   logger.error(f"Failed to parse GOOGLE_CREDENTIALS env var: {e}")
+                   logger.error(f"Action=initialize_credentials Method=env_var Status=failed Error={str(e)}")
 
             elif os.path.exists('credentials.json') or \
                  os.path.exists(os.path.join(os.path.dirname(__file__), '..', 'credentials.json')) or \
                  os.path.exists(os.path.join(os.path.dirname(__file__), '..', 'env', 'credentials.json')):
                 # Fallback to local file
-                # Check current dir first, then parent dir (backend root), then env dir
                 fpath = 'credentials.json'
                 if not os.path.exists(fpath):
                     fpath = os.path.join(os.path.dirname(__file__), '..', 'credentials.json')
                 if not os.path.exists(fpath):
                     fpath = os.path.join(os.path.dirname(__file__), '..', 'env', 'credentials.json')
                     
+                logger.debug(f"Action=initialize_credentials Method=file Path={fpath} Status=attempting")
                 with open(fpath) as f:
                     import json
                     info = json.load(f)
@@ -59,44 +65,48 @@ class CalendarService:
                     self.creds = service_account.Credentials.from_service_account_file(
                         fpath, scopes=SCOPES
                     )
+                    logger.info("Action=initialize_credentials Method=file Status=success")
                 else:
-                    # User Client ID
-                    pass # (Legacy/Local flow logic omitted for env var priority)
+                    logger.warning("Action=initialize_credentials Method=file Status=invalid_type")
                     
             else:
-                 logger.error("No Google Credentials found (Env Var or credentials.json)!")
+                 logger.error("Action=initialize_credentials Status=no_creds_found")
 
             if self.creds:
                 self.service = build('calendar', 'v3', credentials=self.creds)
                 self.fetch_primary_timezone()
+                duration = (time.time() - start_time) * 1000
+                logger.info(f"Action=initialize_credentials Status=finished Duration={duration:.2f}ms")
             else:
-                logger.error("Could not obtain credentials.")
+                logger.error("Action=initialize_credentials Status=failed_no_creds")
                 
         except Exception as err:
-            logger.error(f"Failed to create calendar service: {err}")
+            logger.error(f"Action=initialize_credentials Status=failed Error={str(err)}", exc_info=True)
 
     def fetch_primary_timezone(self):
         """Fetches the timezone setting of the primary calendar."""
-        self.primary_time_zone = 'Europe/Rome' # Default fallback
-        if not self.service: return
+        logger.debug("Action=fetch_primary_timezone Status=started")
+        if not self.service: 
+            logger.warning("Action=fetch_primary_timezone Status=no_service")
+            return
+        
+        start_time = time.time()
         try:
             calendar = self.service.calendars().get(calendarId='primary').execute()
             self.primary_time_zone = calendar.get('timeZone', 'Europe/Rome')
-            logger.info(f"Primary Calendar Timezone detected: {self.primary_time_zone}")
+            duration = (time.time() - start_time) * 1000
+            logger.info(f"Action=fetch_primary_timezone Status=finished Timezone={self.primary_time_zone} Duration={duration:.2f}ms")
         except HttpError as err:
-            logger.error(f"Error fetching calendar timezone: {err}")
+            logger.error(f"Action=fetch_primary_timezone Status=failed Error={str(err)}")
 
     def get_timezone(self):
         return self.primary_time_zone
 
     def get_busy_periods(self, start_iso, end_iso):
-        """
-        Fetch 'busy' periods from primary calendar.
-        start_iso, end_iso: ISO formatted strings with timezone
-        Returns list of {start, end} dicts.
-        """
+        """Fetch 'busy' periods from primary calendar."""
+        logger.info(f"Action=get_busy_periods Status=started Start={start_iso} End={end_iso}")
         if not self.service:
-            logger.error("Calendar service not initialized")
+            logger.error("Action=get_busy_periods Status=no_service")
             return []
 
         body = {
@@ -106,21 +116,26 @@ class CalendarService:
             "items": [{"id": "primary"}]
         }
 
+        start_time = time.time()
         try:
             events_result = self.service.freebusy().query(body=body).execute()
             calendars = events_result.get('calendars', {})
             primary = calendars.get('primary', {})
-            return primary.get('busy', [])
+            busy_periods = primary.get('busy', [])
+            duration = (time.time() - start_time) * 1000
+            logger.info(f"Action=get_busy_periods Status=finished Count={len(busy_periods)} Duration={duration:.2f}ms")
+            return busy_periods
         except HttpError as err:
-            logger.error(f"Error fetching free/busy: {err}")
+            logger.error(f"Action=get_busy_periods Status=failed Error={str(err)}")
             return []
 
     def create_event(self, summary, start_iso, end_iso, attendees_emails=None, description=""):
-        """
-        Inserts an event into the primary calendar.
-        attendees_emails: List of email strings.
-        """
+        """Inserts an event into the primary calendar."""
+        masked_emails = [mask_pii(e) for e in attendees_emails] if attendees_emails else []
+        logger.info(f"Action=create_event Status=started Summary='{summary}' Attendees={masked_emails}")
+        
         if not self.service:
+            logger.error("Action=create_event Status=no_service")
             return None
 
         attendees = [{'email': email} for email in attendees_emails] if attendees_emails else []
@@ -137,28 +152,29 @@ class CalendarService:
                 'timeZone': self.primary_time_zone,
             },
             'attendees': attendees,
-
         }
 
+        start_time = time.time()
         try:
             event = self.service.events().insert(
                 calendarId='primary', 
                 body=event
             ).execute()
+            duration = (time.time() - start_time) * 1000
+            logger.info(f"Action=create_event Status=finished EventID={event.get('id')} Duration={duration:.2f}ms")
             return event
         except HttpError as err:
-            logger.error(f"Error creating event: {err}")
+            logger.error(f"Action=create_event Status=failed Error={str(err)}", exc_info=True)
             return None
 
     def list_events(self, start_iso, end_iso):
-        """
-        List events from primary calendar.
-        start_iso, end_iso: ISO strings.
-        Returns list of event objects.
-        """
+        """List events from primary calendar."""
+        logger.debug(f"Action=list_events Status=started Start={start_iso} End={end_iso}")
         if not self.service:
+            logger.error("Action=list_events Status=no_service")
             return []
 
+        start_time = time.time()
         try:
             events_result = self.service.events().list(
                 calendarId='primary', 
@@ -167,24 +183,37 @@ class CalendarService:
                 singleEvents=True,
                 orderBy='startTime'
             ).execute()
-            return events_result.get('items', [])
+            items = events_result.get('items', [])
+            duration = (time.time() - start_time) * 1000
+            logger.info(f"Action=list_events Status=finished Count={len(items)} Duration={duration:.2f}ms")
+            return items
         except HttpError as err:
-            logger.error(f"Error listing events: {err}")
+            logger.error(f"Action=list_events Status=failed Error={str(err)}")
             return []
 
     def delete_event(self, event_id):
         """Deletes an event from primary calendar."""
-        if not self.service: return False
+        logger.info(f"Action=delete_event Status=started EventID={event_id}")
+        if not self.service:
+            logger.error("Action=delete_event Status=no_service")
+            return False
+            
+        start_time = time.time()
         try:
             self.service.events().delete(calendarId='primary', eventId=event_id).execute()
+            duration = (time.time() - start_time) * 1000
+            logger.info(f"Action=delete_event Status=success EventID={event_id} Duration={duration:.2f}ms")
             return True
         except HttpError as err:
-            logger.error(f"Error deleting event: {err}")
+            logger.error(f"Action=delete_event Status=failed EventID={event_id} Error={str(err)}")
             return False
 
     def update_event(self, event_id, summary, start_iso, end_iso, description=""):
         """Updates an event in primary calendar."""
-        if not self.service: return None
+        logger.info(f"Action=update_event Status=started EventID={event_id} Summary='{summary}'")
+        if not self.service:
+            logger.error("Action=update_event Status=no_service")
+            return None
         
         event_body = {
             'summary': summary,
@@ -199,16 +228,20 @@ class CalendarService:
             },
         }
         
+        start_time = time.time()
         try:
             updated_event = self.service.events().update(
                 calendarId='primary', 
                 eventId=event_id, 
                 body=event_body
             ).execute()
+            duration = (time.time() - start_time) * 1000
+            logger.info(f"Action=update_event Status=finished EventID={event_id} Duration={duration:.2f}ms")
             return updated_event
         except HttpError as err:
-            logger.error(f"Error updating event: {err}")
+            logger.error(f"Action=update_event Status=failed EventID={event_id} Error={str(err)}", exc_info=True)
             return None
 
 # Singleton instance
 calendar_service = CalendarService()
+

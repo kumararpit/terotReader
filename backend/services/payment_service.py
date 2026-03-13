@@ -3,6 +3,7 @@
 import paypalrestsdk
 import os
 import logging
+import time
 from typing import Dict, Any
 from dotenv import load_dotenv
 from pathlib import Path
@@ -13,30 +14,7 @@ load_dotenv(dotenv_path=env_path)
 
 logger = logging.getLogger(__name__)
 
-# Add File Handler for debugging
-try:
-    log_dir = Path(__file__).parent.parent / "logs"
-    log_dir.mkdir(exist_ok=True)
-    f_handler = logging.FileHandler(log_dir / 'paypal_debug.log')
-    f_handler.setLevel(logging.INFO)
-    fmt = logging.Formatter('%(asctime)s - %(message)s')
-    f_handler.setFormatter(fmt)
-    logger.addHandler(f_handler)
-except Exception as e:
-    print(f"Failed to setup file logging: {e}")
-
-# Initialize payment gateways
-# stripe.api_key = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51dummy123456789')
-
-# razorpay_client = razorpay.Client(
-#     auth=(
-#         os.getenv('RAZORPAY_KEY_ID', 'rzp_test_dummy123456'),
-#         os.getenv('RAZORPAY_KEY_SECRET', 'dummy_secret_123456')
-#     )
-# )
-
 # PayPal Configuration
-# Mode determination based on APP_ENV
 app_env = os.getenv('APP_ENV', 'development').lower()
 
 if app_env == 'production':
@@ -44,9 +22,8 @@ if app_env == 'production':
 elif app_env == 'development':
     paypal_mode = 'sandbox'
 else:
-    # Strict enforcement as requested: "if development then sandbox, else error" (implies invalid env should error)
-    logger.error(f"Invalid APP_ENV: {app_env}. PayPal requires 'development' or 'production'.")
-    raise ValueError(f"CRITICAL: Invalid APP_ENV '{app_env}'. Must be 'development' or 'production' for PayPal configuration.")
+    logger.error(f"Action=paypal_config Status=failed Error='Invalid APP_ENV: {app_env}'")
+    raise ValueError(f"CRITICAL: Invalid APP_ENV '{app_env}'. Must be 'development' or 'production'.")
 
 paypalrestsdk.configure({
     "mode": paypal_mode,
@@ -60,20 +37,15 @@ class PaymentService:
     
     @staticmethod
     def create_paypal_payment(amount: float, currency: str, booking_data: Dict[str, Any]):
-        """Create PayPal payment"""
+        """Create PayPal payment."""
+        booking_id = booking_data.get('booking_id', 'unknown')
+        logger.info(f"Action=create_paypal_payment Status=started BookingID={booking_id} Amount={amount} Currency={currency}")
+        
+        start_time = time.time()
         try:
             pp_client = os.getenv('PAYPAL_CLIENT_ID', '')
-            # pp_mode = paypalrestsdk.api.default_api.mode # INVALID
-            app_env_debug = os.getenv('APP_ENV', 'unknown')
-            current_mode_override = os.getenv('PAYPAL_MODE', 'NOT_SET')
-            calculated_mode = 'live' if app_env_debug == 'production' else 'sandbox'
-            
-            logger.info(f"PAYPAL DEBUG: AppEnv={app_env_debug}") 
-            logger.info(f"PAYPAL DEBUG: OverrideMode={current_mode_override} (Calculated Default={calculated_mode})")
-            logger.info(f"PAYPAL DEBUG: ClientID (partial)={pp_client[:5]}...{pp_client[-5:] if pp_client else 'None'}")
-
             if not pp_client:
-                logger.error("PayPal Client ID not configured")
+                logger.error(f"Action=create_paypal_payment Status=failed BookingID={booking_id} Reason=missing_client_id")
                 return {'success': False, 'error': "PayPal configuration missing"}
             
             # PayPal Tax Breakdown
@@ -85,8 +57,8 @@ class PaymentService:
                 "intent": "sale",
                 "payer": {"payment_method": "paypal"},
                 "redirect_urls": {
-                    "return_url": f"{FRONTEND_URL}/payment-success?booking_id={booking_data.get('booking_id')}",
-                    "cancel_url": f"{FRONTEND_URL}/payment-cancel?booking_id={booking_data.get('booking_id')}"
+                    "return_url": f"{FRONTEND_URL}/payment-success?booking_id={booking_id}",
+                    "cancel_url": f"{FRONTEND_URL}/payment-cancel?booking_id={booking_id}"
                 },
                 "transactions": [{
                     "amount": {
@@ -101,7 +73,7 @@ class PaymentService:
                     "item_list": {
                         "items": [{
                             "name": f"Tarot Reading ({booking_data.get('service_type')})",
-                            "sku": booking_data.get('booking_id'),
+                            "sku": booking_id,
                             "price": f"{subtotal:.2f}",
                             "currency": currency,
                             "quantity": 1
@@ -110,11 +82,10 @@ class PaymentService:
                 }]
             })
             
-            logger.info(f"PAYPAL DEBUG: Return URL: {FRONTEND_URL}/payment-success")
-            logger.info(f"PAYPAL DEBUG: Cancel URL: {FRONTEND_URL}/payment-cancel")
-            
             if payment.create():
                 approval_url = next(link.href for link in payment.links if link.rel == 'approval_url')
+                duration = (time.time() - start_time) * 1000
+                logger.info(f"Action=create_paypal_payment Status=finished BookingID={booking_id} PaymentID={payment.id} Duration={duration:.2f}ms")
                 return {
                     'success': True,
                     'payment_id': payment.id,
@@ -122,20 +93,23 @@ class PaymentService:
                     'payment_method': 'paypal'
                 }
             else:
-                logger.error(f"PayPal payment creation failed: {payment.error}")
+                duration = (time.time() - start_time) * 1000
+                logger.error(f"Action=create_paypal_payment Status=failed BookingID={booking_id} Error={str(payment.error)} Duration={duration:.2f}ms")
                 return {'success': False, 'error': payment.error}
         except Exception as e:
-            logger.error(f"PayPal payment error: {str(e)}")
-            # Return generic error to user as requested
-            return {'success': False, 'error': "Technical Error: Unable to initiate payment. Please try again later."}
+            duration = (time.time() - start_time) * 1000
+            logger.error(f"Action=create_paypal_payment Status=failed BookingID={booking_id} Error={str(e)} Duration={duration:.2f}ms", exc_info=True)
+            return {'success': False, 'error': "Technical Error: Unable to initiate payment."}
     
     @staticmethod
     def verify_paypal_payment(payment_id: str, payer_id: str = None):
-        """Verify PayPal payment"""
+        """Verify PayPal payment."""
+        logger.info(f"Action=verify_paypal_payment Status=started PaymentID={payment_id} PayerID={payer_id}")
+        
+        start_time = time.time()
         try:
-            logger.info(f"PAYPAL DEBUG: Verifying payment_id={payment_id}, payer_id={payer_id}")
-            # For testing with dummy ID if needed, but usually we want real verification
             if 'demo' in payment_id:
+                 logger.info("Action=verify_paypal_payment Status=finished_demo")
                  return {
                     'success': True,
                     'payment_status': 'approved',
@@ -154,14 +128,16 @@ class PaymentService:
                     pass
             
             if not exec_payer_id:
-                logger.error("No payer_id provided or found in payment object.")
+                logger.error(f"Action=verify_paypal_payment Status=failed PaymentID={payment_id} Reason=missing_payer_id")
                 return {'success': False, 'error': "Missing payer_id"}
 
             if payment.execute({"payer_id": exec_payer_id}):
+                duration = (time.time() - start_time) * 1000
                 if payment.state != 'approved':
-                    logger.error(f"PayPal payment executed but state is {payment.state}")
+                    logger.error(f"Action=verify_paypal_payment Status=failed PaymentID={payment_id} State={payment.state} Duration={duration:.2f}ms")
                     return {'success': False, 'error': f"Payment state is {payment.state}"}
                     
+                logger.info(f"Action=verify_paypal_payment Status=finished PaymentID={payment_id} Duration={duration:.2f}ms")
                 return {
                     'success': True,
                     'payment_status': payment.state,
@@ -170,10 +146,12 @@ class PaymentService:
                     'currency': payment.transactions[0].amount.currency
                 }
             else:
-                logger.error(f"PayPal execution failed: {payment.error}")
+                duration = (time.time() - start_time) * 1000
+                logger.error(f"Action=verify_paypal_payment Status=failed PaymentID={payment_id} Error={str(payment.error)} Duration={duration:.2f}ms")
                 return {'success': False, 'error': payment.error}
         except Exception as e:
-            logger.error(f"PayPal verification error: {str(e)}")
+            duration = (time.time() - start_time) * 1000
+            logger.error(f"Action=verify_paypal_payment Status=failed PaymentID={payment_id} Error={str(e)} Duration={duration:.2f}ms", exc_info=True)
             return {'success': False, 'error': str(e)}
 
 payment_service = PaymentService()
