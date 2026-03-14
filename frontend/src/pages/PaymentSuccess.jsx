@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, Mail, Phone, ArrowRight, Home } from 'lucide-react';
+import { CheckCircle, XCircle, Mail, Phone, ArrowRight, Home, RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
@@ -12,6 +12,7 @@ const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(true);
+  const [verificationFailed, setVerificationFailed] = useState(false);
   const [bookingDetails, setBookingDetails] = useState(null);
   const [timeLeft, setTimeLeft] = useState(120);
 
@@ -49,7 +50,7 @@ const PaymentSuccess = () => {
       const paymentId = searchParams.get('payment_id') || searchParams.get('paymentId');
       const payerId = searchParams.get('PayerID') || searchParams.get('payer_id');
       const bookingId = searchParams.get('booking_id') || sessionStorage.getItem('booking_id');
-      const paymentMethod = sessionStorage.getItem('payment_method') || 'stripe';
+      const paymentMethod = searchParams.get('payment_method') || sessionStorage.getItem('payment_method') || 'paypal';
 
       if (!bookingId) {
         // Only error if we actually expected a booking ID (i.e., not just visiting the page manually)
@@ -82,15 +83,13 @@ const PaymentSuccess = () => {
       }
     } catch (error) {
       console.error('Payment verification error:', error);
-      // Only show error if it's NOT a "already verified" case? 
-      // Backend should handle idempotency, but let's show a friendlier message or ignore if actually success logic allows.
-      // For now, standard error but maybe cleaner text.
-      toast.error('Payment Status Check Failed', {
-        description: 'If you paid, please contact support. Your booking might still be confirmed.'
+      setVerificationFailed(true);
+      toast.error('Payment Verification Failed', {
+        description: 'Your payment could not be confirmed. Please contact support if you were charged.'
       });
     } finally {
       setIsVerifying(false);
-      // Clear localStorage
+      // Clear sessionStorage
       sessionStorage.removeItem('booking_id');
       sessionStorage.removeItem('payment_method');
     }
@@ -145,6 +144,75 @@ const PaymentSuccess = () => {
     );
   }
 
+  // --- FAILURE UI ---
+  if (verificationFailed) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="max-w-2xl w-full relative z-10">
+          <div className="bg-card/80 backdrop-blur-md border border-red-200/30 shadow-2xl rounded-3xl p-8 md:p-12 text-center">
+            {/* Failure Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center animate-in zoom-in duration-500">
+                <XCircle className="text-red-500" size={48} />
+              </div>
+            </div>
+
+            <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4 font-heading">
+              Payment Not Confirmed
+            </h1>
+            <p className="text-lg text-red-500/80 mb-8 font-medium">
+              We could not verify your payment
+            </p>
+
+            <div className="bg-red-50/50 border border-red-100 rounded-2xl p-6 mb-8 text-left">
+              <h3 className="text-primary font-semibold text-lg mb-4">⚠️ What happened?</h3>
+              <ul className="space-y-3 text-primary/80">
+                <li className="flex items-start">
+                  <span className="text-red-400 mr-3 mt-1">•</span>
+                  <span>The payment may have been cancelled or did not complete on PayPal's end.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-red-400 mr-3 mt-1">•</span>
+                  <span>If you believe you were charged, please contact us immediately.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-red-400 mr-3 mt-1">•</span>
+                  <span>No booking has been confirmed and no emails have been sent.</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div className="mb-8">
+              <p className="text-muted-foreground mb-4">Need help? Reach out to us:</p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4 text-sm">
+                <a href="mailto:bathejatejashvini@gmail.com" className="flex items-center justify-center text-[#B8860B] hover:text-[#8B6508] transition-colors font-medium">
+                  <Mail size={16} className="mr-2" />
+                  bathejatejashvini@gmail.com
+                </a>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => navigate('/')}
+                className="bg-[#B8860B] hover:bg-[#8B6508] text-white rounded-xl px-8 py-4 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              >
+                <Home size={18} className="mr-2" />
+                Return Home
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- SUCCESS UI ---
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Elements matching Payment.jsx */}

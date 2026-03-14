@@ -1,4 +1,8 @@
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Depends, status, Response, Request
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+import asyncio
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from services import email_service
@@ -58,6 +62,7 @@ import re
 from fastapi.responses import FileResponse
 from services.pdf_service import generate_invoice_pdf_v2, generate_booking_details_pdf_v2
 from services.template_selector import get_template_for_service
+from services.calendar_service import calendar_service
 
 # Email Regex
 EMAIL_REGEX = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
@@ -79,6 +84,45 @@ if not MONGO_URL:
 
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[DB_NAME]
+
+# Initialize Rate Limiter
+limiter = Limiter(key_func=get_remote_address)
+
+# Background Task for Cleanup
+async def cleanup_stale_bookings():
+    """Delete pending bookings older than 2 hours periodically"""
+    while True:
+        try:
+            two_hours_ago = datetime.now(timezone.utc) - timedelta(hours=2)
+            # Find and delete pending bookings where created_at is older than 2 hours
+            # and they have no transaction_id
+            query = {
+                "status": "pending",
+                "payment_status": "pending",
+                "transaction_id": None,
+                "created_at": {"$lt": two_hours_ago}
+            }
+            count = await db.bookings.count_documents(query)
+            if count > 0:
+                logger.info(f"Cleanup: Found {count} stale pending bookings. Cleaning slots...")
+                # Note: If GCal events were created (legacy flow), we clean them up to free slots.
+                # We do NOT delete the booking record as it is needed for reminders/analytics.
+                cursor = db.bookings.find(query)
+                async for b in cursor:
+                    if b.get('gcal_event_id'):
+                        try:
+                            # Pass to thread since it's a synchronous blocking call
+                            await asyncio.to_thread(calendar_service.delete_event, b['gcal_event_id'])
+                            # Mark as slot_released so we don't try again
+                            await db.bookings.update_one({"_id": b["_id"]}, {"$set": {"gcal_event_id": None, "slot_released": True}})
+                        except Exception as ge:
+                            logger.error(f"Cleanup GCal Error for {b.get('booking_id')}: {ge}")
+                
+                logger.info(f"Cleanup: Successfully freed slots for {count} stale bookings. Records preserved for analytics.")
+        except Exception as e:
+            logger.error(f"Cleanup Error: {e}")
+        
+        await asyncio.sleep(3600) # Run hourly
 
 # Ensure unique index for slots to prevent duplicates at DB level
 from contextlib import asynccontextmanager
@@ -114,11 +158,19 @@ async def lifespan(app: FastAPI):
             
     except Exception as e:
         logger.error(f"Error creating index or seeding: {e}", exc_info=True)
+
+    # Start cleanup task
+    cleanup_task = asyncio.create_task(cleanup_stale_bookings())
+    
     yield
+    # Cleanup background tasks on shutdown
+    cleanup_task.cancel()
     logger.info("Application shutting down...")
 
 # Create the main app without a prefix
 app = FastAPI(lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Register logging middleware
 app.middleware("http")(log_requests_middleware)
@@ -504,7 +556,8 @@ async def logout(response: Response):
     return {"message": "Logged out"}
 
 @api_router.post("/auth/forgot-password")
-async def forgot_password(data: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+@limiter.limit("5/hour")
+async def forgot_password(data: ForgotPasswordRequest, background_tasks: BackgroundTasks, request: Request):
     logger.info(f"Forgot PW requested for: {data.email}")
     user = await db.users.find_one({"email": data.email})
     
@@ -532,7 +585,8 @@ async def forgot_password(data: ForgotPasswordRequest, background_tasks: Backgro
     return {"message": "If email exists, OTP sent"}
 
 @api_router.post("/auth/reset-password")
-async def reset_password(data: ResetPasswordRequest):
+@limiter.limit("10/hour")
+async def reset_password(data: ResetPasswordRequest, request: Request):
     # Verify OTP
     record = await db.otps.find_one({"email": data.email})
     if not record:
@@ -1078,7 +1132,7 @@ async def delete_booking(booking_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 # --- Slot Routes ---
-from services.calendar_service import calendar_service
+
 
 # Define Windows
 REGULAR_WINDOW_START = "10:30"
@@ -1367,7 +1421,8 @@ async def verify_promo_code(data: VerifyCodeRequest):
     }
 
 @api_router.post("/bookings/create")
-async def create_booking(booking_data: BookingCreate, background_tasks: BackgroundTasks):
+@limiter.limit("3/minute")
+async def create_booking(booking_data: BookingCreate, background_tasks: BackgroundTasks, request: Request):
     """Create a new booking and initiate payment"""
     try:
         # Generate booking ID
@@ -1474,53 +1529,8 @@ async def create_booking(booking_data: BookingCreate, background_tasks: Backgrou
         if booking_data.is_emergency:
              booking.amount = round(booking.amount * 1.30, 2)
         
-        # If live reading, verify slot availability via Double Check Logic?
-        # User requirement says "When user books... create new event... BOOKED: Patient Name".
-        # We assume frontend already fetched valid slot via get_slots which did the check.
-        # But race condition possible. 
-        # Robustness: re-check availability? 
-        # For MVP, just insert. GCal allows overlaps unless we check.
-        
-        if 'live' in booking_data.service_type and 'tiktok' not in booking_data.service_type and booking_data.preferred_date and booking_data.preferred_time:
-             # Calculate Duration
-             duration_b = 20
-             if '40' in booking_data.service_type:
-                 duration_b = 40
-             
-             # Create GCal Event
-             # Handle UTC or Legacy Time
-             p_time = booking_data.preferred_time
-             if 'Z' in p_time or '+' in p_time:
-                 start_dt_iso = f"{booking_data.preferred_date}T{p_time}"
-             else:
-                 # Fallback to Business Offset if no timezone info
-                 current_offset = get_business_offset()
-                 start_dt_iso = f"{booking_data.preferred_date}T{p_time}:00{current_offset}"
-             
-             try:
-                 dt = datetime.fromisoformat(start_dt_iso)
-                 end_dt = dt + timedelta(minutes=duration_b)
-                 end_dt_iso = end_dt.isoformat()
-                 
-                 summary = f"BOOKED: {booking_data.full_name} ({booking_data.service_type})"
-                 if booking_data.is_emergency:
-                     summary = f"[EMERGENCY] {summary}"
-                 
-                 gcal_event = calendar_service.create_event(
-                     summary,
-                     start_dt_iso, 
-                     end_dt_iso,
-                     # attendees_emails=[booking_data.email], # Service Accounts cannot invite without DWD
-                     description=f"Questions: {booking_data.questions}\nSituation: {booking_data.situation_description}"
-                 )
-                 
-                 # Save GCal Event ID to Booking
-                 booking.gcal_event_id = gcal_event.get('id')
-                 
-             except Exception as e:
-                 logger.error(f"Failed to create GCal event: {e}")
-                 # Fail booking if event creation fails
-                 raise HTTPException(status_code=500, detail=f"Failed to create Calendar Event: {str(e)}")
+        # GCal Event Logic MOVED to verify_payment to avoid blocking slots for unpaid bookings.
+        # We only create the booking record as 'pending' here.
         
         # Booking save and notifications deferred until payment success
 
@@ -1614,6 +1624,61 @@ async def verify_payment(verification: PaymentVerification, background_tasks: Ba
                 'updated_at': datetime.now(timezone.utc).isoformat()
             }}
         )
+
+        # 3. Create GCal Event NOW (After payment success)
+        if str(booking.get('service_type', '')).startswith('live-') and not booking.get('gcal_event_id'):
+            try:
+                 # Calculate Duration
+                 duration_b = 20
+                 if '40' in booking.get('service_type'):
+                     duration_b = 40
+                 
+                 p_date = booking.get('preferred_date')
+                 p_time = booking.get('preferred_time')
+                 
+                 # Recalculate start_dt_iso
+                 if 'Z' in p_time or '+' in p_time:
+                     start_dt_iso = f"{p_date}T{p_time}"
+                 else:
+                     current_offset = get_business_offset()
+                     start_dt_iso = f"{p_date}T{p_time}:00{current_offset}"
+                 
+                 dt = datetime.fromisoformat(start_dt_iso)
+                 end_dt = dt + timedelta(minutes=duration_b)
+                 end_dt_iso = end_dt.isoformat()
+                 
+                 # Final Availability Re-Check (Avoid double booking in the payment interval)
+                 busy_at_that_time = calendar_service.is_busy(p_date, p_time, duration_b)
+                 if busy_at_that_time:
+                     logger.error(f"Double Booking Conflict: Slot {p_date} {p_time} became busy during payment for {verification.booking_id}")
+                     # In this extreme case, we still take the payment (it succeeded) 
+                     # but Tejashvini MUST reach out to reschedule. 
+                     # We still create the event but mark it as CONFLICT?
+                     summary = f"[CONFLICT] BOOKED: {booking.get('full_name')} ({booking.get('service_type')})"
+                 else:
+                     summary = f"BOOKED: {booking.get('full_name')} ({booking.get('service_type')})"
+                 
+                 if booking.get('is_emergency'):
+                     summary = f"[EMERGENCY] {summary}"
+                 
+                 gcal_event = calendar_service.create_event(
+                     summary,
+                     start_dt_iso, 
+                     end_dt_iso,
+                     description=f"Questions: {booking.get('questions')}\nSituation: {booking.get('situation_description')}"
+                 )
+                 
+                 await db.bookings.update_one(
+                     {'booking_id': verification.booking_id},
+                     {"$set": {"gcal_event_id": gcal_event.get('id')}}
+                 )
+                 # Refresh local booking object to include new gcal_event_id
+                 booking['gcal_event_id'] = gcal_event.get('id')
+                 
+            except Exception as e:
+                 logger.error(f"Post-Payment GCal Error for {verification.booking_id}: {e}")
+                 # We don't fail the verification (payment is already processed) but log heavily.
+
 
         # Retention Tracking: Mark previous incomplete bookings for this email as retained
         try:
@@ -1876,13 +1941,45 @@ async def get_admin_stats(days: int = 30, current_user: str = Depends(get_curren
         raise HTTPException(status_code=500, detail="Failed to fetch statistics")
 
 @api_router.get("/bookings/{booking_id}")
-async def get_booking(booking_id: str):
-    """Get booking details"""
+async def get_booking(booking_id: str, request: Request):
+    """Get booking details (Filtered for public users, full for admin)"""
     booking = await db.bookings.find_one({'booking_id': booking_id}, {"_id": 0})
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    # Convert ISO string timestamps back to datetime objects
+    # Check if admin (for full data)
+    is_admin = False
+    try:
+        # Re-use logic from get_current_admin but don't raise if not authenticated
+        token = request.cookies.get("admin_token")
+        if not token:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+        
+        if token:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            if payload.get("sub"):
+                is_admin = True
+    except:
+        pass
+
+    # Filter PII if not admin
+    if not is_admin:
+        # Return only essential non-PII fields
+        return {
+            "booking_id": booking["booking_id"],
+            "status": booking["status"],
+            "payment_status": booking["payment_status"],
+            "service_type": booking["service_type"],
+            "preferred_date": booking["preferred_date"],
+            "preferred_time": booking.get("preferred_time"),
+            "amount": booking.get("amount"),
+            "currency": booking.get("currency"),
+            "created_at": booking.get("created_at")
+        }
+
+    # Convert ISO string timestamps back to datetime objects for full response
     if isinstance(booking['created_at'], str):
         booking['created_at'] = datetime.fromisoformat(booking['created_at'])
     if isinstance(booking['updated_at'], str):

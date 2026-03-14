@@ -338,3 +338,816 @@ ValueError: This is a test exception for logging verification
 2026-03-14 02:25:09,813 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
 2026-03-14 02:25:10,781 | INFO     | [-] | app | lifespan:89 | Application starting up...
 2026-03-14 02:25:10,972 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-14 13:27:22,958 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 13:27:24,232 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-14 13:27:24,421 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-14 13:30:30,865 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-14 13:30:55,408 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 13:30:56,794 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-14 13:30:57,268 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-14 13:47:27,556 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-14 13:47:31,362 | INFO     | [-] | app | <module>:137 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 13:47:32,565 | INFO     | [-] | app | lifespan:89 | Application starting up...
+2026-03-14 13:47:32,793 | INFO     | [-] | app | lifespan:91 | Ensured unique index on slots (date, time)
+2026-03-14 13:47:57,414 | INFO     | [-] | app | lifespan:118 | Application shutting down...
+2026-03-14 13:58:50,967 | INFO     | [-] | app | <module>:185 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 13:58:52,246 | INFO     | [-] | app | lifespan:131 | Application starting up...
+2026-03-14 13:58:52,449 | INFO     | [-] | app | lifespan:133 | Ensured unique index on slots (date, time)
+2026-03-14 13:58:52,481 | INFO     | [-] | app | cleanup_stale_bookings:106 | Cleanup: Found 14 stale pending bookings. Deleting...
+2026-03-14 13:58:52,893 | INFO     | [-] | app | cleanup_stale_bookings:119 | Cleanup: Successfully deleted 14 stale bookings.
+2026-03-14 14:00:07,703 | INFO     | [7339f094] | app | log_requests_middleware:22 | [7339f094] ➜ GET /api/settings/offer | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:07,713 | INFO     | [7339f094] | app | log_requests_middleware:42 | [7339f094] ✓ GET /api/settings/offer | Status: 200 | 10.98ms
+2026-03-14 14:00:07,720 | INFO     | [77f9effe] | app | log_requests_middleware:22 | [77f9effe] ➜ GET /api/settings/offer | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:07,729 | INFO     | [77f9effe] | app | log_requests_middleware:42 | [77f9effe] ✓ GET /api/settings/offer | Status: 200 | 8.6ms
+2026-03-14 14:00:07,749 | INFO     | [67897e9d] | app | log_requests_middleware:22 | [67897e9d] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:07,753 | INFO     | [ec965d6a] | app | log_requests_middleware:22 | [ec965d6a] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:07,763 | INFO     | [67897e9d] | app | log_requests_middleware:42 | [67897e9d] ✓ GET /api/services | Status: 200 | 13.97ms
+2026-03-14 14:00:07,768 | INFO     | [19f1f863] | app | log_requests_middleware:22 | [19f1f863] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:07,777 | INFO     | [19f1f863] | app | log_requests_middleware:42 | [19f1f863] ✓ GET /api/services | Status: 200 | 9.27ms
+2026-03-14 14:00:07,863 | INFO     | [ec965d6a] | app | log_requests_middleware:42 | [ec965d6a] ✓ GET /api/campaign | Status: 200 | 110.58ms
+2026-03-14 14:00:07,870 | INFO     | [ff16f86e] | app | log_requests_middleware:22 | [ff16f86e] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:07,884 | INFO     | [ff16f86e] | app | log_requests_middleware:42 | [ff16f86e] ✓ GET /api/campaign | Status: 200 | 13.3ms
+2026-03-14 14:00:28,771 | INFO     | [af72028a] | app | log_requests_middleware:22 | [af72028a] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:28,774 | INFO     | [23328d1d] | app | log_requests_middleware:22 | [23328d1d] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:28,777 | INFO     | [b47e9ff6] | app | log_requests_middleware:22 | [b47e9ff6] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:28,786 | INFO     | [23328d1d] | app | log_requests_middleware:42 | [23328d1d] ✓ GET /api/campaign | Status: 200 | 11.91ms
+2026-03-14 14:00:28,787 | INFO     | [af72028a] | app | log_requests_middleware:42 | [af72028a] ✓ GET /api/services | Status: 200 | 16.84ms
+2026-03-14 14:00:28,795 | INFO     | [15a8da1e] | app | log_requests_middleware:22 | [15a8da1e] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:28,797 | INFO     | [71b5bc41] | app | log_requests_middleware:22 | [71b5bc41] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:28,858 | INFO     | [15a8da1e] | app | log_requests_middleware:42 | [15a8da1e] ✓ GET /api/services | Status: 200 | 63.08ms
+2026-03-14 14:00:28,869 | INFO     | [b47e9ff6] | app | log_requests_middleware:42 | [b47e9ff6] ✓ GET /api/taxes/active | Status: 200 | 91.78ms
+2026-03-14 14:00:28,874 | INFO     | [b62e9260] | app | log_requests_middleware:22 | [b62e9260] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:28,887 | INFO     | [b62e9260] | app | log_requests_middleware:42 | [b62e9260] ✓ GET /api/taxes/active | Status: 200 | 13.5ms
+2026-03-14 14:00:29,044 | INFO     | [71b5bc41] | app | log_requests_middleware:42 | [71b5bc41] ✓ GET /api/campaign | Status: 200 | 246.74ms
+2026-03-14 14:00:30,968 | INFO     | [60340f48] | app | log_requests_middleware:22 | [60340f48] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:30,985 | INFO     | [60340f48] | app | create_booking:1473 | TikTok Live service selected. Discounts are not applicable.
+2026-03-14 14:00:34,679 | WARNING  | [60340f48] | app | log_requests_middleware:42 | [60340f48] ✓ POST /api/bookings/create | Status: 200 | 3710.82ms ⚠ SLOW REQUEST
+2026-03-14 14:00:52,447 | INFO     | [-] | app | lifespan:166 | Application shutting down...
+2026-03-14 14:00:56,454 | INFO     | [-] | app | <module>:188 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 14:00:57,828 | INFO     | [-] | app | lifespan:132 | Application starting up...
+2026-03-14 14:00:57,991 | INFO     | [-] | app | lifespan:134 | Ensured unique index on slots (date, time)
+2026-03-14 14:00:58,019 | INFO     | [21ef01e4] | app | log_requests_middleware:22 | [21ef01e4] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:58,020 | INFO     | [bdfea163] | app | log_requests_middleware:22 | [bdfea163] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:58,024 | INFO     | [f39861cc] | app | log_requests_middleware:22 | [f39861cc] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:58,037 | INFO     | [21ef01e4] | app | log_requests_middleware:42 | [21ef01e4] ✓ GET /api/services | Status: 200 | 18.69ms
+2026-03-14 14:00:58,050 | INFO     | [c37bfafb] | app | log_requests_middleware:22 | [c37bfafb] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:58,062 | INFO     | [c37bfafb] | app | log_requests_middleware:42 | [c37bfafb] ✓ GET /api/services | Status: 200 | 12.35ms
+2026-03-14 14:00:58,107 | INFO     | [f39861cc] | app | log_requests_middleware:42 | [f39861cc] ✓ GET /api/taxes/active | Status: 200 | 83.94ms
+2026-03-14 14:00:58,112 | INFO     | [47fc4d55] | app | log_requests_middleware:22 | [47fc4d55] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:58,123 | INFO     | [47fc4d55] | app | log_requests_middleware:42 | [47fc4d55] ✓ GET /api/taxes/active | Status: 200 | 11.1ms
+2026-03-14 14:00:58,326 | INFO     | [bdfea163] | app | log_requests_middleware:42 | [bdfea163] ✓ GET /api/campaign | Status: 200 | 306.42ms
+2026-03-14 14:00:58,332 | INFO     | [e9e74934] | app | log_requests_middleware:22 | [e9e74934] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:00:58,350 | INFO     | [e9e74934] | app | log_requests_middleware:42 | [e9e74934] ✓ GET /api/campaign | Status: 200 | 17.45ms
+2026-03-14 14:01:02,008 | INFO     | [edc984f7] | app | log_requests_middleware:22 | [edc984f7] ➜ GET /api/auth/me | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:02,010 | INFO     | [edc984f7] | app | log_requests_middleware:42 | [edc984f7] ✓ GET /api/auth/me | Status: 401 | 1.92ms
+2026-03-14 14:01:02,016 | INFO     | [ecf5f611] | app | log_requests_middleware:22 | [ecf5f611] ➜ GET /api/auth/me | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:02,017 | INFO     | [ecf5f611] | app | log_requests_middleware:42 | [ecf5f611] ✓ GET /api/auth/me | Status: 401 | 1.68ms
+2026-03-14 14:01:02,027 | INFO     | [f1fecf9d] | app | log_requests_middleware:22 | [f1fecf9d] ➜ GET /api/auth/setup-status | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:02,041 | INFO     | [f1fecf9d] | app | log_requests_middleware:42 | [f1fecf9d] ✓ GET /api/auth/setup-status | Status: 200 | 14.22ms
+2026-03-14 14:01:02,045 | INFO     | [17234300] | app | log_requests_middleware:22 | [17234300] ➜ GET /api/auth/setup-status | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:02,056 | INFO     | [17234300] | app | log_requests_middleware:42 | [17234300] ✓ GET /api/auth/setup-status | Status: 200 | 10.34ms
+2026-03-14 14:01:02,063 | INFO     | [7a831e6f] | app | log_requests_middleware:22 | [7a831e6f] ➜ GET /api/auth/setup-status | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:02,075 | INFO     | [7a831e6f] | app | log_requests_middleware:42 | [7a831e6f] ✓ GET /api/auth/setup-status | Status: 200 | 11.95ms
+2026-03-14 14:01:05,458 | INFO     | [d442d88b] | app | log_requests_middleware:22 | [d442d88b] ➜ POST /api/login | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:05,470 | INFO     | [d442d88b] | app | log_requests_middleware:42 | [d442d88b] ✓ POST /api/login | Status: 200 | 12.06ms
+2026-03-14 14:01:05,681 | INFO     | [a8bb6dff] | app | log_requests_middleware:22 | [a8bb6dff] ➜ GET /api/slots | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:05,683 | INFO     | [a8bb6dff] | app | get_slots:1147 | GET_SLOTS: date=2026-03-14 type=None duration=20 avail_only=False
+2026-03-14 14:01:06,097 | INFO     | [7aa952ac] | app | log_requests_middleware:22 | [7aa952ac] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:06,102 | INFO     | [44962dd6] | app | log_requests_middleware:22 | [44962dd6] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:06,111 | INFO     | [dab106eb] | app | log_requests_middleware:22 | [dab106eb] ➜ GET /api/admin/stats | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:06,114 | INFO     | [d6085bfd] | app | log_requests_middleware:22 | [d6085bfd] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:06,127 | INFO     | [a8bb6dff] | app | log_requests_middleware:42 | [a8bb6dff] ✓ GET /api/slots | Status: 200 | 445.61ms
+2026-03-14 14:01:06,129 | INFO     | [7aa952ac] | app | log_requests_middleware:42 | [7aa952ac] ✓ GET /api/testimonials | Status: 200 | 32.49ms
+2026-03-14 14:01:06,150 | INFO     | [2bf8db8f] | app | log_requests_middleware:22 | [2bf8db8f] ➜ GET /api/availability | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:06,510 | INFO     | [2bf8db8f] | app | log_requests_middleware:42 | [2bf8db8f] ✓ GET /api/availability | Status: 200 | 359.96ms
+2026-03-14 14:01:06,515 | INFO     | [44962dd6] | app | log_requests_middleware:42 | [44962dd6] ✓ GET /api/bookings | Status: 200 | 413.54ms
+2026-03-14 14:01:06,544 | INFO     | [dab106eb] | app | log_requests_middleware:42 | [dab106eb] ✓ GET /api/admin/stats | Status: 200 | 432.32ms
+2026-03-14 14:01:06,563 | INFO     | [d6085bfd] | app | log_requests_middleware:42 | [d6085bfd] ✓ GET /api/bookings | Status: 200 | 448.29ms
+2026-03-14 14:01:12,160 | INFO     | [eded6b7c] | app | log_requests_middleware:22 | [eded6b7c] ➜ GET /api/slots | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:12,161 | INFO     | [eded6b7c] | app | get_slots:1147 | GET_SLOTS: date=2026-03-14 type=None duration=20 avail_only=False
+2026-03-14 14:01:12,554 | INFO     | [2be916fd] | app | log_requests_middleware:22 | [2be916fd] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:12,555 | INFO     | [fdcd7133] | app | log_requests_middleware:22 | [fdcd7133] ➜ GET /api/admin/stats | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:12,558 | INFO     | [2553a229] | app | log_requests_middleware:22 | [2553a229] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:12,559 | INFO     | [f22501d8] | app | log_requests_middleware:22 | [f22501d8] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:12,570 | INFO     | [eded6b7c] | app | log_requests_middleware:42 | [eded6b7c] ✓ GET /api/slots | Status: 200 | 409.41ms
+2026-03-14 14:01:12,571 | INFO     | [2be916fd] | app | log_requests_middleware:42 | [2be916fd] ✓ GET /api/testimonials | Status: 200 | 17.28ms
+2026-03-14 14:01:12,580 | INFO     | [e40e513b] | app | log_requests_middleware:22 | [e40e513b] ➜ GET /api/availability | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:12,962 | INFO     | [e40e513b] | app | log_requests_middleware:42 | [e40e513b] ✓ GET /api/availability | Status: 200 | 382.59ms
+2026-03-14 14:01:12,977 | INFO     | [f22501d8] | app | log_requests_middleware:42 | [f22501d8] ✓ GET /api/bookings | Status: 200 | 417.6ms
+2026-03-14 14:01:12,983 | INFO     | [2553a229] | app | log_requests_middleware:42 | [2553a229] ✓ GET /api/bookings | Status: 200 | 425.33ms
+2026-03-14 14:01:13,001 | INFO     | [fdcd7133] | app | log_requests_middleware:42 | [fdcd7133] ✓ GET /api/admin/stats | Status: 200 | 445.85ms
+2026-03-14 14:01:21,358 | INFO     | [cdd769cd] | app | log_requests_middleware:22 | [cdd769cd] ➜ GET /api/bookings/gcal/TRT-20260314-0EB5659E | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:01:21,381 | INFO     | [cdd769cd] | app | log_requests_middleware:42 | [cdd769cd] ✓ GET /api/bookings/gcal/TRT-20260314-0EB5659E | Status: 200 | 22.77ms
+2026-03-14 14:13:31,948 | INFO     | [05304fdd] | app | log_requests_middleware:22 | [05304fdd] ➜ GET /api/health | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:13:31,953 | INFO     | [05304fdd] | app | log_requests_middleware:42 | [05304fdd] ✓ GET /api/health | Status: 200 | 6.52ms
+2026-03-14 14:14:06,388 | INFO     | [5e784f07] | app | log_requests_middleware:22 | [5e784f07] ➜ GET /api/bookings/NON_EXISTENT_ID | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:14:06,434 | INFO     | [5e784f07] | app | log_requests_middleware:42 | [5e784f07] ✓ GET /api/bookings/NON_EXISTENT_ID | Status: 404 | 46.07ms
+2026-03-14 14:17:43,012 | INFO     | [888ca3ce] | app | log_requests_middleware:22 | [888ca3ce] ➜ GET /api/auth/me | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:17:43,108 | INFO     | [888ca3ce] | app | log_requests_middleware:42 | [888ca3ce] ✓ GET /api/auth/me | Status: 200 | 96.2ms
+2026-03-14 14:17:43,128 | INFO     | [ce5be59d] | app | log_requests_middleware:22 | [ce5be59d] ➜ GET /api/auth/me | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:17:43,140 | INFO     | [ce5be59d] | app | log_requests_middleware:42 | [ce5be59d] ✓ GET /api/auth/me | Status: 200 | 11.39ms
+2026-03-14 14:17:43,409 | INFO     | [ddb4e9bd] | app | log_requests_middleware:22 | [ddb4e9bd] ➜ GET /api/slots | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:17:43,411 | INFO     | [ddb4e9bd] | app | get_slots:1147 | GET_SLOTS: date=2026-03-14 type=None duration=20 avail_only=False
+2026-03-14 14:17:43,453 | ERROR    | [ddb4e9bd] | app | log_requests_middleware:32 | [ddb4e9bd] ✗ GET /api/slots | FAILED after 43.7ms | Error: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 159, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/anyio/streams/memory.py", line 117, in receive
+    return self.receive_nowait()
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/anyio/streams/memory.py", line 110, in receive_nowait
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/middleware.py", line 29, in log_requests_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        dependant=dependant, values=values, is_coroutine=is_coroutine
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/server.py", line 1154, in get_slots
+    events = calendar_service.list_events(day_start_iso, day_end_iso)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/services/calendar_service.py", line 185, in list_events
+    ).execute()
+      ~~~~~~~^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/_helpers.py", line 130, in positional_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 923, in execute
+    resp, content = _retry_request(
+                    ~~~~~~~~~~~~~~^
+        http,
+        ^^^^^
+    ...<7 lines>...
+        headers=self.headers,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 222, in _retry_request
+    raise exception
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 191, in _retry_request
+    resp, content = http.request(uri, method, *args, **kwargs)
+                    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/google_auth_httplib2.py", line 216, in request
+    response, content = self.http.request(
+                        ~~~~~~~~~~~~~~~~~^
+        uri,
+        ^^^^
+    ...<5 lines>...
+        **kwargs
+        ^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1727, in request
+    (response, content) = self._request(
+                          ~~~~~~~~~~~~~^
+        conn, authority, uri, request_uri, method, body, headers, redirections, cachekey,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1447, in _request
+    (response, content) = self._conn_request(conn, request_uri, method, body, headers)
+                          ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1399, in _conn_request
+    response = conn.getresponse()
+  File "/usr/lib64/python3.14/http/client.py", line 1450, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib64/python3.14/http/client.py", line 336, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib64/python3.14/http/client.py", line 297, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.14/socket.py", line 725, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib64/python3.14/ssl.py", line 1304, in recv_into
+    return self.read(nbytes, buffer)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.14/ssl.py", line 1138, in read
+    return self._sslobj.read(len, buffer)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-14 14:17:43,485 | INFO     | [bc88eacf] | app | log_requests_middleware:22 | [bc88eacf] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:17:43,487 | ERROR    | [ddb4e9bd] | app | global_exception_handler:12 | [ddb4e9bd] Unhandled exception | GET /api/slots
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib64/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    |     raise exc
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/middleware.py", line 29, in log_requests_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 756, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 776, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 297, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 72, in app
+    |     response = await func(request)
+    |                ^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 278, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         dependant=dependant, values=values, is_coroutine=is_coroutine
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/server.py", line 1154, in get_slots
+    |     events = calendar_service.list_events(day_start_iso, day_end_iso)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/services/calendar_service.py", line 185, in list_events
+    |     ).execute()
+    |       ~~~~~~~^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/_helpers.py", line 130, in positional_wrapper
+    |     return wrapped(*args, **kwargs)
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 923, in execute
+    |     resp, content = _retry_request(
+    |                     ~~~~~~~~~~~~~~^
+    |         http,
+    |         ^^^^^
+    |     ...<7 lines>...
+    |         headers=self.headers,
+    |         ^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 222, in _retry_request
+    |     raise exception
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 191, in _retry_request
+    |     resp, content = http.request(uri, method, *args, **kwargs)
+    |                     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/google_auth_httplib2.py", line 216, in request
+    |     response, content = self.http.request(
+    |                         ~~~~~~~~~~~~~~~~~^
+    |         uri,
+    |         ^^^^
+    |     ...<5 lines>...
+    |         **kwargs
+    |         ^^^^^^^^
+    |     )
+    |     ^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1727, in request
+    |     (response, content) = self._request(
+    |                           ~~~~~~~~~~~~~^
+    |         conn, authority, uri, request_uri, method, body, headers, redirections, cachekey,
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1447, in _request
+    |     (response, content) = self._conn_request(conn, request_uri, method, body, headers)
+    |                           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1399, in _conn_request
+    |     response = conn.getresponse()
+    |   File "/usr/lib64/python3.14/http/client.py", line 1450, in getresponse
+    |     response.begin()
+    |     ~~~~~~~~~~~~~~^^
+    |   File "/usr/lib64/python3.14/http/client.py", line 336, in begin
+    |     version, status, reason = self._read_status()
+    |                               ~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib64/python3.14/http/client.py", line 297, in _read_status
+    |     line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+    |                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+    |   File "/usr/lib64/python3.14/socket.py", line 725, in readinto
+    |     return self._sock.recv_into(b)
+    |            ~~~~~~~~~~~~~~~~~~~~^^^
+    |   File "/usr/lib64/python3.14/ssl.py", line 1304, in recv_into
+    |     return self.read(nbytes, buffer)
+    |            ~~~~~~~~~^^^^^^^^^^^^^^^^
+    |   File "/usr/lib64/python3.14/ssl.py", line 1138, in read
+    |     return self._sslobj.read(len, buffer)
+    |            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+    | BrokenPipeError: [Errno 32] Broken pipe
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib64/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/middleware.py", line 29, in log_requests_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        dependant=dependant, values=values, is_coroutine=is_coroutine
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/server.py", line 1154, in get_slots
+    events = calendar_service.list_events(day_start_iso, day_end_iso)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/services/calendar_service.py", line 185, in list_events
+    ).execute()
+      ~~~~~~~^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/_helpers.py", line 130, in positional_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 923, in execute
+    resp, content = _retry_request(
+                    ~~~~~~~~~~~~~~^
+        http,
+        ^^^^^
+    ...<7 lines>...
+        headers=self.headers,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 222, in _retry_request
+    raise exception
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/googleapiclient/http.py", line 191, in _retry_request
+    resp, content = http.request(uri, method, *args, **kwargs)
+                    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/google_auth_httplib2.py", line 216, in request
+    response, content = self.http.request(
+                        ~~~~~~~~~~~~~~~~~^
+        uri,
+        ^^^^
+    ...<5 lines>...
+        **kwargs
+        ^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1727, in request
+    (response, content) = self._request(
+                          ~~~~~~~~~~~~~^
+        conn, authority, uri, request_uri, method, body, headers, redirections, cachekey,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1447, in _request
+    (response, content) = self._conn_request(conn, request_uri, method, body, headers)
+                          ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arpit/Desktop/promo/tarotReader_web/backend/venv/lib64/python3.14/site-packages/httplib2/__init__.py", line 1399, in _conn_request
+    response = conn.getresponse()
+  File "/usr/lib64/python3.14/http/client.py", line 1450, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib64/python3.14/http/client.py", line 336, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib64/python3.14/http/client.py", line 297, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.14/socket.py", line 725, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib64/python3.14/ssl.py", line 1304, in recv_into
+    return self.read(nbytes, buffer)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.14/ssl.py", line 1138, in read
+    return self._sslobj.read(len, buffer)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-14 14:17:43,563 | INFO     | [e22c09c6] | app | log_requests_middleware:22 | [e22c09c6] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:17:43,564 | INFO     | [cc3960ad] | app | log_requests_middleware:22 | [cc3960ad] ➜ GET /api/admin/stats | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:17:43,564 | INFO     | [70218c7a] | app | log_requests_middleware:22 | [70218c7a] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:17:43,620 | INFO     | [bc88eacf] | app | log_requests_middleware:42 | [bc88eacf] ✓ GET /api/testimonials | Status: 200 | 134.31ms
+2026-03-14 14:17:43,675 | INFO     | [70218c7a] | app | log_requests_middleware:42 | [70218c7a] ✓ GET /api/bookings | Status: 200 | 110.52ms
+2026-03-14 14:17:43,723 | INFO     | [e22c09c6] | app | log_requests_middleware:42 | [e22c09c6] ✓ GET /api/bookings | Status: 200 | 159.59ms
+2026-03-14 14:17:44,222 | INFO     | [cc3960ad] | app | log_requests_middleware:42 | [cc3960ad] ✓ GET /api/admin/stats | Status: 200 | 658.16ms
+2026-03-14 14:18:20,456 | INFO     | [2eb913e5] | app | log_requests_middleware:22 | [2eb913e5] ➜ GET /api/slots | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:20,457 | INFO     | [2eb913e5] | app | get_slots:1147 | GET_SLOTS: date=2026-03-14 type=None duration=20 avail_only=False
+2026-03-14 14:18:20,974 | INFO     | [46165194] | app | log_requests_middleware:22 | [46165194] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:20,978 | INFO     | [ca1bae7c] | app | log_requests_middleware:22 | [ca1bae7c] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:20,979 | INFO     | [d8eb4329] | app | log_requests_middleware:22 | [d8eb4329] ➜ GET /api/admin/stats | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:20,981 | INFO     | [87e6f8c0] | app | log_requests_middleware:22 | [87e6f8c0] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:20,993 | INFO     | [2eb913e5] | app | log_requests_middleware:42 | [2eb913e5] ✓ GET /api/slots | Status: 200 | 537.18ms
+2026-03-14 14:18:21,004 | INFO     | [c18b3065] | app | log_requests_middleware:22 | [c18b3065] ➜ GET /api/availability | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:21,472 | INFO     | [46165194] | app | log_requests_middleware:42 | [46165194] ✓ GET /api/testimonials | Status: 200 | 498.03ms
+2026-03-14 14:18:21,477 | INFO     | [c18b3065] | app | log_requests_middleware:42 | [c18b3065] ✓ GET /api/availability | Status: 200 | 472.27ms
+2026-03-14 14:18:21,489 | INFO     | [87e6f8c0] | app | log_requests_middleware:42 | [87e6f8c0] ✓ GET /api/bookings | Status: 200 | 508.38ms
+2026-03-14 14:18:21,511 | INFO     | [d8eb4329] | app | log_requests_middleware:42 | [d8eb4329] ✓ GET /api/admin/stats | Status: 200 | 532.28ms
+2026-03-14 14:18:21,591 | INFO     | [ca1bae7c] | app | log_requests_middleware:42 | [ca1bae7c] ✓ GET /api/bookings | Status: 200 | 613.48ms
+2026-03-14 14:18:26,869 | INFO     | [9e9faf5b] | app | log_requests_middleware:22 | [9e9faf5b] ➜ GET /api/slots | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:26,870 | INFO     | [9e9faf5b] | app | get_slots:1147 | GET_SLOTS: date=2026-03-14 type=None duration=20 avail_only=False
+2026-03-14 14:18:27,309 | INFO     | [519c255e] | app | log_requests_middleware:22 | [519c255e] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:27,312 | INFO     | [7c8f870f] | app | log_requests_middleware:22 | [7c8f870f] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:27,313 | INFO     | [e4cefaa1] | app | log_requests_middleware:22 | [e4cefaa1] ➜ GET /api/admin/stats | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:27,325 | INFO     | [f2417c51] | app | log_requests_middleware:22 | [f2417c51] ➜ GET /api/bookings | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:27,331 | INFO     | [9e9faf5b] | app | log_requests_middleware:42 | [9e9faf5b] ✓ GET /api/slots | Status: 200 | 462.41ms
+2026-03-14 14:18:27,344 | INFO     | [26e9b541] | app | log_requests_middleware:22 | [26e9b541] ➜ GET /api/availability | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:18:27,709 | INFO     | [26e9b541] | app | log_requests_middleware:42 | [26e9b541] ✓ GET /api/availability | Status: 200 | 364.6ms
+2026-03-14 14:18:27,730 | INFO     | [7c8f870f] | app | log_requests_middleware:42 | [7c8f870f] ✓ GET /api/bookings | Status: 200 | 418.13ms
+2026-03-14 14:18:27,731 | INFO     | [519c255e] | app | log_requests_middleware:42 | [519c255e] ✓ GET /api/testimonials | Status: 200 | 421.69ms
+2026-03-14 14:18:27,748 | INFO     | [e4cefaa1] | app | log_requests_middleware:42 | [e4cefaa1] ✓ GET /api/admin/stats | Status: 200 | 435.54ms
+2026-03-14 14:18:38,483 | WARNING  | [f2417c51] | app | log_requests_middleware:42 | [f2417c51] ✓ GET /api/bookings | Status: 200 | 11157.68ms ⚠ SLOW REQUEST
+2026-03-14 14:22:12,104 | INFO     | [9761703f] | app | log_requests_middleware:22 | [9761703f] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:22:12,127 | INFO     | [9761703f] | app | create_booking:1474 | Applied Global Campaign: 35% off. New amount: 14.3
+2026-03-14 14:22:14,564 | WARNING  | [9761703f] | app | log_requests_middleware:42 | [9761703f] ✓ POST /api/bookings/create | Status: 200 | 2459.84ms ⚠ SLOW REQUEST
+2026-03-14 14:23:25,825 | INFO     | [0dffa9c4] | app | log_requests_middleware:22 | [0dffa9c4] ➜ GET /api/bookings/TRT-20260314-0EB5659E | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:23:25,836 | INFO     | [0dffa9c4] | app | log_requests_middleware:42 | [0dffa9c4] ✓ GET /api/bookings/TRT-20260314-0EB5659E | Status: 200 | 11.01ms
+2026-03-14 14:23:33,925 | INFO     | [621af893] | app | log_requests_middleware:22 | [621af893] ➜ GET /api/bookings/TRT-20260314-0EB5659E | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:23:33,938 | INFO     | [621af893] | app | log_requests_middleware:42 | [621af893] ✓ GET /api/bookings/TRT-20260314-0EB5659E | Status: 200 | 13.29ms
+2026-03-14 14:24:32,432 | INFO     | [5aa4abed] | app | log_requests_middleware:22 | [5aa4abed] ➜ GET /api/bookings/TRT-20260314-0EB5659E | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:24:32,443 | INFO     | [5aa4abed] | app | log_requests_middleware:42 | [5aa4abed] ✓ GET /api/bookings/TRT-20260314-0EB5659E | Status: 200 | 10.98ms
+2026-03-14 14:25:56,345 | INFO     | [-] | app | lifespan:167 | Application shutting down...
+2026-03-14 14:26:01,623 | INFO     | [-] | app | <module>:189 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 14:26:01,733 | INFO     | [-] | app | lifespan:133 | Application starting up...
+2026-03-14 14:26:07,069 | INFO     | [-] | app | lifespan:135 | Ensured unique index on slots (date, time)
+2026-03-14 14:26:11,714 | INFO     | [243f85a8] | app | log_requests_middleware:22 | [243f85a8] ➜ GET /api/health | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:26:11,717 | INFO     | [243f85a8] | app | log_requests_middleware:42 | [243f85a8] ✓ GET /api/health | Status: 200 | 2.73ms
+2026-03-14 14:27:31,558 | INFO     | [-] | app | lifespan:168 | Application shutting down...
+2026-03-14 14:27:38,119 | INFO     | [-] | app | <module>:189 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 14:27:38,204 | INFO     | [-] | app | lifespan:133 | Application starting up...
+2026-03-14 14:27:38,443 | INFO     | [-] | app | lifespan:135 | Ensured unique index on slots (date, time)
+2026-03-14 14:27:41,564 | INFO     | [-] | app | lifespan:168 | Application shutting down...
+2026-03-14 14:27:45,007 | INFO     | [-] | app | <module>:189 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 14:27:45,093 | INFO     | [-] | app | lifespan:133 | Application starting up...
+2026-03-14 14:27:45,245 | INFO     | [-] | app | lifespan:135 | Ensured unique index on slots (date, time)
+2026-03-14 14:27:56,586 | INFO     | [d5d6655c] | app | log_requests_middleware:22 | [d5d6655c] ➜ GET /api/health | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:27:56,589 | INFO     | [d5d6655c] | app | log_requests_middleware:42 | [d5d6655c] ✓ GET /api/health | Status: 200 | 2.46ms
+2026-03-14 14:29:07,173 | INFO     | [09c15b9f] | app | log_requests_middleware:22 | [09c15b9f] ➜ POST /api/bookings/verify-payment | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:29:07,185 | ERROR    | [09c15b9f] | app | verify_payment:1761 | Payment verification error: 404: Booking not found
+2026-03-14 14:29:07,186 | INFO     | [09c15b9f] | app | log_requests_middleware:42 | [09c15b9f] ✓ POST /api/bookings/verify-payment | Status: 500 | 13.18ms
+2026-03-14 14:29:59,757 | INFO     | [6548f9a5] | app | log_requests_middleware:22 | [6548f9a5] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:29:59,764 | INFO     | [6548f9a5] | app | log_requests_middleware:42 | [6548f9a5] ✓ POST /api/bookings/create | Status: 422 | 7.13ms
+2026-03-14 14:29:59,783 | INFO     | [6eef50c7] | app | log_requests_middleware:22 | [6eef50c7] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:29:59,786 | INFO     | [6eef50c7] | app | log_requests_middleware:42 | [6eef50c7] ✓ POST /api/bookings/create | Status: 422 | 2.25ms
+2026-03-14 14:29:59,797 | INFO     | [51fbec8a] | app | log_requests_middleware:22 | [51fbec8a] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:29:59,799 | INFO     | [51fbec8a] | app | log_requests_middleware:42 | [51fbec8a] ✓ POST /api/bookings/create | Status: 422 | 2.26ms
+2026-03-14 14:29:59,811 | INFO     | [f7c5e412] | app | log_requests_middleware:22 | [f7c5e412] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:29:59,812 | INFO     | [f7c5e412] | app | log_requests_middleware:42 | [f7c5e412] ✓ POST /api/bookings/create | Status: 422 | 1.58ms
+2026-03-14 14:29:59,823 | INFO     | [0ecfcb97] | app | log_requests_middleware:22 | [0ecfcb97] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:29:59,825 | INFO     | [0ecfcb97] | app | log_requests_middleware:42 | [0ecfcb97] ✓ POST /api/bookings/create | Status: 422 | 1.23ms
+2026-03-14 14:31:24,202 | INFO     | [d0462dee] | app | log_requests_middleware:22 | [d0462dee] ➜ GET /api/bookings/TRT-20260314-0EB5659E | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:31:24,212 | INFO     | [d0462dee] | app | log_requests_middleware:42 | [d0462dee] ✓ GET /api/bookings/TRT-20260314-0EB5659E | Status: 200 | 10.49ms
+2026-03-14 14:35:45,546 | INFO     | [6e32b75d] | app | log_requests_middleware:22 | [6e32b75d] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:35:45,562 | INFO     | [6e32b75d] | app | create_booking:1477 | Applied Global Campaign: 35% off. New amount: 42.900000000000006
+2026-03-14 14:35:48,126 | WARNING  | [6e32b75d] | app | log_requests_middleware:42 | [6e32b75d] ✓ POST /api/bookings/create | Status: 200 | 2579.76ms ⚠ SLOW REQUEST
+2026-03-14 14:35:48,139 | INFO     | [20090e11] | app | log_requests_middleware:22 | [20090e11] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:35:48,154 | INFO     | [20090e11] | app | create_booking:1477 | Applied Global Campaign: 35% off. New amount: 42.900000000000006
+2026-03-14 14:35:49,453 | WARNING  | [20090e11] | app | log_requests_middleware:42 | [20090e11] ✓ POST /api/bookings/create | Status: 200 | 1314.62ms ⚠ SLOW REQUEST
+2026-03-14 14:35:49,481 | INFO     | [f7a8e699] | app | log_requests_middleware:22 | [f7a8e699] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:35:49,495 | INFO     | [f7a8e699] | app | create_booking:1477 | Applied Global Campaign: 35% off. New amount: 42.900000000000006
+2026-03-14 14:35:51,017 | WARNING  | [f7a8e699] | app | log_requests_middleware:42 | [f7a8e699] ✓ POST /api/bookings/create | Status: 200 | 1536.48ms ⚠ SLOW REQUEST
+2026-03-14 14:35:51,046 | INFO     | [5190bc13] | app | log_requests_middleware:22 | [5190bc13] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:35:51,049 | INFO     | [5190bc13] | app | log_requests_middleware:42 | [5190bc13] ✓ POST /api/bookings/create | Status: 429 | 2.98ms
+2026-03-14 14:35:51,061 | INFO     | [2dafa51b] | app | log_requests_middleware:22 | [2dafa51b] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: curl/8.15.0
+2026-03-14 14:35:51,063 | INFO     | [2dafa51b] | app | log_requests_middleware:42 | [2dafa51b] ✓ POST /api/bookings/create | Status: 429 | 2.31ms
+2026-03-14 14:37:31,346 | INFO     | [2f461323] | app | log_requests_middleware:22 | [2f461323] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:31,348 | INFO     | [41e05591] | app | log_requests_middleware:22 | [41e05591] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:31,351 | INFO     | [d9def4d0] | app | log_requests_middleware:22 | [d9def4d0] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:31,354 | INFO     | [2f461323] | app | log_requests_middleware:42 | [2f461323] ✓ GET /api/services | Status: 200 | 8.54ms
+2026-03-14 14:37:31,357 | INFO     | [9affa321] | app | log_requests_middleware:22 | [9affa321] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:31,365 | INFO     | [9affa321] | app | log_requests_middleware:42 | [9affa321] ✓ GET /api/services | Status: 200 | 7.53ms
+2026-03-14 14:37:31,459 | INFO     | [d9def4d0] | app | log_requests_middleware:42 | [d9def4d0] ✓ GET /api/taxes/active | Status: 200 | 108.97ms
+2026-03-14 14:37:31,462 | INFO     | [f15e8638] | app | log_requests_middleware:22 | [f15e8638] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:31,471 | INFO     | [f15e8638] | app | log_requests_middleware:42 | [f15e8638] ✓ GET /api/taxes/active | Status: 200 | 8.77ms
+2026-03-14 14:37:31,471 | INFO     | [41e05591] | app | log_requests_middleware:42 | [41e05591] ✓ GET /api/campaign | Status: 200 | 123.34ms
+2026-03-14 14:37:31,475 | INFO     | [0e887e7a] | app | log_requests_middleware:22 | [0e887e7a] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:31,484 | INFO     | [0e887e7a] | app | log_requests_middleware:42 | [0e887e7a] ✓ GET /api/campaign | Status: 200 | 8.41ms
+2026-03-14 14:37:34,227 | INFO     | [0380cf49] | app | log_requests_middleware:22 | [0380cf49] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:34,229 | INFO     | [1bf60720] | app | log_requests_middleware:22 | [1bf60720] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:34,236 | INFO     | [0380cf49] | app | log_requests_middleware:42 | [0380cf49] ✓ GET /api/services | Status: 200 | 9.33ms
+2026-03-14 14:37:34,238 | INFO     | [1bf60720] | app | log_requests_middleware:42 | [1bf60720] ✓ GET /api/campaign | Status: 200 | 9.63ms
+2026-03-14 14:37:34,241 | INFO     | [03e7515e] | app | log_requests_middleware:22 | [03e7515e] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:34,245 | INFO     | [6c4ed1ac] | app | log_requests_middleware:22 | [6c4ed1ac] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:34,251 | INFO     | [03e7515e] | app | log_requests_middleware:42 | [03e7515e] ✓ GET /api/services | Status: 200 | 10.04ms
+2026-03-14 14:37:34,254 | INFO     | [6c4ed1ac] | app | log_requests_middleware:42 | [6c4ed1ac] ✓ GET /api/campaign | Status: 200 | 9.63ms
+2026-03-14 14:37:36,785 | INFO     | [541a3f86] | app | log_requests_middleware:22 | [541a3f86] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:36,787 | INFO     | [9d035100] | app | log_requests_middleware:22 | [9d035100] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:36,797 | INFO     | [9d035100] | app | log_requests_middleware:42 | [9d035100] ✓ GET /api/campaign | Status: 200 | 9.74ms
+2026-03-14 14:37:36,798 | INFO     | [541a3f86] | app | log_requests_middleware:42 | [541a3f86] ✓ GET /api/services | Status: 200 | 13.12ms
+2026-03-14 14:37:36,802 | INFO     | [004796fe] | app | log_requests_middleware:22 | [004796fe] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:36,804 | INFO     | [2ea37e5c] | app | log_requests_middleware:22 | [2ea37e5c] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:36,810 | INFO     | [004796fe] | app | log_requests_middleware:42 | [004796fe] ✓ GET /api/services | Status: 200 | 8.27ms
+2026-03-14 14:37:36,812 | INFO     | [2ea37e5c] | app | log_requests_middleware:42 | [2ea37e5c] ✓ GET /api/campaign | Status: 200 | 8.43ms
+2026-03-14 14:37:50,854 | INFO     | [dcde8a57] | app | log_requests_middleware:22 | [dcde8a57] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:50,856 | INFO     | [c38ac33d] | app | log_requests_middleware:22 | [c38ac33d] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:50,857 | INFO     | [e16bcc70] | app | log_requests_middleware:22 | [e16bcc70] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:50,866 | INFO     | [e16bcc70] | app | log_requests_middleware:42 | [e16bcc70] ✓ GET /api/taxes/active | Status: 200 | 9.48ms
+2026-03-14 14:37:50,867 | INFO     | [c38ac33d] | app | log_requests_middleware:42 | [c38ac33d] ✓ GET /api/campaign | Status: 200 | 11.33ms
+2026-03-14 14:37:50,870 | INFO     | [dcde8a57] | app | log_requests_middleware:42 | [dcde8a57] ✓ GET /api/services | Status: 200 | 15.06ms
+2026-03-14 14:37:50,874 | INFO     | [7a4fa825] | app | log_requests_middleware:22 | [7a4fa825] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:50,876 | INFO     | [5e0cf21a] | app | log_requests_middleware:22 | [5e0cf21a] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:50,877 | INFO     | [53f06c5c] | app | log_requests_middleware:22 | [53f06c5c] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:37:50,885 | INFO     | [7a4fa825] | app | log_requests_middleware:42 | [7a4fa825] ✓ GET /api/services | Status: 200 | 11.31ms
+2026-03-14 14:37:50,888 | INFO     | [5e0cf21a] | app | log_requests_middleware:42 | [5e0cf21a] ✓ GET /api/campaign | Status: 200 | 12.02ms
+2026-03-14 14:37:50,890 | INFO     | [53f06c5c] | app | log_requests_middleware:42 | [53f06c5c] ✓ GET /api/taxes/active | Status: 200 | 12.9ms
+2026-03-14 14:38:10,710 | INFO     | [9e36b7a7] | app | log_requests_middleware:22 | [9e36b7a7] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:10,713 | INFO     | [1946a32a] | app | log_requests_middleware:22 | [1946a32a] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:10,713 | INFO     | [9a023e3d] | app | log_requests_middleware:22 | [9a023e3d] ➜ GET /api/settings/offer | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:10,714 | INFO     | [a2c55703] | app | log_requests_middleware:22 | [a2c55703] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:10,718 | INFO     | [9e36b7a7] | app | log_requests_middleware:42 | [9e36b7a7] ✓ GET /api/services | Status: 200 | 8.07ms
+2026-03-14 14:38:10,723 | INFO     | [1946a32a] | app | log_requests_middleware:42 | [1946a32a] ✓ GET /api/campaign | Status: 200 | 10.73ms
+2026-03-14 14:38:10,724 | INFO     | [b03f6bcd] | app | log_requests_middleware:22 | [b03f6bcd] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:10,732 | INFO     | [a2c55703] | app | log_requests_middleware:42 | [a2c55703] ✓ GET /api/testimonials | Status: 200 | 18.64ms
+2026-03-14 14:38:10,734 | INFO     | [88cd826d] | app | log_requests_middleware:22 | [88cd826d] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:10,737 | INFO     | [c4a65cd1] | app | log_requests_middleware:22 | [c4a65cd1] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:10,743 | INFO     | [b03f6bcd] | app | log_requests_middleware:42 | [b03f6bcd] ✓ GET /api/services | Status: 200 | 19.12ms
+2026-03-14 14:38:10,747 | INFO     | [88cd826d] | app | log_requests_middleware:42 | [88cd826d] ✓ GET /api/campaign | Status: 200 | 12.65ms
+2026-03-14 14:38:10,753 | INFO     | [c4a65cd1] | app | log_requests_middleware:42 | [c4a65cd1] ✓ GET /api/testimonials | Status: 200 | 16.3ms
+2026-03-14 14:38:10,790 | INFO     | [9a023e3d] | app | log_requests_middleware:42 | [9a023e3d] ✓ GET /api/settings/offer | Status: 200 | 76.94ms
+2026-03-14 14:38:10,793 | INFO     | [a1fbfd28] | app | log_requests_middleware:22 | [a1fbfd28] ➜ GET /api/settings/offer | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:10,802 | INFO     | [a1fbfd28] | app | log_requests_middleware:42 | [a1fbfd28] ✓ GET /api/settings/offer | Status: 200 | 8.58ms
+2026-03-14 14:38:18,627 | INFO     | [7cc184d0] | app | log_requests_middleware:22 | [7cc184d0] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:18,632 | INFO     | [f785f7d2] | app | log_requests_middleware:22 | [f785f7d2] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:18,637 | INFO     | [7cc184d0] | app | log_requests_middleware:42 | [7cc184d0] ✓ GET /api/services | Status: 200 | 10.17ms
+2026-03-14 14:38:18,642 | INFO     | [f785f7d2] | app | log_requests_middleware:42 | [f785f7d2] ✓ GET /api/campaign | Status: 200 | 9.78ms
+2026-03-14 14:38:18,645 | INFO     | [0e27fd55] | app | log_requests_middleware:22 | [0e27fd55] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:18,647 | INFO     | [f3f19210] | app | log_requests_middleware:22 | [f3f19210] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:18,659 | INFO     | [f3f19210] | app | log_requests_middleware:42 | [f3f19210] ✓ GET /api/campaign | Status: 200 | 11.52ms
+2026-03-14 14:38:18,661 | INFO     | [0e27fd55] | app | log_requests_middleware:42 | [0e27fd55] ✓ GET /api/services | Status: 200 | 15.81ms
+2026-03-14 14:38:29,804 | INFO     | [bbf1586d] | app | log_requests_middleware:22 | [bbf1586d] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:29,805 | INFO     | [87106ef2] | app | log_requests_middleware:22 | [87106ef2] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:29,807 | INFO     | [10cbfea0] | app | log_requests_middleware:22 | [10cbfea0] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:29,815 | INFO     | [10cbfea0] | app | log_requests_middleware:42 | [10cbfea0] ✓ GET /api/taxes/active | Status: 200 | 8.05ms
+2026-03-14 14:38:29,819 | INFO     | [11075dea] | app | log_requests_middleware:22 | [11075dea] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:29,826 | INFO     | [11075dea] | app | log_requests_middleware:42 | [11075dea] ✓ GET /api/taxes/active | Status: 200 | 7.61ms
+2026-03-14 14:38:29,856 | INFO     | [bbf1586d] | app | log_requests_middleware:42 | [bbf1586d] ✓ GET /api/services | Status: 200 | 52.29ms
+2026-03-14 14:38:29,858 | INFO     | [ce02f903] | app | log_requests_middleware:22 | [ce02f903] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:29,865 | INFO     | [ce02f903] | app | log_requests_middleware:42 | [ce02f903] ✓ GET /api/services | Status: 200 | 7.06ms
+2026-03-14 14:38:30,052 | INFO     | [87106ef2] | app | log_requests_middleware:42 | [87106ef2] ✓ GET /api/campaign | Status: 200 | 246.79ms
+2026-03-14 14:38:30,054 | INFO     | [77bfac8d] | app | log_requests_middleware:22 | [77bfac8d] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:30,061 | INFO     | [77bfac8d] | app | log_requests_middleware:42 | [77bfac8d] ✓ GET /api/campaign | Status: 200 | 6.73ms
+2026-03-14 14:38:35,021 | INFO     | [625d5be2] | app | log_requests_middleware:22 | [625d5be2] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:38:35,031 | INFO     | [625d5be2] | app | create_booking:1479 | TikTok Live service selected. Discounts are not applicable.
+2026-03-14 14:38:36,787 | WARNING  | [625d5be2] | app | log_requests_middleware:42 | [625d5be2] ✓ POST /api/bookings/create | Status: 200 | 1766.48ms ⚠ SLOW REQUEST
+2026-03-14 14:39:16,520 | INFO     | [-] | app | lifespan:168 | Application shutting down...
+2026-03-14 14:39:21,166 | INFO     | [-] | app | <module>:189 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 14:39:21,259 | INFO     | [-] | app | lifespan:133 | Application starting up...
+2026-03-14 14:39:21,467 | INFO     | [-] | app | lifespan:135 | Ensured unique index on slots (date, time)
+2026-03-14 14:39:40,168 | INFO     | [83d3efb2] | app | log_requests_middleware:22 | [83d3efb2] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:40,169 | INFO     | [be095dbf] | app | log_requests_middleware:22 | [be095dbf] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:40,172 | INFO     | [28075ddb] | app | log_requests_middleware:22 | [28075ddb] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:40,179 | INFO     | [83d3efb2] | app | log_requests_middleware:42 | [83d3efb2] ✓ GET /api/services | Status: 200 | 11.57ms
+2026-03-14 14:39:40,182 | INFO     | [4be33480] | app | log_requests_middleware:22 | [4be33480] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:40,197 | INFO     | [4be33480] | app | log_requests_middleware:42 | [4be33480] ✓ GET /api/services | Status: 200 | 15.38ms
+2026-03-14 14:39:40,240 | INFO     | [be095dbf] | app | log_requests_middleware:42 | [be095dbf] ✓ GET /api/campaign | Status: 200 | 71.12ms
+2026-03-14 14:39:40,246 | INFO     | [91e58c44] | app | log_requests_middleware:22 | [91e58c44] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:40,257 | INFO     | [91e58c44] | app | log_requests_middleware:42 | [91e58c44] ✓ GET /api/campaign | Status: 200 | 11.49ms
+2026-03-14 14:39:40,453 | INFO     | [28075ddb] | app | log_requests_middleware:42 | [28075ddb] ✓ GET /api/testimonials | Status: 200 | 281.37ms
+2026-03-14 14:39:40,456 | INFO     | [3c614542] | app | log_requests_middleware:22 | [3c614542] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:40,464 | INFO     | [3c614542] | app | log_requests_middleware:42 | [3c614542] ✓ GET /api/testimonials | Status: 200 | 8.16ms
+2026-03-14 14:39:46,531 | INFO     | [4ba68626] | app | log_requests_middleware:22 | [4ba68626] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:46,532 | INFO     | [0d8ad9c3] | app | log_requests_middleware:22 | [0d8ad9c3] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:46,538 | INFO     | [0d8ad9c3] | app | log_requests_middleware:42 | [0d8ad9c3] ✓ GET /api/campaign | Status: 200 | 6.77ms
+2026-03-14 14:39:46,539 | INFO     | [4ba68626] | app | log_requests_middleware:42 | [4ba68626] ✓ GET /api/services | Status: 200 | 8.66ms
+2026-03-14 14:39:46,542 | INFO     | [0a5e3812] | app | log_requests_middleware:22 | [0a5e3812] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:46,544 | INFO     | [2acd680e] | app | log_requests_middleware:22 | [2acd680e] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:46,551 | INFO     | [0a5e3812] | app | log_requests_middleware:42 | [0a5e3812] ✓ GET /api/services | Status: 200 | 8.11ms
+2026-03-14 14:39:46,553 | INFO     | [2acd680e] | app | log_requests_middleware:42 | [2acd680e] ✓ GET /api/campaign | Status: 200 | 8.83ms
+2026-03-14 14:39:54,944 | INFO     | [1298327c] | app | log_requests_middleware:22 | [1298327c] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:54,946 | INFO     | [9502b5f7] | app | log_requests_middleware:22 | [9502b5f7] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:54,949 | INFO     | [dd767ea2] | app | log_requests_middleware:22 | [dd767ea2] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:54,956 | INFO     | [9502b5f7] | app | log_requests_middleware:42 | [9502b5f7] ✓ GET /api/campaign | Status: 200 | 10.69ms
+2026-03-14 14:39:54,957 | INFO     | [dd767ea2] | app | log_requests_middleware:42 | [dd767ea2] ✓ GET /api/taxes/active | Status: 200 | 7.99ms
+2026-03-14 14:39:54,958 | INFO     | [1298327c] | app | log_requests_middleware:42 | [1298327c] ✓ GET /api/services | Status: 200 | 14.78ms
+2026-03-14 14:39:54,964 | INFO     | [f247596c] | app | log_requests_middleware:22 | [f247596c] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:54,967 | INFO     | [0ec5abde] | app | log_requests_middleware:22 | [0ec5abde] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:54,968 | INFO     | [23c77bc5] | app | log_requests_middleware:22 | [23c77bc5] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:54,977 | INFO     | [0ec5abde] | app | log_requests_middleware:42 | [0ec5abde] ✓ GET /api/campaign | Status: 200 | 10.17ms
+2026-03-14 14:39:54,979 | INFO     | [f247596c] | app | log_requests_middleware:42 | [f247596c] ✓ GET /api/services | Status: 200 | 15.08ms
+2026-03-14 14:39:54,980 | INFO     | [23c77bc5] | app | log_requests_middleware:42 | [23c77bc5] ✓ GET /api/taxes/active | Status: 200 | 12.47ms
+2026-03-14 14:39:56,361 | INFO     | [7220cce6] | app | log_requests_middleware:22 | [7220cce6] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:39:56,371 | INFO     | [7220cce6] | app | create_booking:1479 | TikTok Live service selected. Discounts are not applicable.
+2026-03-14 14:39:58,518 | WARNING  | [7220cce6] | app | log_requests_middleware:42 | [7220cce6] ✓ POST /api/bookings/create | Status: 200 | 2156.64ms ⚠ SLOW REQUEST
+2026-03-14 14:40:22,704 | INFO     | [30b163af] | app | log_requests_middleware:22 | [30b163af] ➜ POST /api/bookings/verify-payment | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:40:22,715 | INFO     | [30b163af] | app | verify_payment:1607 | VERIFY DEBUG: Receiving verification request: booking_id='TRT-20260314-BD2F6B74' payment_method='paypal' session_id=None payment_id='PAYID-NG2SLZQ49M605690B443520A' payer_id='6W6PWYSKRZUWS' order_id=None signature=None
+2026-03-14 14:40:25,952 | INFO     | [30b163af] | app | verify_payment:1703 | Retention: Marked 3 previous bookings for arpitkumar1101@gmail.com as retained by TRT-20260314-BD2F6B74
+2026-03-14 14:40:25,962 | WARNING  | [30b163af] | app | log_requests_middleware:42 | [30b163af] ✓ POST /api/bookings/verify-payment | Status: 200 | 3258.38ms ⚠ SLOW REQUEST
+2026-03-14 14:40:25,987 | INFO     | [74841160] | app | log_requests_middleware:22 | [74841160] ➜ GET /api/bookings/TRT-20260314-BD2F6B74 | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:40:26,013 | INFO     | [74841160] | app | log_requests_middleware:42 | [74841160] ✓ GET /api/bookings/TRT-20260314-BD2F6B74 | Status: 200 | 26.6ms
+2026-03-14 14:40:42,001 | INFO     | [d2d10fe7] | app | log_requests_middleware:22 | [d2d10fe7] ➜ GET /api/settings/offer | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:40:42,010 | INFO     | [d2d10fe7] | app | log_requests_middleware:42 | [d2d10fe7] ✓ GET /api/settings/offer | Status: 200 | 8.47ms
+2026-03-14 14:40:42,021 | INFO     | [b49d2857] | app | log_requests_middleware:22 | [b49d2857] ➜ POST /api/bookings/verify-payment | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:40:42,024 | INFO     | [9cf71e71] | app | log_requests_middleware:22 | [9cf71e71] ➜ GET /api/settings/offer | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:40:42,030 | INFO     | [b49d2857] | app | verify_payment:1598 | VERIFY DEBUG: Booking TRT-20260314-BD2F6B74 already confirmed. Returning success idempotently.
+2026-03-14 14:40:42,030 | INFO     | [b49d2857] | app | log_requests_middleware:42 | [b49d2857] ✓ POST /api/bookings/verify-payment | Status: 200 | 9.33ms
+2026-03-14 14:40:42,032 | INFO     | [9cf71e71] | app | log_requests_middleware:42 | [9cf71e71] ✓ GET /api/settings/offer | Status: 200 | 7.99ms
+2026-03-14 14:40:42,063 | INFO     | [d4e63248] | app | log_requests_middleware:22 | [d4e63248] ➜ GET /api/bookings/TRT-20260314-BD2F6B74 | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:40:42,069 | INFO     | [d4e63248] | app | log_requests_middleware:42 | [d4e63248] ✓ GET /api/bookings/TRT-20260314-BD2F6B74 | Status: 200 | 6.51ms
+2026-03-14 14:42:05,235 | INFO     | [cd3073ab] | app | log_requests_middleware:22 | [cd3073ab] ➜ GET /api/settings/offer | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:42:05,237 | INFO     | [8b72eb78] | app | log_requests_middleware:22 | [8b72eb78] ➜ POST /api/bookings/verify-payment | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:42:05,243 | INFO     | [cd3073ab] | app | log_requests_middleware:42 | [cd3073ab] ✓ GET /api/settings/offer | Status: 200 | 7.31ms
+2026-03-14 14:42:05,245 | INFO     | [8b72eb78] | app | verify_payment:1598 | VERIFY DEBUG: Booking TRT-20260314-BD2F6B74 already confirmed. Returning success idempotently.
+2026-03-14 14:42:05,246 | INFO     | [8b72eb78] | app | log_requests_middleware:42 | [8b72eb78] ✓ POST /api/bookings/verify-payment | Status: 200 | 8.45ms
+2026-03-14 14:42:05,247 | INFO     | [d0e284ed] | app | log_requests_middleware:22 | [d0e284ed] ➜ GET /api/settings/offer | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:42:05,252 | INFO     | [bc4b3d2d] | app | log_requests_middleware:22 | [bc4b3d2d] ➜ GET /api/bookings/TRT-20260314-BD2F6B74 | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:42:05,256 | INFO     | [d0e284ed] | app | log_requests_middleware:42 | [d0e284ed] ✓ GET /api/settings/offer | Status: 200 | 8.78ms
+2026-03-14 14:42:05,260 | INFO     | [bc4b3d2d] | app | log_requests_middleware:42 | [bc4b3d2d] ✓ GET /api/bookings/TRT-20260314-BD2F6B74 | Status: 200 | 8.16ms
+2026-03-14 14:42:22,344 | INFO     | [-] | app | lifespan:168 | Application shutting down...
+2026-03-14 14:42:27,140 | INFO     | [-] | app | <module>:189 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 14:42:27,262 | INFO     | [-] | app | lifespan:133 | Application starting up...
+2026-03-14 14:42:27,481 | INFO     | [-] | app | lifespan:135 | Ensured unique index on slots (date, time)
+2026-03-14 14:43:26,719 | INFO     | [93f95b93] | app | log_requests_middleware:22 | [93f95b93] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:26,721 | INFO     | [7436e0de] | app | log_requests_middleware:22 | [7436e0de] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:26,724 | INFO     | [245047ad] | app | log_requests_middleware:22 | [245047ad] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:26,729 | INFO     | [93f95b93] | app | log_requests_middleware:42 | [93f95b93] ✓ GET /api/services | Status: 200 | 10.5ms
+2026-03-14 14:43:26,736 | INFO     | [dd18598a] | app | log_requests_middleware:22 | [dd18598a] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:26,754 | INFO     | [dd18598a] | app | log_requests_middleware:42 | [dd18598a] ✓ GET /api/services | Status: 200 | 17.48ms
+2026-03-14 14:43:26,796 | INFO     | [7436e0de] | app | log_requests_middleware:42 | [7436e0de] ✓ GET /api/campaign | Status: 200 | 74.83ms
+2026-03-14 14:43:26,802 | INFO     | [fb93eab1] | app | log_requests_middleware:22 | [fb93eab1] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:26,809 | INFO     | [fb93eab1] | app | log_requests_middleware:42 | [fb93eab1] ✓ GET /api/campaign | Status: 200 | 7.23ms
+2026-03-14 14:43:26,812 | INFO     | [245047ad] | app | log_requests_middleware:42 | [245047ad] ✓ GET /api/testimonials | Status: 200 | 88.17ms
+2026-03-14 14:43:26,820 | INFO     | [34b7beb5] | app | log_requests_middleware:22 | [34b7beb5] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:26,827 | INFO     | [34b7beb5] | app | log_requests_middleware:42 | [34b7beb5] ✓ GET /api/testimonials | Status: 200 | 7.81ms
+2026-03-14 14:43:32,846 | INFO     | [a315e950] | app | log_requests_middleware:22 | [a315e950] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:32,849 | INFO     | [c200ab31] | app | log_requests_middleware:22 | [c200ab31] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:32,856 | INFO     | [a315e950] | app | log_requests_middleware:42 | [a315e950] ✓ GET /api/services | Status: 200 | 9.64ms
+2026-03-14 14:43:32,861 | INFO     | [c200ab31] | app | log_requests_middleware:42 | [c200ab31] ✓ GET /api/campaign | Status: 200 | 12.14ms
+2026-03-14 14:43:32,862 | INFO     | [a80143d1] | app | log_requests_middleware:22 | [a80143d1] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:32,869 | INFO     | [8a10d19a] | app | log_requests_middleware:22 | [8a10d19a] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:32,873 | INFO     | [a80143d1] | app | log_requests_middleware:42 | [a80143d1] ✓ GET /api/services | Status: 200 | 10.7ms
+2026-03-14 14:43:32,877 | INFO     | [8a10d19a] | app | log_requests_middleware:42 | [8a10d19a] ✓ GET /api/campaign | Status: 200 | 8.57ms
+2026-03-14 14:43:46,227 | INFO     | [3e78e55f] | app | log_requests_middleware:22 | [3e78e55f] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:46,229 | INFO     | [4a71db76] | app | log_requests_middleware:22 | [4a71db76] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:46,232 | INFO     | [bcda99e3] | app | log_requests_middleware:22 | [bcda99e3] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:46,239 | INFO     | [3e78e55f] | app | log_requests_middleware:42 | [3e78e55f] ✓ GET /api/services | Status: 200 | 12.24ms
+2026-03-14 14:43:46,246 | INFO     | [38338e3a] | app | log_requests_middleware:22 | [38338e3a] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:46,251 | INFO     | [bcda99e3] | app | log_requests_middleware:42 | [bcda99e3] ✓ GET /api/taxes/active | Status: 200 | 19.15ms
+2026-03-14 14:43:46,252 | INFO     | [4a71db76] | app | log_requests_middleware:42 | [4a71db76] ✓ GET /api/campaign | Status: 200 | 22.77ms
+2026-03-14 14:43:46,256 | INFO     | [a1e7b384] | app | log_requests_middleware:22 | [a1e7b384] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:46,261 | INFO     | [79992216] | app | log_requests_middleware:22 | [79992216] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:43:46,264 | INFO     | [38338e3a] | app | log_requests_middleware:42 | [38338e3a] ✓ GET /api/services | Status: 200 | 18.24ms
+2026-03-14 14:43:46,267 | INFO     | [a1e7b384] | app | log_requests_middleware:42 | [a1e7b384] ✓ GET /api/taxes/active | Status: 200 | 10.6ms
+2026-03-14 14:43:46,271 | INFO     | [79992216] | app | log_requests_middleware:42 | [79992216] ✓ GET /api/campaign | Status: 200 | 9.9ms
+2026-03-14 14:43:59,866 | INFO     | [-] | app | lifespan:168 | Application shutting down...
+2026-03-14 14:44:05,275 | INFO     | [-] | app | <module>:189 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 14:44:05,450 | INFO     | [-] | app | lifespan:133 | Application starting up...
+2026-03-14 14:44:05,759 | INFO     | [-] | app | lifespan:135 | Ensured unique index on slots (date, time)
+2026-03-14 14:44:05,777 | INFO     | [a91335ca] | app | log_requests_middleware:22 | [a91335ca] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:05,778 | INFO     | [5351f461] | app | log_requests_middleware:22 | [5351f461] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:05,779 | INFO     | [c6f33303] | app | log_requests_middleware:22 | [c6f33303] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:05,793 | INFO     | [a91335ca] | app | log_requests_middleware:42 | [a91335ca] ✓ GET /api/services | Status: 200 | 15.63ms
+2026-03-14 14:44:05,797 | INFO     | [8ac91af0] | app | log_requests_middleware:22 | [8ac91af0] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:05,813 | INFO     | [8ac91af0] | app | log_requests_middleware:42 | [8ac91af0] ✓ GET /api/services | Status: 200 | 16.31ms
+2026-03-14 14:44:05,855 | INFO     | [5351f461] | app | log_requests_middleware:42 | [5351f461] ✓ GET /api/campaign | Status: 200 | 77.05ms
+2026-03-14 14:44:05,860 | INFO     | [67bec7d4] | app | log_requests_middleware:22 | [67bec7d4] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:05,868 | INFO     | [67bec7d4] | app | log_requests_middleware:42 | [67bec7d4] ✓ GET /api/campaign | Status: 200 | 8.52ms
+2026-03-14 14:44:05,870 | INFO     | [c6f33303] | app | log_requests_middleware:42 | [c6f33303] ✓ GET /api/taxes/active | Status: 200 | 90.93ms
+2026-03-14 14:44:05,874 | INFO     | [05b5a2fe] | app | log_requests_middleware:22 | [05b5a2fe] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:05,880 | INFO     | [05b5a2fe] | app | log_requests_middleware:42 | [05b5a2fe] ✓ GET /api/taxes/active | Status: 200 | 6.77ms
+2026-03-14 14:44:07,007 | INFO     | [383540cf] | app | log_requests_middleware:22 | [383540cf] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:07,039 | INFO     | [383540cf] | app | create_booking:1479 | TikTok Live service selected. Discounts are not applicable.
+2026-03-14 14:44:13,369 | WARNING  | [383540cf] | app | log_requests_middleware:42 | [383540cf] ✓ POST /api/bookings/create | Status: 200 | 6361.42ms ⚠ SLOW REQUEST
+2026-03-14 14:44:21,610 | INFO     | [47852505] | app | log_requests_middleware:22 | [47852505] ➜ POST /api/bookings/verify-payment | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:21,624 | INFO     | [47852505] | app | verify_payment:1607 | VERIFY DEBUG: Receiving verification request: booking_id='TRT-20260314-E4AC9904' payment_method='paypal' session_id=None payment_id='PAYID-NG2SNZA1UB726930M812962R' payer_id='6W6PWYSKRZUWS' order_id=None signature=None
+2026-03-14 14:44:24,764 | WARNING  | [47852505] | app | log_requests_middleware:42 | [47852505] ✓ POST /api/bookings/verify-payment | Status: 200 | 3153.5ms ⚠ SLOW REQUEST
+2026-03-14 14:44:24,793 | INFO     | [d36293f8] | app | log_requests_middleware:22 | [d36293f8] ➜ GET /api/bookings/TRT-20260314-E4AC9904 | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:24,814 | INFO     | [d36293f8] | app | log_requests_middleware:42 | [d36293f8] ✓ GET /api/bookings/TRT-20260314-E4AC9904 | Status: 200 | 21.75ms
+2026-03-14 14:44:27,826 | INFO     | [4fa88d3a] | app | log_requests_middleware:22 | [4fa88d3a] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:27,829 | INFO     | [12859771] | app | log_requests_middleware:22 | [12859771] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:27,833 | INFO     | [d9e8d779] | app | log_requests_middleware:22 | [d9e8d779] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:27,836 | INFO     | [4fa88d3a] | app | log_requests_middleware:42 | [4fa88d3a] ✓ GET /api/services | Status: 200 | 10.48ms
+2026-03-14 14:44:27,841 | INFO     | [12859771] | app | log_requests_middleware:42 | [12859771] ✓ GET /api/campaign | Status: 200 | 11.75ms
+2026-03-14 14:44:27,848 | INFO     | [f748e389] | app | log_requests_middleware:22 | [f748e389] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:27,852 | INFO     | [d207b183] | app | log_requests_middleware:22 | [d207b183] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:27,853 | INFO     | [d9e8d779] | app | log_requests_middleware:42 | [d9e8d779] ✓ GET /api/testimonials | Status: 200 | 19.88ms
+2026-03-14 14:44:27,860 | INFO     | [65041f6b] | app | log_requests_middleware:22 | [65041f6b] ➜ GET /api/testimonials | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:27,861 | INFO     | [d207b183] | app | log_requests_middleware:42 | [d207b183] ✓ GET /api/campaign | Status: 200 | 9.12ms
+2026-03-14 14:44:27,864 | INFO     | [f748e389] | app | log_requests_middleware:42 | [f748e389] ✓ GET /api/services | Status: 200 | 15.38ms
+2026-03-14 14:44:27,882 | INFO     | [65041f6b] | app | log_requests_middleware:42 | [65041f6b] ✓ GET /api/testimonials | Status: 200 | 22.4ms
+2026-03-14 14:44:32,596 | INFO     | [175d6316] | app | log_requests_middleware:22 | [175d6316] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:32,598 | INFO     | [4dff99eb] | app | log_requests_middleware:22 | [4dff99eb] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:32,612 | INFO     | [4dff99eb] | app | log_requests_middleware:42 | [4dff99eb] ✓ GET /api/campaign | Status: 200 | 13.48ms
+2026-03-14 14:44:32,613 | INFO     | [175d6316] | app | log_requests_middleware:42 | [175d6316] ✓ GET /api/services | Status: 200 | 17.26ms
+2026-03-14 14:44:32,619 | INFO     | [7bae86cc] | app | log_requests_middleware:22 | [7bae86cc] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:32,620 | INFO     | [8960d86c] | app | log_requests_middleware:22 | [8960d86c] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:32,633 | INFO     | [7bae86cc] | app | log_requests_middleware:42 | [7bae86cc] ✓ GET /api/campaign | Status: 200 | 14.79ms
+2026-03-14 14:44:32,635 | INFO     | [8960d86c] | app | log_requests_middleware:42 | [8960d86c] ✓ GET /api/services | Status: 200 | 14.38ms
+2026-03-14 14:44:41,853 | INFO     | [43d5ab0e] | app | log_requests_middleware:22 | [43d5ab0e] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:41,855 | INFO     | [59524ee5] | app | log_requests_middleware:22 | [59524ee5] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:41,856 | INFO     | [e24d4f31] | app | log_requests_middleware:22 | [e24d4f31] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:41,862 | INFO     | [43d5ab0e] | app | log_requests_middleware:42 | [43d5ab0e] ✓ GET /api/services | Status: 200 | 9.13ms
+2026-03-14 14:44:41,866 | INFO     | [59524ee5] | app | log_requests_middleware:42 | [59524ee5] ✓ GET /api/campaign | Status: 200 | 10.77ms
+2026-03-14 14:44:41,866 | INFO     | [e24d4f31] | app | log_requests_middleware:42 | [e24d4f31] ✓ GET /api/taxes/active | Status: 200 | 9.89ms
+2026-03-14 14:44:41,867 | INFO     | [ddc70074] | app | log_requests_middleware:22 | [ddc70074] ➜ GET /api/services | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:41,873 | INFO     | [126a1a20] | app | log_requests_middleware:22 | [126a1a20] ➜ GET /api/campaign | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:41,876 | INFO     | [c200404c] | app | log_requests_middleware:22 | [c200404c] ➜ GET /api/taxes/active | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:41,881 | INFO     | [ddc70074] | app | log_requests_middleware:42 | [ddc70074] ✓ GET /api/services | Status: 200 | 13.82ms
+2026-03-14 14:44:41,883 | INFO     | [126a1a20] | app | log_requests_middleware:42 | [126a1a20] ✓ GET /api/campaign | Status: 200 | 10.01ms
+2026-03-14 14:44:41,886 | INFO     | [c200404c] | app | log_requests_middleware:42 | [c200404c] ✓ GET /api/taxes/active | Status: 200 | 10.26ms
+2026-03-14 14:44:46,904 | INFO     | [a8c20fa0] | app | log_requests_middleware:22 | [a8c20fa0] ➜ POST /api/bookings/create | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:44:46,917 | INFO     | [a8c20fa0] | app | create_booking:1479 | TikTok Live service selected. Discounts are not applicable.
+2026-03-14 14:44:47,981 | WARNING  | [a8c20fa0] | app | log_requests_middleware:42 | [a8c20fa0] ✓ POST /api/bookings/create | Status: 200 | 1076.91ms ⚠ SLOW REQUEST
+2026-03-14 14:45:02,885 | INFO     | [c41de391] | app | log_requests_middleware:22 | [c41de391] ➜ POST /api/bookings/verify-payment | IP: 127.0.0.1 | UA: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+2026-03-14 14:45:02,892 | INFO     | [c41de391] | app | verify_payment:1607 | VERIFY DEBUG: Receiving verification request: booking_id='TRT-20260314-BE8F4C99' payment_method='paypal' session_id=None payment_id=None payer_id=None order_id=None signature=None
+2026-03-14 14:45:03,843 | ERROR    | [c41de391] | app | verify_payment:1761 | Payment verification error: 400: Payment verification failed
+2026-03-14 14:45:03,845 | INFO     | [c41de391] | app | log_requests_middleware:42 | [c41de391] ✓ POST /api/bookings/verify-payment | Status: 500 | 960.55ms
+2026-03-14 14:45:22,823 | INFO     | [-] | app | lifespan:168 | Application shutting down...
+2026-03-14 14:45:26,889 | INFO     | [-] | app | <module>:189 | Allowed CORS Origins: ['http://localhost:3000', 'https://tejashvinibdivinedecode.com']
+2026-03-14 14:45:27,019 | INFO     | [-] | app | lifespan:133 | Application starting up...
+2026-03-14 14:45:27,274 | INFO     | [-] | app | lifespan:135 | Ensured unique index on slots (date, time)

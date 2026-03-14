@@ -108,15 +108,6 @@ class PaymentService:
         
         start_time = time.time()
         try:
-            if 'demo' in payment_id:
-                 logger.info("Action=verify_paypal_payment Status=finished_demo")
-                 return {
-                    'success': True,
-                    'payment_status': 'approved',
-                    'transaction_id': payment_id,
-                    'amount': 0.0,
-                    'currency': 'EUR'
-                }
 
             payment = paypalrestsdk.Payment.find(payment_id)
             
